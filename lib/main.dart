@@ -7,6 +7,10 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/forgot_password_screen.dart';
 import 'screens/navigation_wrapper.dart'; 
+import 'screens/change_password_screen.dart';
+import 'screens/notifications_screen.dart';
+import 'screens/profile_screen.dart';
+
 
 void main() {
   runApp(const MedEaseApp());
@@ -57,5 +61,18 @@ final GoRouter _router = GoRouter(
       path: '/forgot-password',
       builder: (context, state) => const ForgotPasswordFlow(),
     ),
+    GoRoute(
+  path: '/change-password',
+  builder: (context, state) => const ChangePasswordScreen(),
+  ),
+  GoRoute(
+  path: '/notifications',
+  builder: (context, state) => const NotificationsScreen(),
+),
+   GoRoute(
+  path: '/profile',
+  builder: (context, state) => const ProfileScreen(),
+),
+
   ],
 );

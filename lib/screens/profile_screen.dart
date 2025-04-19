@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
 import 'about_app_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -54,8 +55,23 @@ class ProfileScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    _buildProfileOption(icon: Icons.lock_outline, title: 'Change Password', onTap: () {}),
-                    _buildProfileOption(icon: Icons.notifications_none, title: 'Notifications', onTap: () {}),
+                   _buildProfileOption(
+  icon: Icons.lock_outline,
+  title: 'Change Password',
+  onTap: () {
+    context.push('/change-password');
+
+  },
+),
+
+                    _buildProfileOption(
+  icon: Icons.notifications_none,
+  title: 'Notifications',
+  onTap: () {
+    context.push('/notifications');
+  },
+),
+
                     _buildProfileOption(
   icon: Icons.settings,
   title: 'Settings',
@@ -78,7 +94,14 @@ class ProfileScreen extends StatelessWidget {
   },
 ),
 
-                    _buildProfileOption(icon: Icons.logout, title: 'Logout', onTap: () {}),
+                   _buildProfileOption(
+  icon: Icons.logout,
+  title: 'Logout',
+  onTap: () {
+    context.go('/login'); 
+  },
+),
+
                   ],
                 ),
               ),
