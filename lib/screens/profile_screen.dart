@@ -24,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Ahmed Tarek',
+                'Ahmed Elhalafawy',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -33,7 +33,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'ahmed.tarek@email.com',
+                'ahmed.elhlafawy@email.com',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey,

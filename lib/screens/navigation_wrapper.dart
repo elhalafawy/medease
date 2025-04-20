@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../screens/home_screen.dart';
+import '../screens/upload_screen.dart';
+import '../screens/appointment_screen.dart';
+import '../screens/profile_screen.dart';
 import '../widgets/custom_bottom_bar.dart';
-import 'home_screen.dart';
-import 'upload_screen.dart';
-import 'appointment_screen.dart';
-import 'profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -15,21 +15,35 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    UploadScreen(),
-    AppointmentScreen(),
-    ProfileScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: _buildCurrentScreen(),
       bottomNavigationBar: CustomBottomBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
       ),
     );
+  }
+
+  Widget _buildCurrentScreen() {
+    switch (_currentIndex) {
+      case 0:
+        return HomeScreen(
+          onTabChange: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+        );
+      case 1:
+        return const UploadScreen();
+      case 2:
+        return const AppointmentScreen();
+      case 3:
+        return const ProfileScreen();
+      default:
+        return const HomeScreen();
+    }
   }
 }

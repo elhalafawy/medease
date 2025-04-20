@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'appointment_screen.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
   final VoidCallback? onBack;
+  final VoidCallback? onBookAppointment;
 
-  const DoctorDetailsScreen({super.key, this.onBack});
+  const DoctorDetailsScreen({
+    super.key,
+    this.onBack,
+    this.onBookAppointment,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,37 +38,36 @@ class DoctorDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              alignment: Alignment.topRight,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset('assets/images/doctor_photo.png'),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(12),
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: const Icon(Icons.favorite_border, size: 20),
-                )
-              ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset('assets/images/doctor_photo.png'),
             ),
-            const SizedBox(height: 12),
-            const Text(
-              'Dr. Ahmed',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
-            const Text(
-              'Neurologist and Surgeon',
-              style: TextStyle(color: Colors.grey),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF022E5B),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Dr. Ahmed", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text("Senior Neurologist and Surgeon", style: TextStyle(color: Colors.white70)),
+                  Text("Mirpur Medical College and Hospital", style: TextStyle(color: Colors.white70)),
+                ],
+              ),
             ),
             const SizedBox(height: 24),
-            const Row(
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text("Appointment", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            ),
+            const SizedBox(height: 24),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+              children: const [
                 _DoctorStat(icon: Icons.person, value: '116+', label: 'Patients'),
                 _DoctorStat(icon: Icons.verified_user, value: '3+', label: 'Years'),
                 _DoctorStat(icon: Icons.star_border, value: '4.9', label: 'Rating'),
@@ -72,29 +75,13 @@ class DoctorDetailsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            const Text(
-              'About Me',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Dr. Ahmed is the top most Neurologist specialist in Crist Hospital in London, UK. "
-              "He achieved several awards for his wonderful contribution Read More...",
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AppointmentScreen(
-                        cameFromDoctor: true,
-                      ),
-                    ),
-                  );
+                  if (onBookAppointment != null) {
+                    onBookAppointment!();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF022E5B),
@@ -119,7 +106,11 @@ class _DoctorStat extends StatelessWidget {
   final String value;
   final String label;
 
-  const _DoctorStat({required this.icon, required this.value, required this.label});
+  const _DoctorStat({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +119,7 @@ class _DoctorStat extends StatelessWidget {
         Icon(icon, color: const Color(0xFF022E5B), size: 30),
         const SizedBox(height: 6),
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 2),
         Text(label, style: const TextStyle(color: Colors.grey)),
       ],
     );
