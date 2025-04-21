@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'doctor_details_screen.dart';
-
+import 'medication_screen.dart';
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
 
@@ -12,6 +12,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool showDoctorDetails = false;
+  bool showMedication = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -19,17 +21,25 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFFDFDFD),
       body: SafeArea(
         child: showDoctorDetails
-            ? DoctorDetailsScreen(
-                onBack: () {
-                  setState(() {
-                    showDoctorDetails = false;
-                  });
-                },
-                onBookAppointment: () {
-                  widget.onTabChange?.call(2); 
-                },
-              )
-            : SingleChildScrollView(
+    ? DoctorDetailsScreen(
+        onBack: () {
+          setState(() {
+            showDoctorDetails = false;
+          });
+        },
+        onBookAppointment: () {
+          widget.onTabChange?.call(2);
+        },
+      )
+    : showMedication
+        ? MedicationScreen(
+            onBack: () {
+              setState(() {
+                showMedication = false;
+              });
+            },
+          )
+        : SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +109,12 @@ class _HomeScreenState extends State<HomeScreen> {
             showDoctorDetails = true;
           });
         }),
-        _buildCategory('Medicine', Icons.medication_outlined, const Color(0xFFE7F0FF)),
+        _buildCategory('Medicine', Icons.medication_outlined, const Color(0xFFE7F0FF), () {
+  setState(() {
+    showMedication = true;
+  });
+}),
+
         _buildCategory('Medical\nRecords', Icons.folder, const Color(0xFFFFF4DC)),
       ],
     );
