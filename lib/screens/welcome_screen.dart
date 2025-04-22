@@ -46,7 +46,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const themeColor = Color(0xFF003C5F);
 
     return Scaffold(
       backgroundColor: Colors.white,

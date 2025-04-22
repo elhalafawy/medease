@@ -6,7 +6,9 @@ import '../screens/profile_screen.dart';
 import '../widgets/custom_bottom_bar.dart';
 
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key});
+  final bool goToAppointment;
+
+  const MainNavigation({super.key, this.goToAppointment = false});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -16,6 +18,14 @@ class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.goToAppointment) {
+      _currentIndex = 2; 
+    }
+  }
+
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildCurrentScreen(),
@@ -39,7 +49,7 @@ class _MainNavigationState extends State<MainNavigation> {
       case 1:
         return const UploadScreen();
       case 2:
-        return const AppointmentScreen();
+        return const AppointmentScreen(); 
       case 3:
         return const ProfileScreen();
       default:

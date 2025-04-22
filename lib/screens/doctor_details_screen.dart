@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'appointment_screen.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
+  
   final VoidCallback? onBack;
   final VoidCallback? onBookAppointment;
 
@@ -79,10 +81,11 @@ class DoctorDetailsScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  if (onBookAppointment != null) {
-                    onBookAppointment!();
-                  }
-                },
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AppointmentScreen()),
+              );
+            },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF022E5B),
                   padding: const EdgeInsets.symmetric(vertical: 16),

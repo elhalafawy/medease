@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'doctor_details_screen.dart';
+import 'doctors_screen.dart';
 import 'medication_screen.dart';
+import 'medical_record_screen.dart'; // إضافة MedicalRecordScreen
+
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
 
@@ -13,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool showDoctorDetails = false;
   bool showMedication = false;
-
+  bool showMedicalRecord = false; // تغيير هنا لإضافة السجل الطبي
 
   @override
   Widget build(BuildContext context) {
@@ -21,55 +24,57 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFFDFDFD),
       body: SafeArea(
         child: showDoctorDetails
-    ? DoctorDetailsScreen(
-        onBack: () {
-          setState(() {
-            showDoctorDetails = false;
-          });
-        },
-        onBookAppointment: () {
-          widget.onTabChange?.call(2);
-        },
-      )
-    : showMedication
-        ? MedicationScreen(
-            onBack: () {
-              setState(() {
-                showMedication = false;
-              });
-            },
-          )
-        : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Image.asset('assets/images/home_banner.png'),
-                    const SizedBox(height: 20),
-                    _buildSearchBar(),
-                    const SizedBox(height: 24),
-                    _buildQuickOptions(),
-                    const SizedBox(height: 24),
-                    _buildProtectionBanner(),
-                    const SizedBox(height: 32),
-                    const Text(
-                      'New investigations',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF3C4A59)),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildArticle(
-                      title: 'What is the Replication Crisis?',
-                      subtitle: 'This article will look at this subject, providing a brief overview.',
-                      image: 'assets/images/article_1.png',
-                    ),
-                    _buildArticle(
-                      title: 'Cardiology and pregnancy?',
-                      subtitle: 'Although approximately 86% of practicing cardiologists surveyed...',
-                      image: 'assets/images/article_2.png',
-                    ),
-                  ],
-                ),
-              ),
+            ? DoctorDetailsScreen(
+                onBack: () {
+                  setState(() {
+                    showDoctorDetails = false;
+                  });
+                },
+                onBookAppointment: () {
+                  widget.onTabChange?.call(2);
+                },
+              )
+            : showMedication
+                ? MedicationScreen(
+                    onBack: () {
+                      setState(() {
+                        showMedication = false;
+                      });
+                    },
+                  )
+                : showMedicalRecord // عند الضغط على Medical Record نعرض الشاشة
+                    ? const MedicalRecordScreen() // الصفحة المطلوبة
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Image.asset('assets/images/home_banner.png'),
+                            const SizedBox(height: 20),
+                            _buildSearchBar(),
+                            const SizedBox(height: 24),
+                            _buildQuickOptions(),
+                            const SizedBox(height: 24),
+                            _buildProtectionBanner(),
+                            const SizedBox(height: 32),
+                            const Text(
+                              'New investigations',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF3C4A59)),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildArticle(
+                              title: 'What is the Replication Crisis?',
+                              subtitle: 'This article will look at this subject, providing a brief overview.',
+                              image: 'assets/images/article_1.png',
+                            ),
+                            _buildArticle(
+                              title: 'Cardiology and pregnancy?',
+                              subtitle: 'Although approximately 86% of practicing cardiologists surveyed...',
+                              image: 'assets/images/article_2.png',
+                            ),
+                          ],
+                        ),
+                      ),
       ),
     );
   }
@@ -105,17 +110,21 @@ class _HomeScreenState extends State<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildCategory('Doctors', Icons.person, const Color(0xFFFFE4E0), () {
-          setState(() {
-            showDoctorDetails = true;
-          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const DoctorsScreen()),
+          );
         }),
         _buildCategory('Medicine', Icons.medication_outlined, const Color(0xFFE7F0FF), () {
-  setState(() {
-    showMedication = true;
-  });
-}),
-
-        _buildCategory('Medical\nRecords', Icons.folder, const Color(0xFFFFF4DC)),
+          setState(() {
+            showMedication = true;
+          });
+        }),
+        _buildCategory('Medical\nRecords', Icons.folder, const Color(0xFFFFF4DC), () {
+          setState(() {
+            showMedicalRecord = true; // هنا تم تفعيل عرض شاشة السجل الطبي
+          });
+        }),
       ],
     );
   }
