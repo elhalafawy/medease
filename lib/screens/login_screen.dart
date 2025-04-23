@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:medease/Firebase/Authentication.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
+  late final TextEditingController _email = TextEditingController();
+  late final TextEditingController _password = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +46,9 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _email,
+                    decoration: const InputDecoration(
                       hintText: 'username@gmail.com',
                       labelText: 'Email Address',
                       border: OutlineInputBorder(
@@ -54,9 +57,10 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const TextField(
+                  TextField(
                     obscureText: true,
-                    decoration: InputDecoration(
+                    controller: _password,
+                    decoration: const InputDecoration(
                       hintText: '************',
                       labelText: 'Password',
                       border: OutlineInputBorder(
@@ -80,8 +84,9 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
-                      onPressed: () => context.go('/home'),
+                    child: ElevatedButton(  // Next button
+                      onPressed: () => Login(context, _email.text, _password.text),
+                          // context.go('/home'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00264D),
                         shape: RoundedRectangleBorder(
@@ -96,8 +101,10 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Center(
+                    // Sign up button
                     child: TextButton(
                       onPressed: () => context.go('/signup'),
+                          // context.go('/signup'),
                       child: const Text(
                         'Sign Up',
                         style: TextStyle(

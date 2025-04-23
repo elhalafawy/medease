@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'Camera/Camera.dart';
@@ -11,9 +12,11 @@ import 'screens/change_password_screen.dart';
 import 'screens/notifications_screen.dart';
 import 'screens/profile_screen.dart';
 
-void main() {
-  // runApp(const MedEaseApp());
-  runApp(const CameraScreen());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MedEaseApp());
+  // runApp(const CameraScreen());
 }
 
 class MedEaseApp extends StatelessWidget {
@@ -47,11 +50,11 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => LoginScreen(),
     ),
     GoRoute(
       path: '/signup',
-      builder: (context, state) => const RegisterScreen(),
+      builder: (context, state) =>  RegisterScreen(),
     ),
     GoRoute(
       path: '/home',

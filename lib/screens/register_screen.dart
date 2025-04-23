@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../Firebase/Authentication.dart';
 import 'color_reference.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
-
+  RegisterScreen({super.key});
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _agreeToTerms = false;
+  late final TextEditingController _email = TextEditingController();
+  late final TextEditingController _password = TextEditingController();
+  late final TextEditingController _username = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +46,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _email,
+                    decoration: const InputDecoration(
                       hintText: 'username@gmail.com',
                       labelText: 'Email Address',
                       labelStyle: TextStyle(fontSize: 14),
@@ -54,8 +58,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: _username,
+                    decoration: const InputDecoration(
                       hintText: 'username',
                       labelText: 'User Name',
                       labelStyle: TextStyle(fontSize: 14),
@@ -109,8 +114,9 @@ TextField(
 ),
 
                   const SizedBox(height: 16),
-                  const TextField(
+                   TextField(
                     obscureText: true,
+                      controller: _password,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(
@@ -124,7 +130,8 @@ TextField(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _agreeToTerms ? () => context.go('/home') : null,
+                      onPressed: _agreeToTerms ? () => Register(context, _email.text, _password.text) : null,
+                          // context.go('/home') : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorSchemes.buttonColor,
                         shape: RoundedRectangleBorder(
