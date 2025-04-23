@@ -50,7 +50,7 @@ class DoctorsScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => DoctorDetailsScreen(),
+            builder: (_) => const DoctorDetailsScreen(),
           ),
         );
       },

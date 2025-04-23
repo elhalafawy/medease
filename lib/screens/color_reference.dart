@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 class ColorSchemes {
-  static final lightCodeColorScheme = ColorScheme.light(
+  static const lightCodeColorScheme = ColorScheme.light(
     primary: Color(0xFF022E5B), // Dark Blue
     primaryContainer: Color(0xFFD9E4FF), // Light Blue
     errorContainer: Color(0xFF114F79),

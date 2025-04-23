@@ -67,9 +67,9 @@ class DoctorDetailsScreen extends StatelessWidget {
               child: Text("Appointment", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
             ),
             const SizedBox(height: 24),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
+              children: [
                 _DoctorStat(icon: Icons.person, value: '116+', label: 'Patients'),
                 _DoctorStat(icon: Icons.verified_user, value: '3+', label: 'Years'),
                 _DoctorStat(icon: Icons.star_border, value: '4.9', label: 'Rating'),

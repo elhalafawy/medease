@@ -100,8 +100,8 @@ TextField(
         if (selectedDate != null) {
           // Set the selected date into the TextField
           // You can format the date as needed here
-          TextEditingController _controller = TextEditingController();
-          _controller.text = "${selectedDate.toLocal()}".split(' ')[0];  // Format: yyyy-mm-dd
+          TextEditingController controller = TextEditingController();
+          controller.text = "${selectedDate.toLocal()}".split(' ')[0];  // Format: yyyy-mm-dd
         }
       },
     ),

@@ -27,7 +27,7 @@ class SettingsScreen extends StatelessWidget {
             value: true,
             onChanged: (_) {},
             title: const Text('Push Notification'),
-            activeColor: Color(0xFF022E5B),
+            activeColor: const Color(0xFF022E5B),
           ),
           SwitchListTile(
             value: false,

@@ -52,9 +52,9 @@ class MedicalRecordScreen extends StatelessWidget {
   }
 
   Widget _buildFilterTabs() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: const [
+      children: [
         _FilterTab(label: 'All Records'),
         _FilterTab(label: '2025'),
         _FilterTab(label: '2024'),
@@ -89,7 +89,7 @@ class MedicalRecordScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(color: Colors.black12, blurRadius: 5),
           ],
         ),
@@ -98,9 +98,9 @@ class MedicalRecordScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.access_alarm_outlined,
-                  color: const Color(0xFF022E5B),
+                  color: Color(0xFF022E5B),
                   size: 24,
                 ),
                 const SizedBox(width: 10),
