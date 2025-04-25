@@ -29,6 +29,10 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
+<<<<<<< HEAD
+=======
+	<key>NSCameraUsageDescription</key>
+>>>>>>> 1684feb23ffa1354bd95d6a413bbf70c608322cc
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
@@ -44,6 +48,10 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+<<<<<<< HEAD
+=======
+	<string>This app needs access to your camera</string>
+>>>>>>> 1684feb23ffa1354bd95d6a413bbf70c608322cc
 	<true/>
 </dict>
 </plist>

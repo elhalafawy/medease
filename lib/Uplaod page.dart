@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-// lib/upload_screen.dart
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
 
 class UploadScreen extends StatefulWidget {
-  const UploadScreen({Key? key}) : super(key: key);
+  const UploadScreen({super.key});
 
   @override
   State<UploadScreen> createState() => _UploadScreenState();
@@ -33,11 +31,26 @@ class _UploadScreenState extends State<UploadScreen> {
   }
 
   Future<void> _initCamera() async {
+    final status = await Permission.camera.request();
+    if (status.isDenied || status.isPermanentlyDenied) {
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Camera Permission Needed'),
+          content: const Text(
+            'This feature requires camera access.\n'
+            'Please grant camera permission in your device settings.',
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+          ],
+        ),
+      );
+      if (status.isPermanentlyDenied) await openAppSettings();
+      return;
+    }
+
     try {
-      if (!await Permission.camera.request().isGranted) {
-        print('Camera permission denied');
-        return;
-      }
       final cams = await availableCameras();
       _camCtrl = CameraController(cams.first, ResolutionPreset.high);
       await _camCtrl!.initialize();
@@ -59,8 +72,7 @@ class _UploadScreenState extends State<UploadScreen> {
         _ocrText = res.text;
         _busy = false;
       });
-      _pageController.animateToPage(
-        4,
+      _pageController.animateToPage(4,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
@@ -77,64 +89,47 @@ class _UploadScreenState extends State<UploadScreen> {
     super.dispose();
   }
 
-  Widget _buildDots() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(5, (i) {
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: _pageIndex == i ? 12 : 8,
-          height: _pageIndex == i ? 12 : 8,
-          decoration: BoxDecoration(
-            color: _pageIndex == i ? Colors.teal : Colors.grey,
-            shape: BoxShape.circle,
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _frameOverlay() {
-    return Container(
-      width: 250,
-      height: 350,
+  Widget _buildDots() => Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: List.generate(5, (i) => Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      width: _pageIndex == i ? 12 : 8,
+      height: _pageIndex == i ? 12 : 8,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 3),
-        borderRadius: BorderRadius.circular(12),
+        color: _pageIndex == i ? Colors.teal : Colors.grey,
+        shape: BoxShape.circle,
       ),
-    );
-  }
+    )),
+  );
 
-  Widget _buildTile(String label, IconData icon) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _imageFile = null;
-            _ocrText = '';
-          });
-          _pageController.animateToPage(1,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 48),
-            const SizedBox(height: 8),
-            Text(label, textAlign: TextAlign.center),
-          ],
-        ),
+  Widget _frameOverlay() => Container(
+    width: 250, height: 350,
+    decoration: BoxDecoration(
+      border: Border.all(color: Colors.white, width: 3),
+      borderRadius: BorderRadius.circular(12),
+    ),
+  );
+
+  Widget _buildTile(String label, IconData icon) => Card(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    child: InkWell(
+      onTap: () {
+        setState(() { _imageFile = null; _ocrText = ''; });
+        _pageController.animateToPage(1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [ Icon(icon, size: 48), const SizedBox(height: 8), Text(label, textAlign: TextAlign.center) ],
       ),
-    );
-  }
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     final camReady = _camCtrl != null && _camCtrl!.value.isInitialized;
-
     return Scaffold(
       appBar: AppBar(title: const Text('OCR Flow')),
       body: Stack(children: [
@@ -142,48 +137,37 @@ class _UploadScreenState extends State<UploadScreen> {
           controller: _pageController,
           onPageChanged: (i) => setState(() => _pageIndex = i),
           children: [
-
-            // Page 0: Home grid
+            // Page 0
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   const Text('Medical records', style: TextStyle(fontSize: 24)),
                   const SizedBox(height: 24),
-                  Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      children: [
-                        _buildTile('Prescriptions', Icons.medical_services),
-                        _buildTile('Lab reports', Icons.science),
-                        _buildTile('Medication', Icons.local_pharmacy),
-                        _buildTile('Other', Icons.note),
-                      ],
-                    ),
-                  ),
+                  Expanded(child: GridView.count(
+                    crossAxisCount: 2, mainAxisSpacing: 16, crossAxisSpacing: 16,
+                    children: [
+                      _buildTile('Prescriptions', Icons.medical_services),
+                      _buildTile('Lab reports', Icons.science),
+                      _buildTile('Medication', Icons.local_pharmacy),
+                      _buildTile('Other', Icons.note),
+                    ],
+                  )),
                 ],
               ),
             ),
-
-            // Page 1: Live camera
-            if (!camReady)
-              const Center(child: CircularProgressIndicator())
-            else
-            Stack(
+            // Page 1
+            if (!camReady) const Center(child: CircularProgressIndicator()) else Stack(
               children: [
                 CameraPreview(_camCtrl!),
                 Center(child: _frameOverlay()),
-                if (_busy)
-                  Container(color: Colors.black26, child: const Center(child: CircularProgressIndicator())),
+                if (_busy) Container(color: Colors.black26, child: const Center(child: CircularProgressIndicator())),
                 Positioned(
                   bottom: 24, left: 24, right: 24,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.photo, size: 32),
+                      IconButton(icon: const Icon(Icons.photo, size: 32),
                         onPressed: () async {
                           final img = await ImagePicker().pickImage(source: ImageSource.gallery);
                           if (img != null) await _doOCR(img);
@@ -194,36 +178,27 @@ class _UploadScreenState extends State<UploadScreen> {
                           try {
                             final pic = await _camCtrl!.takePicture();
                             await _doOCR(pic);
-                          } catch (e) {
-                            print('Capture failed: $e');
-                          }
+                          } catch (e) { print('Capture failed: $e'); }
                         },
                         child: const Icon(Icons.camera_alt, size: 32),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.insert_drive_file, size: 32),
-                        onPressed: () {},
-                      ),
+                      IconButton(icon: const Icon(Icons.insert_drive_file, size: 32), onPressed: (){}),
                     ],
                   ),
                 ),
               ],
             ),
-
-            // Page 2: Original image
-            _imageFile == null
-              ? const Center(child: Text('No image yet'))
+            // Page 2
+            _imageFile == null ? const Center(child: Text('No image yet'))
               : Image.file(File(_imageFile!.path), fit: BoxFit.contain),
-
-            // Page 3: Crop overlay
+            // Page 3
             _imageFile == null ? const SizedBox() : Stack(
               children: [
                 Image.file(File(_imageFile!.path), fit: BoxFit.contain),
                 Center(child: Opacity(opacity: .4, child: _frameOverlay())),
               ],
             ),
-
-            // Page 4: OCR result
+            // Page 4
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -231,45 +206,22 @@ class _UploadScreenState extends State<UploadScreen> {
                   const Text('Result OCR', style: TextStyle(fontSize: 24)),
                   const SizedBox(height: 16),
                   Expanded(child: SingleChildScrollView(child: Text(_ocrText))),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.copy),
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: _ocrText));
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied')));
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.share),
-                        onPressed: () => Share.share(_ocrText),
-                      ),
-                    ],
-                  ),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                    IconButton(icon: const Icon(Icons.copy),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: _ocrText));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied')));
+                      },
+                    ),
+                    IconButton(icon: const Icon(Icons.share), onPressed: () => Share.share(_ocrText)),
+                  ]),
                 ],
               ),
             ),
           ],
         ),
-
         Positioned(bottom: 16, left: 0, right: 0, child: _buildDots()),
       ]),
     );
-=======
-import 'package:flutter/material.dart';
-import 'package:medease/Camera/Camera.dart';
-
-class UploadScreen extends StatelessWidget {
-  const UploadScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // return const CameraApp();
-    return const UploadScreen();
-    // return const Scaffold(
-    //   body: Center(child: Text('Upload Screen')),
-    // );
->>>>>>> 1684feb23ffa1354bd95d6a413bbf70c608322cc
   }
 }

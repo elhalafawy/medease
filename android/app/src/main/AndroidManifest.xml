@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 <uses-permission android:name="android.permission.CAMERA"/>
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+=======
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+>>>>>>> 1684feb23ffa1354bd95d6a413bbf70c608322cc
     <application
         android:label="medease"
         android:name="${applicationName}"
