@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // lib/upload_screen.dart
 import 'dart:io';
 import 'package:camera/camera.dart';
@@ -256,20 +255,5 @@ class _UploadScreenState extends State<UploadScreen> {
         Positioned(bottom: 16, left: 0, right: 0, child: _buildDots()),
       ]),
     );
-=======
-import 'package:flutter/material.dart';
-import 'package:medease/Camera/Camera.dart';
-
-class UploadScreen extends StatelessWidget {
-  const UploadScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    // return const CameraApp();
-    return const UploadScreen();
-    // return const Scaffold(
-    //   body: Center(child: Text('Upload Screen')),
-    // );
->>>>>>> 1684feb23ffa1354bd95d6a413bbf70c608322cc
   }
 }
