@@ -132,6 +132,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     final camReady = _camCtrl != null && _camCtrl!.value.isInitialized;
 
     return Scaffold(
@@ -255,5 +256,12 @@ class _UploadScreenState extends State<UploadScreen> {
         Positioned(bottom: 16, left: 0, right: 0, child: _buildDots()),
       ]),
     );
+=======
+    return const CameraApp();
+    // return const UploadScreen();
+    // return const Scaffold(
+    //   body: Center(child: Text('Upload Screen')),
+    // );
+>>>>>>> 1bcceb55fd24979eca1e8282e9a1f97f50b46290
   }
 }
