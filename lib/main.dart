@@ -62,7 +62,7 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/forgot-password',
-      builder: (context, state) => const ForgotPasswordFlow(),
+      builder: (context, state) => const ForgotPasswordScreen(),
     ),
     GoRoute(
   path: '/change-password',

@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:medease/Firebase/Authentication.dart';
-import 'package:medease/screens/login_success_widget.dart'; 
-import 'verify_email_screen.dart'; 
+import 'package:go_router/go_router.dart';
+import 'forgot_password_screen.dart';  
+import 'verify_email_screen.dart';
+import 'package:medease/screens/login_success_widget.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool _isPasswordVisible = false;
+    bool _isForgotPasswordFlow = false; 
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
+  
+  void _showForgotPasswordFlow() {
+    showDialog(
+      context: context,
+      builder: (context) => const ForgotPasswordScreen(), 
+    );
+  }
+
+ 
   Future<void> signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -29,6 +46,7 @@ class LoginScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign in failed: $e')));
     }
   }
+
 
   Future<void> signInWithFacebook(BuildContext context) async {
     try {
@@ -98,22 +116,30 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    obscureText: true,
+                    obscureText: !_isPasswordVisible, 
                     controller: _password,
-                    decoration: const InputDecoration(
-                      hintText: '************',
+                    decoration: InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
-                      suffixIcon: Icon(Icons.visibility_off_outlined),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off_outlined, 
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible; 
+                          });
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () => context.go('/forgot-password'),
+                      onPressed: _showForgotPasswordFlow,  
                       child: const Text(
                         'Forgot password?',
                         style: TextStyle(color: Colors.black54),
@@ -125,31 +151,28 @@ class LoginScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                     onPressed: () async {
-  try {
-    final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: _email.text.trim(),
-      password: _password.text.trim(),
-    );
+                      onPressed: () async {
+                        try {
+                          final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: _email.text.trim(),
+                            password: _password.text.trim(),
+                          );
 
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && user.emailVerified) {
-      showDialog(
-        context: context,
-        builder: (_) => const LoginSuccessWidget(),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-      );
-    }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Login failed: $e')),
-    );
-  }
-},
-
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null && user.emailVerified) {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const LoginSuccessWidget(),
+                            );
+                          } else {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00264D),
                         shape: RoundedRectangleBorder(
@@ -176,82 +199,78 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-              const SizedBox(height: 32),
-
-Row(
-  children: [
-    Expanded(
-      child: Divider(
-        color: Colors.grey.shade400,
-        thickness: 1,
-      ),
-    ),
-    const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8),
-      child: Text(
-        "Or sign in with",
-        style: TextStyle(color: Colors.black54, fontSize: 14),
-      ),
-    ),
-    Expanded(
-      child: Divider(
-        color: Colors.grey.shade400,
-        thickness: 1,
-      ),
-    ),
-  ],
-),
-
-const SizedBox(height: 24),
-
-Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    InkWell(
-  onTap: () => signInWithFacebook(context),
-  borderRadius: BorderRadius.circular(50),
-  child: Container(
-    width: 50,
-    height: 50,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      shape: BoxShape.circle,
-      border: Border.all(color: Colors.grey.shade300),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: Image.asset('assets/icons/facebook_icon.png'),
-    ),
-  ),
-),
-
-    const SizedBox(width: 24),
-    InkWell(
-  onTap: () => signInWithGoogle(context),
-  borderRadius: BorderRadius.circular(50),
-  child: Container(
-    width: 50,
-    height: 50,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      shape: BoxShape.circle,
-      border: Border.all(color: Colors.grey.shade300),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: Image.asset('assets/icons/google_icon.png'),
-    ),
-  ),
-),
-
-  ],
-),
-
-const SizedBox(height: 24),
+                  const SizedBox(height: 32),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade400,
+                          thickness: 1,
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          "Or sign in with",
+                          style: TextStyle(color: Colors.black54, fontSize: 14),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: Colors.grey.shade400,
+                          thickness: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        onTap: () => signInWithFacebook(context),
+                        borderRadius: BorderRadius.circular(50),
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Image.asset('assets/icons/facebook_icon.png'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      InkWell(
+                        onTap: () => signInWithGoogle(context),
+                        borderRadius: BorderRadius.circular(50),
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Image.asset('assets/icons/google_icon.png'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
+          
+          if (_isForgotPasswordFlow) const ForgotPasswordScreen(), 
         ],
       ),
     );
