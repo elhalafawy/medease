@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:medease/screens/otp_verification_widget.dart';
 import '../Firebase/Authentication.dart';
+import 'verify_email_screen.dart';
 import 'color_reference.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -14,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late final TextEditingController _email = TextEditingController();
   late final TextEditingController _password = TextEditingController();
   late final TextEditingController _username = TextEditingController();
+  late final TextEditingController _birthdate = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -77,47 +80,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
                     ),
-                    value: 'Female',
+                    value: 'Male',
                     items: const [
                       DropdownMenuItem(value: 'Male', child: Text('Male')),
                       DropdownMenuItem(value: 'Female', child: Text('Female')),
-                      DropdownMenuItem(value: 'Engineer', child: Text('Engineer')),
                     ],
                     onChanged: (value) {},
                   ),
                   const SizedBox(height: 16),
-TextField(
-  readOnly: true,
-  decoration: InputDecoration(
-    labelText: 'Birthdate',
-    border: const OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-    ),
-    suffixIcon: IconButton(
-      icon: const Icon(Icons.calendar_today_outlined),
-      onPressed: () async {
-        DateTime? selectedDate = await showDatePicker(
-          context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(1900),
-          lastDate: DateTime.now(),
-        );
-        if (selectedDate != null) {
-          // Set the selected date into the TextField
-          // You can format the date as needed here
-          TextEditingController _controller = TextEditingController();
-          _controller.text = "${selectedDate.toLocal()}".split(' ')[0];  // Format: yyyy-mm-dd
-        }
-      },
-    ),
-  ),
-),
-
-                  const SizedBox(height: 16),
-                   TextField(
-                    obscureText: true,
-                      controller: _password,
+                  TextField(
+                    controller: _birthdate,
+                    readOnly: true,
                     decoration: InputDecoration(
+                      labelText: 'Birthdate',
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.calendar_today_outlined),
+                        onPressed: () async {
+                          DateTime? selectedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(1900),
+                            lastDate: DateTime.now(),
+                          );
+                          if (selectedDate != null) {
+                            _birthdate.text = "${selectedDate.toLocal()}".split(' ')[0];
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    obscureText: true,
+                    controller: _password,
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -130,8 +129,20 @@ TextField(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _agreeToTerms ? () => Register(context, _email.text, _password.text) : null,
-                          // context.go('/home') : null,
+                      onPressed: _agreeToTerms
+    ? () async {
+        await Register(
+          context,
+          _email.text.trim(),
+          _password.text.trim(),
+        );
+        showDialog(
+          context: context,
+          builder: (_) => OtpVerificationWidget(email: _email.text.trim()),
+        );
+      }
+    : null,
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: ColorSchemes.buttonColor,
                         shape: RoundedRectangleBorder(
@@ -140,7 +151,7 @@ TextField(
                         elevation: 0,
                       ),
                       child: const Text(
-                        'Done',
+                        'Verify', 
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -179,7 +190,7 @@ TextField(
                           padding: EdgeInsets.only(top: 4),
                           child: Text.rich(
                             TextSpan(
-                              text: 'By Signing up I agree to Investa\'s ',
+                              text: 'By Signing up I agree to Medease\'s ',
                               children: [
                                 TextSpan(
                                   text: 'Terms of Service',

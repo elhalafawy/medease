@@ -1,11 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:medease/Firebase/Authentication.dart';
+import 'package:medease/screens/login_success_widget.dart'; 
+import 'verify_email_screen.dart'; 
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
-  late final TextEditingController _email = TextEditingController();
-  late final TextEditingController _password = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+
+  Future<void> signInWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      Navigator.of(context).pushReplacementNamed('/home');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign in failed: $e')));
+    }
+  }
+
+  Future<void> signInWithFacebook(BuildContext context) async {
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+
+      if (result.status == LoginStatus.success) {
+        final OAuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.token);
+        await FirebaseAuth.instance.signInWithCredential(credential);
+
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Facebook sign in failed')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Facebook sign in error: $e')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +124,32 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(  // Next button
-                      onPressed: () => 
-                      // Login(context, _email.text, _password.text),
-                          context.go('/home'),
+                    child: ElevatedButton(
+                     onPressed: () async {
+  try {
+    final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: _email.text.trim(),
+      password: _password.text.trim(),
+    );
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.emailVerified) {
+      showDialog(
+        context: context,
+        builder: (_) => const LoginSuccessWidget(),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login failed: $e')),
+    );
+  }
+},
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00264D),
                         shape: RoundedRectangleBorder(
@@ -95,17 +157,15 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'Next',
+                        'Login',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Center(
-                    // Sign up button
                     child: TextButton(
                       onPressed: () => context.go('/signup'),
-                          // context.go('/signup'),
                       child: const Text(
                         'Sign Up',
                         style: TextStyle(
@@ -116,7 +176,78 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+              const SizedBox(height: 32),
+
+Row(
+  children: [
+    Expanded(
+      child: Divider(
+        color: Colors.grey.shade400,
+        thickness: 1,
+      ),
+    ),
+    const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Text(
+        "Or sign in with",
+        style: TextStyle(color: Colors.black54, fontSize: 14),
+      ),
+    ),
+    Expanded(
+      child: Divider(
+        color: Colors.grey.shade400,
+        thickness: 1,
+      ),
+    ),
+  ],
+),
+
+const SizedBox(height: 24),
+
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    InkWell(
+  onTap: () => signInWithFacebook(context),
+  borderRadius: BorderRadius.circular(50),
+  child: Container(
+    width: 50,
+    height: 50,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      shape: BoxShape.circle,
+      border: Border.all(color: Colors.grey.shade300),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Image.asset('assets/icons/facebook_icon.png'),
+    ),
+  ),
+),
+
+    const SizedBox(width: 24),
+    InkWell(
+  onTap: () => signInWithGoogle(context),
+  borderRadius: BorderRadius.circular(50),
+  child: Container(
+    width: 50,
+    height: 50,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      shape: BoxShape.circle,
+      border: Border.all(color: Colors.grey.shade300),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Image.asset('assets/icons/google_icon.png'),
+    ),
+  ),
+),
+
+  ],
+),
+
+const SizedBox(height: 24),
                 ],
               ),
             ),

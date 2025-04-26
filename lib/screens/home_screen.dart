@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'doctor_details_screen.dart';
 import 'doctors_screen.dart';
 import 'medication_screen.dart';
-import 'medical_record_screen.dart'; // إضافة MedicalRecordScreen
+import 'medical_record_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -16,7 +17,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool showDoctorDetails = false;
   bool showMedication = false;
-  bool showMedicalRecord = false; // تغيير هنا لإضافة السجل الطبي
+  bool showMedicalRecord = false;
+  User? user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +50,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       });
                     },
                   )
-                : showMedicalRecord // عند الضغط على Medical Record نعرض الشاشة
-                    ? const MedicalRecordScreen() // الصفحة المطلوبة
+                : showMedicalRecord
+                    ? const MedicalRecordScreen()
                     : SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Image.asset('assets/images/home_banner.png'),
+                            const SizedBox(height: 20),
+                            _buildUserWelcome(),
                             const SizedBox(height: 20),
                             _buildSearchBar(),
                             const SizedBox(height: 24),
@@ -76,6 +86,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
       ),
+    );
+  }
+
+  Widget _buildUserWelcome() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Welcome, ${user?.displayName?? "Guest"} 👋', 
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF00264D)),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Hope you are doing well today!',
+          style: TextStyle(fontSize: 14, color: Colors.black54),
+        ),
+      ],
     );
   }
 
@@ -122,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }),
         _buildCategory('Medical\nRecords', Icons.folder, const Color(0xFFFFF4DC), () {
           setState(() {
-            showMedicalRecord = true; // هنا تم تفعيل عرض شاشة السجل الطبي
+            showMedicalRecord = true;
           });
         }),
       ],
@@ -232,3 +259,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
