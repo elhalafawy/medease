@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'appointment_screen.dart';
+import '../Appointment/appointment_screen.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
   

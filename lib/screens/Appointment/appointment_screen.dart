@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'doctor_details_screen.dart';
+import '../Doctor/doctor_details_screen.dart';
 
 class AppointmentScreen extends StatefulWidget {
   const AppointmentScreen({super.key});
@@ -26,10 +26,11 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const DoctorDetailsScreen()),
-            );
+            Navigator.pop(context);
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(builder: (context) => const DoctorDetailsScreen()),
+            // );
           },
         ),
         centerTitle: true,
@@ -186,7 +187,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                   ),
                   child: const Text(
                     'Confirm',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),

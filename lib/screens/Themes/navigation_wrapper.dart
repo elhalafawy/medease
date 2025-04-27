@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../screens/home_screen.dart';
-import '../screens/upload_screen.dart';
-import '../screens/appointment_screen.dart';
-import '../screens/profile_screen.dart';
-import '../widgets/custom_bottom_bar.dart';
+import '../Home/home_screen.dart';
+import '../Upload/upload_screen.dart';
+import '../Appointment/appointment_screen.dart';
+import '../Profile/profile_screen.dart';
+import '../../widgets/custom_bottom_bar.dart';
 
 class MainNavigation extends StatefulWidget {
   final bool goToAppointment;

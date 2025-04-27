@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'doctor_details_screen.dart';
-import 'doctors_screen.dart';
+import '../Doctor/doctor_details_screen.dart';
+import '../Doctor/doctors_screen.dart';
 import 'medication_screen.dart';
 import 'medical_record_screen.dart';
 

@@ -5,7 +5,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'forgot_password_screen.dart';  
 import 'verify_email_screen.dart';
-import 'package:medease/screens/login_success_widget.dart';
+import 'package:medease/screens/Before%20home/login_success_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});

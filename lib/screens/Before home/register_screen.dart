@@ -3,10 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:medease/screens/otp_verification_widget.dart';
-import '../Firebase/Authentication.dart';
+import 'package:medease/screens/Before%20home/otp_verification_widget.dart';
+import '../../Firebase/Authentication.dart';
 import 'verify_email_screen.dart';
-import 'color_reference.dart';
+import '../Themes/color_reference.dart';
 
 class RegisterScreen extends StatefulWidget {
   RegisterScreen({super.key});

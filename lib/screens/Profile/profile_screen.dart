@@ -5,6 +5,7 @@ import 'about_app_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatelessWidget {
+  // String email;
   const ProfileScreen({super.key});
 
   @override

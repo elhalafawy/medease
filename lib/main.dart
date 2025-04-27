@@ -2,15 +2,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'Camera/Camera.dart';
-import 'screens/splash_screen.dart';
-import 'screens/welcome_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
-import 'screens/forgot_password_screen.dart';
-import 'screens/navigation_wrapper.dart'; 
-import 'screens/change_password_screen.dart';
-import 'screens/notifications_screen.dart';
-import 'screens/profile_screen.dart';
+import 'screens/Before home/splash_screen.dart';
+import 'screens/Before home/welcome_screen.dart';
+import 'screens/Before home/login_screen.dart';
+import 'screens/Before home/register_screen.dart';
+import 'screens/Before home/forgot_password_screen.dart';
+import 'screens/Themes/navigation_wrapper.dart'; 
+import 'screens/Before home/change_password_screen.dart';
+import 'screens/Profile/notifications_screen.dart';
+import 'screens/Profile/profile_screen.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
