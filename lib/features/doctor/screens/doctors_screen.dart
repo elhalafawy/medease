@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'doctor_details_screen.dart';
+import '../../../core/widgets/custom_bottom_bar.dart';
+import '../../../core/utils/navigation_wrapper.dart';
 
 class DoctorsScreen extends StatelessWidget {
-  const DoctorsScreen({super.key});
+  final String category;
+  final VoidCallback? onBack;
+  final Function(Map<String, dynamic>)? onDoctorTap;
+  
+  const DoctorsScreen({
+    super.key,
+    required this.category,
+    this.onBack,
+    this.onDoctorTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -10,11 +21,13 @@ class DoctorsScreen extends StatelessWidget {
       {
         'name': 'Dr. Ahmed',
         'type': 'Neurologist',
-        'rating': '4.9',
+        'rating': '4.8',
         'patients': '116+',
         'experience': '3+ Years',
         'reviews': '90+',
         'image': 'assets/images/doctor_photo.png',
+        'hospital': 'Al Shifa Hospital',
+        'price': '300 EGP',
       },
     ];
 
@@ -24,7 +37,7 @@ class DoctorsScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: onBack ?? () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
@@ -47,12 +60,9 @@ class DoctorsScreen extends StatelessWidget {
   Widget _buildDoctorCard(BuildContext context, Map<String, dynamic> doctor) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const DoctorDetailsScreen(),
-          ),
-        );
+        if (onDoctorTap != null) {
+          onDoctorTap!(doctor);
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -60,7 +70,14 @@ class DoctorsScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: const Color(0xFFE8F3F1)),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -82,6 +99,11 @@ class DoctorsScreen extends StatelessWidget {
                     doctor['type'],
                     style: const TextStyle(color: Color(0xFFADADAD), fontSize: 13),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    doctor['hospital'],
+                    style: const TextStyle(color: Color(0xFF73D0ED), fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -89,9 +111,9 @@ class DoctorsScreen extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(doctor['rating'], style: const TextStyle(fontSize: 13)),
                       const SizedBox(width: 16),
-                      const Icon(Icons.people, size: 16, color: Colors.grey),
+                      const Icon(Icons.attach_money, size: 16, color: Colors.green),
                       const SizedBox(width: 4),
-                      Text(doctor['patients'], style: const TextStyle(fontSize: 13)),
+                      Text(doctor['price'], style: const TextStyle(fontSize: 13, color: Colors.green)),
                     ],
                   ),
                 ],

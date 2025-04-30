@@ -83,4 +83,4 @@ class DefaultFirebaseOptions {
     authDomain: 'medeaseapp-d0d47.firebaseapp.com',
     storageBucket: 'medeaseapp-d0d47.firebasestorage.app',
   );
-}
+} 

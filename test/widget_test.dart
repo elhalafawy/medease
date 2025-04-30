@@ -5,7 +5,7 @@ import 'package:medease/main.dart';
 
 void main() {
   testWidgets('App loads smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const MedEaseApp());
+    await tester.pumpWidget(const MyApp());
 
     expect(find.byType(MaterialApp), findsOneWidget);
   });

@@ -1,83 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:medease/screens/Before%20home/otp_verification_widget.dart';
-import '../../Firebase/Authentication.dart';
+import '../widgets/otp_verification_widget.dart';
+import '../../../core/firebase/auth_service.dart';
 import 'verify_email_screen.dart';
-import '../Themes/color_reference.dart';
+import '../../../core/theme/app_theme.dart';
+import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
-  RegisterScreen({super.key});
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _authServiceProvider = AuthServiceProvider();
   bool _agreeToTerms = false;
   bool _isPasswordVisible = false;
-  late final TextEditingController _email = TextEditingController();
-  late final TextEditingController _password = TextEditingController();
-  late final TextEditingController _username = TextEditingController();
-  late final TextEditingController _birthdate = TextEditingController();
-
-  // Google Sign-In
-  Future<void> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      setState(() {
-        _email.text = FirebaseAuth.instance.currentUser?.email ?? '';
-        _username.text = FirebaseAuth.instance.currentUser?.displayName ?? '';
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign in failed: $e')));
-    }
-  }
-
-  // Facebook Sign-In
-  Future<void> signInWithFacebook() async {
-    try {
-      final LoginResult result = await FacebookAuth.instance.login();
-
-      if (result.status == LoginStatus.success) {
-        final OAuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.token);
-        await FirebaseAuth.instance.signInWithCredential(credential);
-
-        setState(() {
-          _email.text = FirebaseAuth.instance.currentUser?.email ?? '';
-          _username.text = FirebaseAuth.instance.currentUser?.displayName ?? '';
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Facebook sign in failed')));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Facebook sign in error: $e')));
-    }
-  }
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _username = TextEditingController();
+  final TextEditingController _birthdate = TextEditingController();
 
   // Registration Method
   Future<void> registerUser() async {
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _email.text.trim(),
-        password: _password.text.trim(),
+      await _authServiceProvider.registerWithEmailAndPassword(
+        _email.text.trim(),
+        _password.text.trim(),
       );
-
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Registration successful! Please verify your email.")),
@@ -124,6 +76,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -144,13 +98,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 60),
-                  const Text(
+                  Text(
                     'Create Account',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: ColorSchemes.loginTextColor,
-                    ),
+                    style: theme.textTheme.headlineLarge,
                   ),
                   const SizedBox(height: 32),
                   TextField(
@@ -158,10 +108,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: const InputDecoration(
                       hintText: 'username@gmail.com',
                       labelText: 'Email Address',
-                      labelStyle: TextStyle(fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -170,19 +116,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     decoration: const InputDecoration(
                       hintText: 'username',
                       labelText: 'User Name',
-                      labelStyle: TextStyle(fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     decoration: const InputDecoration(
                       labelText: 'Gender',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
                     ),
                     value: 'Male',
                     items: const [
@@ -197,9 +136,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     readOnly: true,
                     decoration: InputDecoration(
                       labelText: 'Birthdate',
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.calendar_today_outlined),
                         onPressed: () async {
@@ -218,13 +154,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextField(
-                    obscureText: !_isPasswordVisible, 
+                    obscureText: !_isPasswordVisible,
                     controller: _password,
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible ? Icons.visibility : Icons.visibility_off_outlined,
@@ -258,22 +191,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: ElevatedButton(
                       onPressed: _agreeToTerms
                           ? () async {
-                              await registerUser();
+                              await Register(
+                                context,
+                                _email.text.trim(),
+                                _password.text.trim(),
+                              );
                             }
                           : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorSchemes.buttonColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 0,
-                      ),
                       child: const Text(
                         'Register',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -282,82 +211,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Center(
                     child: TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text(
+                      child: Text(
                         'Log In',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
-                          color: ColorSchemes.linkColor,
+                          color: theme.primaryColor,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: Colors.grey.shade400,
-                          thickness: 1,
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          "Or sign up with",
-                          style: TextStyle(color: Colors.black54, fontSize: 14),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: Colors.grey.shade400,
-                          thickness: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InkWell(
-                        onTap: () => signInWithFacebook(),
-                        borderRadius: BorderRadius.circular(50),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Image.asset('assets/icons/facebook_icon.png'),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      InkWell(
-                        onTap: () => signInWithGoogle(),
-                        borderRadius: BorderRadius.circular(50),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Image.asset('assets/icons/google_icon.png'),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),

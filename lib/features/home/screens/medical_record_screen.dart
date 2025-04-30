@@ -3,7 +3,8 @@ import 'home_screen.dart';
 import 'medical_record_details_screen.dart';
 
 class MedicalRecordScreen extends StatelessWidget {
-  const MedicalRecordScreen({super.key});
+  final VoidCallback? onBack;
+  const MedicalRecordScreen({super.key, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -14,14 +15,15 @@ class MedicalRecordScreen extends StatelessWidget {
           style: TextStyle(color: Colors.black),
         ),
         backgroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
-        onPressed: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()), 
-          );
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            if (onBack != null) {
+              onBack!();
+            } else {
+              Navigator.pop(context);
+            }
           },
         ),
       ),

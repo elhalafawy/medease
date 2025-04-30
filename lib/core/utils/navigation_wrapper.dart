@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../Home/home_screen.dart';
-import '../Upload/upload_screen.dart';
-import '../Appointment/appointment_screen.dart';
-import '../Profile/profile_screen.dart';
-import '../../widgets/custom_bottom_bar.dart';
+import '../../features/home/screens/home_screen.dart';
+import '../../features/upload/screens/upload_screen.dart';
+import '../../features/appointment/screens/appointment_schedule_screen.dart';
+import '../../features/profile/screens/profile_screen.dart';
+import '../widgets/custom_bottom_bar.dart';
 
 class MainNavigation extends StatefulWidget {
   final bool goToAppointment;
@@ -11,10 +11,10 @@ class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key, this.goToAppointment = false});
 
   @override
-  State<MainNavigation> createState() => _MainNavigationState();
+  State<MainNavigation> createState() => MainNavigationState();
 }
 
-class _MainNavigationState extends State<MainNavigation> {
+class MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
   @override
@@ -25,13 +25,18 @@ class _MainNavigationState extends State<MainNavigation> {
     }
   }
 
+  void setTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildCurrentScreen(),
       bottomNavigationBar: CustomBottomBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
       ),
     );
   }
@@ -49,7 +54,14 @@ class _MainNavigationState extends State<MainNavigation> {
       case 1:
         return const UploadScreen();
       case 2:
-        return const AppointmentScreen(); 
+        return AppointmentScheduleScreen(
+          appointments: const [], // Added required parameter
+          onBack: () {
+            setState(() {
+              _currentIndex = 0;
+            });
+          },
+        );
       case 3:
         return const ProfileScreen();
       default:

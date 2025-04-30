@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../utils/navigation_wrapper.dart';
 
 class CustomBottomBar extends StatelessWidget {
   final int currentIndex;
-  final Function(int) onTap;
 
-  const CustomBottomBar({super.key, required this.currentIndex, required this.onTap});
+  const CustomBottomBar({super.key, required this.currentIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +24,35 @@ class CustomBottomBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem("assets/icons/ic_home.png", "Home", 0),
-          _buildNavItem("assets/icons/ic_upload.png", "Upload", 1),
-          _buildNavItem("assets/icons/ic_appointment.png", "Appointment", 2),
-          _buildNavItem("assets/icons/ic_profile.png", "Profile", 3),
+          _buildNavItem(context, "assets/icons/ic_home.png", "Home", 0),
+          _buildNavItem(context, "assets/icons/ic_upload.png", "Upload", 1),
+          _buildNavItem(context, "assets/icons/ic_appointment.png", "Appointment", 2),
+          _buildNavItem(context, "assets/icons/ic_profile.png", "Profile", 3),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(String iconPath, String label, int index) {
+  Widget _buildNavItem(BuildContext context, String iconPath, String label, int index) {
     final bool isSelected = currentIndex == index;
     return GestureDetector(
-      onTap: () => onTap(index),
+      onTap: () {
+        // Smart navigation: if already in MainNavigation, switch tab; else, pushAndRemoveUntil
+        final mainNavState = context.findAncestorStateOfType<MainNavigationState>();
+        if (mainNavState != null) {
+          mainNavState.setTab(index);
+        } else {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MainNavigation(goToAppointment: index == 2),
+              ),
+              (route) => false,
+            );
+          });
+        }
+      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import '../Appointment/appointment_screen.dart';
+import '../../appointment/screens/appointment_screen.dart';
+import '../../../core/widgets/custom_bottom_bar.dart';
+import '../../../core/utils/navigation_wrapper.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
-  
+  final Map<String, dynamic> doctor;
   final VoidCallback? onBack;
   final VoidCallback? onBookAppointment;
 
   const DoctorDetailsScreen({
     super.key,
+    required this.doctor,
     this.onBack,
     this.onBookAppointment,
   });
@@ -42,7 +45,7 @@ class DoctorDetailsScreen extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.asset('assets/images/doctor_photo.png'),
+              child: Image.asset(doctor['image']),
             ),
             const SizedBox(height: 16),
             Container(
@@ -51,13 +54,13 @@ class DoctorDetailsScreen extends StatelessWidget {
                 color: const Color(0xFF022E5B),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Dr. Ahmed", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 4),
-                  Text("Senior Neurologist and Surgeon", style: TextStyle(color: Colors.white70)),
-                  Text("Mirpur Medical College and Hospital", style: TextStyle(color: Colors.white70)),
+                  Text(doctor['name'], style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(doctor['type'], style: const TextStyle(color: Colors.white70)),
+                  const Text("Mirpur Medical College and Hospital", style: TextStyle(color: Colors.white70)),
                 ],
               ),
             ),
@@ -67,13 +70,13 @@ class DoctorDetailsScreen extends StatelessWidget {
               child: Text("Appointment", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
             ),
             const SizedBox(height: 24),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _DoctorStat(icon: Icons.person, value: '116+', label: 'Patients'),
-                _DoctorStat(icon: Icons.verified_user, value: '3+', label: 'Years'),
-                _DoctorStat(icon: Icons.star_border, value: '4.9', label: 'Rating'),
-                _DoctorStat(icon: Icons.chat, value: '90+', label: 'Reviews'),
+                _DoctorStat(icon: Icons.person, value: doctor['patients'], label: 'Patients'),
+                _DoctorStat(icon: Icons.verified_user, value: doctor['experience'], label: 'Years'),
+                _DoctorStat(icon: Icons.star_border, value: doctor['rating'], label: 'Rating'),
+                _DoctorStat(icon: Icons.chat, value: doctor['reviews'], label: 'Reviews'),
               ],
             ),
             const SizedBox(height: 24),

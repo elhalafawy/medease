@@ -5,7 +5,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'forgot_password_screen.dart';  
 import 'verify_email_screen.dart';
-import 'package:medease/screens/Before%20home/login_success_widget.dart';
+import '../widgets/login_success_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
@@ -152,26 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () async {
-                        try {
-                          final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-                            email: _email.text.trim(),
-                            password: _password.text.trim(),
-                          );
-
-                          final user = FirebaseAuth.instance.currentUser;
-                          if (user != null && user.emailVerified) {
-                            showDialog(
-                              context: context,
-                              builder: (_) => const LoginSuccessWidget(),
-                            );
-                          } else {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => const VerifyEmailScreen()),
-                            );
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed: $e')));
-                        }
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          context.go('/main');
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF00264D),
@@ -188,7 +171,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   Center(
                     child: TextButton(
-                      onPressed: () => context.go('/signup'),
+                      onPressed: () => context.go('/register'),
                       child: const Text(
                         'Sign Up',
                         style: TextStyle(

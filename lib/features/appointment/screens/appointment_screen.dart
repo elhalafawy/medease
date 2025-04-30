@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../Doctor/doctor_details_screen.dart';
+import '../../doctor/screens/doctor_details_screen.dart';
+import '../../../core/widgets/custom_snackbar.dart';
+import '../../../core/widgets/custom_bottom_bar.dart';
+import '../../../core/utils/navigation_wrapper.dart';
 
 class AppointmentScreen extends StatefulWidget {
   const AppointmentScreen({super.key});
@@ -11,10 +14,63 @@ class AppointmentScreen extends StatefulWidget {
 class _AppointmentScreenState extends State<AppointmentScreen> {
   int selectedDayIndex = 2;
   int selectedTimeIndex = 0;
+  bool isBooking = false;
 
   final List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
   final List<String> dates = ['3', '4', '5', '6', '7'];
   final List<String> times = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM'];
+
+  Future<void> _showConfirmationDialog() async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Appointment'),
+          content: Text(
+            'Are you sure you want to book an appointment for ${days[selectedDayIndex]} at ${times[selectedTimeIndex]}?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _bookAppointment();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF022E5B),
+              ),
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _bookAppointment() async {
+    setState(() => isBooking = true);
+    
+    // Simulate API call
+    await Future.delayed(const Duration(seconds: 1));
+    
+    setState(() => isBooking = false);
+    
+    if (mounted) {
+      CustomSnackBar.show(
+        context: context,
+        message: 'Appointment booked successfully for ${days[selectedDayIndex]} at ${times[selectedTimeIndex]}',
+      );
+      
+      // Navigate back after a short delay
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,24 +227,25 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Appointment booked for ${days[selectedDayIndex]} at ${times[selectedTimeIndex]}',
-                        ),
-                      ),
-                    );
-                  },
+                  onPressed: isBooking ? null : _showConfirmationDialog,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF022E5B),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
-                  child: const Text(
-                    'Confirm',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                  ),
+                  child: isBooking
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Book Appointment',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                        ),
                 ),
               ),
             ),
