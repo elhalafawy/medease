@@ -14,7 +14,8 @@ class ReviewCard extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundImage: AssetImage('assets/images/patient.png'),
+            radius: 24,
+            backgroundImage: AssetImage('assets/images/profile_picture.png'),
           ),
           SizedBox(width: 10),
           Expanded(
