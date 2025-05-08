@@ -11,7 +11,6 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   } catch (e) {
-    
     debugPrint('Firebase already initialized: $e');
   }
   runApp(const MyApp());
@@ -25,6 +24,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'MedEase',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
     );

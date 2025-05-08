@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../appointment/screens/appointment_screen.dart';
-import '../../../core/widgets/custom_bottom_bar.dart';
-import '../../../core/utils/navigation_wrapper.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> doctor;
@@ -23,7 +21,7 @@ class DoctorDetailsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF022E5B)),
           onPressed: () {
             if (onBack != null) {
               onBack!();
@@ -34,8 +32,12 @@ class DoctorDetailsScreen extends StatelessWidget {
         ),
         centerTitle: true,
         title: const Text(
-          'Doctor',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          'Doctor Details',
+          style: TextStyle(
+            color: Color(0xFF022E5B),
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -45,7 +47,21 @@ class DoctorDetailsScreen extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.asset(doctor['image']),
+              child: Container(
+                height: 400,
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 20),
+                child: Image.asset(
+                  doctor['image'],
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.person, size: 100, color: Colors.grey),
+                    );
+                  },
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             Container(
@@ -57,17 +73,34 @@ class DoctorDetailsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(doctor['name'], style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    doctor['name'],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(doctor['type'], style: const TextStyle(color: Colors.white70)),
-                  const Text("Mirpur Medical College and Hospital", style: TextStyle(color: Colors.white70)),
+                  Text(
+                    doctor['type'],
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  Text(
+                    doctor['hospital'],
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text("Appointment", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            const Text(
+              "Doctor Information",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: Color(0xFF022E5B),
+              ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -84,11 +117,11 @@ class DoctorDetailsScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AppointmentScreen()),
-              );
-            },
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AppointmentScreen()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF022E5B),
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -96,7 +129,11 @@ class DoctorDetailsScreen extends StatelessWidget {
                 ),
                 child: const Text(
                   'Book Appointment',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -124,9 +161,21 @@ class _DoctorStat extends StatelessWidget {
       children: [
         Icon(icon, color: const Color(0xFF022E5B), size: 30),
         const SizedBox(height: 6),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF022E5B),
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFFADADAD),
+            fontSize: 12,
+          ),
+        ),
       ],
     );
   }
