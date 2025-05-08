@@ -9,6 +9,7 @@ import '../../features/doctor/screens/doctors_screen.dart';
 import '../../features/doctor/screens/doctor_details_screen.dart';
 import '../../features/appointment/screens/appointment_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
+import '../../doctor_dashboard/screens/doctor_dashboard_screen.dart';
 import '../utils/navigation_wrapper.dart';
 
 class AppRouter {
@@ -54,6 +55,10 @@ class AppRouter {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/doctor-dashboard',
+        builder: (context, state) => const DoctorDashboardScreen(),
       ),
       GoRoute(
         path: '/main',

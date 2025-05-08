@@ -3,9 +3,15 @@ import '../../doctor/screens/doctor_details_screen.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/widgets/custom_bottom_bar.dart';
 import '../../../core/utils/navigation_wrapper.dart';
+import 'appointment_schedule_screen.dart';
 
 class AppointmentScreen extends StatefulWidget {
-  const AppointmentScreen({super.key});
+  final Map<String, dynamic>? doctor;
+
+  const AppointmentScreen({
+    super.key,
+    this.doctor,
+  });
 
   @override
   State<AppointmentScreen> createState() => _AppointmentScreenState();
@@ -53,6 +59,17 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   Future<void> _bookAppointment() async {
     setState(() => isBooking = true);
     
+    // Create new appointment data
+    final newAppointment = {
+      'doctorName': widget.doctor?['name'] ?? 'Dr. Ahmed',
+      'specialty': widget.doctor?['type'] ?? 'Senior Neurologist and Surgeon',
+      'hospital': widget.doctor?['hospital'] ?? 'Mirpur Medical College and Hospital',
+      'date': '${days[selectedDayIndex]} ${dates[selectedDayIndex]}',
+      'time': times[selectedTimeIndex],
+      'status': 'Pending',
+      'imageUrl': widget.doctor?['image'] ?? 'assets/images/doctor_photo.png',
+    };
+    
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
     
@@ -64,10 +81,23 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         message: 'Appointment booked successfully for ${days[selectedDayIndex]} at ${times[selectedTimeIndex]}',
       );
       
-      // Navigate back after a short delay
-      await Future.delayed(const Duration(seconds: 1));
+      // Navigate to the main navigation with appointments tab selected and pass the new appointment
       if (mounted) {
+        // First pop the current screen
         Navigator.pop(context);
+        
+        // Then navigate to the main navigation
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainNavigation(
+                goToAppointment: true,
+                initialAppointments: [newAppointment],
+              ),
+            ),
+          );
+        });
       }
     }
   }
@@ -81,17 +111,11 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(builder: (context) => const DoctorDetailsScreen()),
-            // );
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
-          'Doctor',
+          'Book Appointment',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
@@ -100,7 +124,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.asset('assets/images/doctor_photo.png'),
+              child: Image.asset(widget.doctor?['image'] ?? 'assets/images/doctor_photo.png'),
             ),
             const SizedBox(height: 16),
             Container(
@@ -110,13 +134,22 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                 color: const Color(0xFF022E5B),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Dr. Ahmed", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 4),
-                  Text("Senior Neurologist and Surgeon", style: TextStyle(color: Colors.white70)),
-                  Text("Mirpur Medical College and Hospital", style: TextStyle(color: Colors.white70)),
+                  Text(
+                    widget.doctor?['name'] ?? "Dr. Ahmed",
+                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.doctor?['type'] ?? "Senior Neurologist and Surgeon",
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                  Text(
+                    widget.doctor?['hospital'] ?? "Mirpur Medical College and Hospital",
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             ),

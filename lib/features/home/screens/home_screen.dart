@@ -55,35 +55,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: showAppointmentDetails && selectedAppointment != null
             ? AppointmentDetailsScreen(
-                doctorName: selectedAppointment!["doctorName"] ?? "Dr. Ahmed",
-                specialty: selectedAppointment!["specialty"] ?? "Neurologist",
-                hospital: selectedAppointment!["hospital"] ?? "Al Shifa Hospital",
-                imageUrl: selectedAppointment!["imageUrl"] ?? "assets/images/doctor_photo.png",
-                rating: selectedAppointment!["rating"] ?? 4.8,
-                price: selectedAppointment!["price"] ?? "300 EGP",
-                date: selectedAppointment!["date"] ?? "6 Jun, Sun",
-                time: selectedAppointment!["time"] ?? "10:30am - 11:30pm",
-                status: selectedAppointment!["status"] ?? "Pending",
-                onStatusChanged: (status) {},
+                appointment: selectedAppointment!,
                 onBack: () {
                   setState(() {
-                    showAppointmentDetails = false;
-                  });
-                },
-                onUpdateAppointment: (updatedAppointment) {
-                  setState(() {
-                    final idx = appointments.indexWhere((a) =>
-                      a['doctorName'] == updatedAppointment['doctorName'] &&
-                      a['date'] == selectedAppointment!['date'] &&
-                      a['time'] == selectedAppointment!['time']
-                    );
-                    if (idx != -1) {
-                      appointments[idx] = updatedAppointment;
-                      selectedAppointment = updatedAppointment;
-                    } else {
-                      appointments.add(updatedAppointment);
-                      selectedAppointment = updatedAppointment;
-                    }
+                    selectedAppointment = null;
                   });
                 },
               )

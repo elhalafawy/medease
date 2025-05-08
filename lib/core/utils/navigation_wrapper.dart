@@ -7,8 +7,13 @@ import '../widgets/custom_bottom_bar.dart';
 
 class MainNavigation extends StatefulWidget {
   final bool goToAppointment;
+  final List<Map<String, dynamic>>? initialAppointments;
 
-  const MainNavigation({super.key, this.goToAppointment = false});
+  const MainNavigation({
+    super.key, 
+    this.goToAppointment = false,
+    this.initialAppointments,
+  });
 
   @override
   State<MainNavigation> createState() => MainNavigationState();
@@ -16,6 +21,7 @@ class MainNavigation extends StatefulWidget {
 
 class MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+  late List<Map<String, dynamic>> _appointments;
 
   @override
   void initState() {
@@ -23,6 +29,7 @@ class MainNavigationState extends State<MainNavigation> {
     if (widget.goToAppointment) {
       _currentIndex = 2; 
     }
+    _appointments = widget.initialAppointments ?? [];
   }
 
   void setTab(int index) {
@@ -31,7 +38,13 @@ class MainNavigationState extends State<MainNavigation> {
     });
   }
 
- @override
+  void addAppointment(Map<String, dynamic> appointment) {
+    setState(() {
+      _appointments.add(appointment);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildCurrentScreen(),
@@ -55,7 +68,7 @@ class MainNavigationState extends State<MainNavigation> {
         return const UploadScreen();
       case 2:
         return AppointmentScheduleScreen(
-          appointments: const [], // Added required parameter
+          appointments: _appointments,
           onBack: () {
             setState(() {
               _currentIndex = 0;

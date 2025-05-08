@@ -119,7 +119,11 @@ class DoctorDetailsScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AppointmentScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => AppointmentScreen(
+                        doctor: doctor,
+                      ),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
