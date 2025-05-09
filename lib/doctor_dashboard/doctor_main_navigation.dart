@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_theme.dart';
 import 'screens/doctor_home_screen.dart';
 import 'screens/doctor_appointments_screen.dart';
 import 'screens/doctor_reviews_screen.dart';
+import 'screens/doctor_book_appointment_screen.dart';
 import 'widgets/doctor_bottom_bar.dart';
 
 class DoctorMainNavigation extends StatefulWidget {
@@ -46,6 +48,7 @@ class DoctorMainNavigationState extends State<DoctorMainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: _buildCurrentScreen(),
       bottomNavigationBar: DoctorBottomBar(
         currentIndex: _currentIndex,
@@ -67,16 +70,9 @@ class DoctorMainNavigationState extends State<DoctorMainNavigation> {
       case 1:
         return const _DoctorUploadPlaceholder();
       case 2:
-        return DoctorAppointmentsScreen(
-          appointments: _appointments,
-          onBack: () {
-            setState(() {
-              _currentIndex = 0;
-            });
-          },
-        );
+        return const DoctorBookAppointmentScreen();
       case 3:
-        return const _DoctorProfilePlaceholder();
+        return const _ComingSoonPlaceholder(title: 'Patient');
       default:
         return DoctorHomeScreen(
           onTabChange: (index) {
@@ -94,13 +90,16 @@ class _DoctorUploadPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Upload'),
+        title: Text('Upload', style: AppTheme.titleLarge),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: const Center(
-        child: Text('Upload Screen (قريبًا)', style: TextStyle(fontSize: 20, color: Colors.grey)),
+      body: Center(
+        child: Text('Upload Screen (Coming Soon)', 
+          style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)
+        ),
       ),
     );
   }
@@ -111,13 +110,36 @@ class _DoctorProfilePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text('Profile', style: AppTheme.titleLarge),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: const Center(
-        child: Text('Profile Screen (قريبًا)', style: TextStyle(fontSize: 20, color: Colors.grey)),
+      body: Center(
+        child: Text('Profile Screen (Coming Soon)', 
+          style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)
+        ),
+      ),
+    );
+  }
+}
+
+class _ComingSoonPlaceholder extends StatelessWidget {
+  final String title;
+  const _ComingSoonPlaceholder({required this.title});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('$title (Coming Soon)', style: AppTheme.titleLarge),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Center(
+        child: Text('$title feature coming soon!',
+          style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor),
+        ),
       ),
     );
   }

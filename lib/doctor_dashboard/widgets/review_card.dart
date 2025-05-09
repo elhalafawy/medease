@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_theme.dart';
 
 class ReviewCard extends StatelessWidget {
   const ReviewCard({super.key});
@@ -6,18 +7,20 @@ class ReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 24,
             backgroundImage: AssetImage('assets/images/profile_picture.png'),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,17 +28,17 @@ class ReviewCard extends StatelessWidget {
                 Row(
                   children: List.generate(
                     5,
-                    (index) => Icon(Icons.star, color: Colors.orange, size: 16),
+                    (index) => const Icon(Icons.star, color: Colors.amber, size: 18),
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  "Dr. Ahmed is highly recommended for his compassionate approach and exceptional skill in cardiology.",
-                  style: TextStyle(fontSize: 12),
+                  "Dr. ahmed is highly recommended for his compassionate approach and exceptional skill in cardiology",
+                  style: AppTheme.bodyMedium.copyWith(fontSize: 13),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

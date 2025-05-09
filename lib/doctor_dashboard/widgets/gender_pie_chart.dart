@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../core/theme/app_theme.dart';
 
 class GenderPieChart extends StatelessWidget {
   const GenderPieChart({super.key});
@@ -9,28 +10,28 @@ class GenderPieChart extends StatelessWidget {
     return PieChart(
       PieChartData(
         sectionsSpace: 2,
-        centerSpaceRadius: 18,
+        centerSpaceRadius: 14,
         sections: [
           PieChartSectionData(
-            color: Colors.pink.shade300,
+            color: Color(0xFFEC4899), // pink
             value: 40,
             title: '40%',
-            radius: 25,
-            titleStyle: TextStyle(fontSize: 10, color: Colors.white),
+            radius: 18,
+            titleStyle: AppTheme.bodyMedium.copyWith(color: Colors.white, fontSize: 10),
           ),
           PieChartSectionData(
-            color: Colors.blue.shade400,
+            color: Color(0xFF3B82F6), // blue
             value: 50,
             title: '50%',
-            radius: 25,
-            titleStyle: TextStyle(fontSize: 10, color: Colors.white),
+            radius: 18,
+            titleStyle: AppTheme.bodyMedium.copyWith(color: Colors.white, fontSize: 10),
           ),
           PieChartSectionData(
-            color: Colors.green.shade400,
+            color: Color(0xFF34D399), // green
             value: 10,
             title: '10%',
-            radius: 25,
-            titleStyle: TextStyle(fontSize: 10, color: Colors.white),
+            radius: 18,
+            titleStyle: AppTheme.bodyMedium.copyWith(color: Colors.white, fontSize: 10),
           ),
         ],
       ),

@@ -12,7 +12,7 @@ class DoctorAppointmentsScreen extends StatelessWidget {
     required this.onBack,
   });
 
-  // الأيام المتاحة (true = متاح، false = غير متاح)
+  // Available days (true = available, false = not available)
   final List<bool> availableDays = const [true, true, true, true, true, false, false];
   final List<String> daysShort = const ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'So'];
 

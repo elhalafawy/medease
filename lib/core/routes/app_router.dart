@@ -9,7 +9,7 @@ import '../../features/doctor/screens/doctors_screen.dart';
 import '../../features/doctor/screens/doctor_details_screen.dart';
 import '../../features/appointment/screens/appointment_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
-import '../../doctor_dashboard/screens/doctor_home_screen.dart';
+import '../../doctor_dashboard/doctor_router.dart';
 import '../utils/navigation_wrapper.dart';
 
 class AppRouter {
@@ -58,7 +58,12 @@ class AppRouter {
       ),
       GoRoute(
         path: '/doctor-dashboard',
-        builder: (context, state) => const DoctorHomeScreen(),
+        pageBuilder: (context, state) => MaterialPage(
+          child: Navigator(
+            onGenerateRoute: DoctorRouter.generateRoute,
+            initialRoute: DoctorRoutes.home,
+          ),
+        ),
       ),
       GoRoute(
         path: '/main',
