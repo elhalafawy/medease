@@ -7,6 +7,8 @@ import 'doctor_reviews_screen.dart';
 import 'doctor_appointments_screen.dart';
 import 'doctor_messages_screen.dart';
 import 'doctor_notifications_screen.dart';
+import '../../features/profile/screens/edit_profile_screen.dart';
+import 'doctor_profile_screen.dart';
 
 
 class DoctorHomeScreen extends StatefulWidget {
@@ -67,15 +69,24 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.edit, size: 16, color: AppTheme.greyColor),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          "Edit Profile",
-                                          style: AppTheme.bodyMedium,
-                                        ),
-                                      ],
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const DoctorProfileScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit, size: 16, color: AppTheme.greyColor),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            "Edit Profile",
+                                            style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -126,12 +137,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 margin: const EdgeInsets.only(right: 10),
                                 padding: const EdgeInsets.all(9),
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFF7FAFC),
+                                  color: AppTheme.backgroundColor,
                                   borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: Color(0xFFB6D0F7), width: 1),
+                                  border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2), width: 1),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.blue.withAlpha((0.08 * 255).toInt()),
+                                      color: AppTheme.primaryColor.withOpacity(0.08),
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
                                     ),
@@ -175,12 +186,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   margin: const EdgeInsets.only(right: 10),
                                   padding: const EdgeInsets.all(9),
                                   decoration: BoxDecoration(
-                                    color: Color(0xFFF7FAFC),
+                                    color: AppTheme.backgroundColor,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Color(0xFFB6D0F7), width: 1),
+                                    border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2), width: 1),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.blue.withAlpha((0.08 * 255).toInt()),
+                                        color: AppTheme.primaryColor.withOpacity(0.08),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -200,11 +211,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       const SizedBox(height: 6),
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFECF7F6),
+                                          color: AppTheme.primaryColor.withOpacity(0.08),
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
-                                        child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF3B82F6), size: 18),
+                                        child: const Icon(Icons.chat_bubble_outline, color: AppTheme.primaryColor, size: 18),
                                       ),
                                     ],
                                   ),
@@ -239,12 +250,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   margin: const EdgeInsets.only(right: 0),
                                   padding: const EdgeInsets.all(9),
                                   decoration: BoxDecoration(
-                                    color: Color(0xFFF7FAFC),
+                                    color: AppTheme.backgroundColor,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: Color(0xFFB6D0F7), width: 1),
+                                    border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2), width: 1),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.blue.withAlpha((0.08 * 255).toInt()),
+                                        color: AppTheme.primaryColor.withOpacity(0.08),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -256,19 +267,19 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                     children: [
                                       Text(
                                         "0",
-                                        style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: Color(0xFF6366F1), fontSize: 18),
+                                        style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 18),
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 2),
-                                      Text("Appointments", style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: Color(0xFF6366F1), fontSize: 13), textAlign: TextAlign.center),
+                                      Text("Appointments", style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 13), textAlign: TextAlign.center),
                                       const SizedBox(height: 6),
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFEFF1FB),
+                                          color: AppTheme.primaryColor.withOpacity(0.08),
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
-                                        child: const Icon(Icons.star_border, color: Color(0xFF6366F1), size: 18),
+                                        child: const Icon(Icons.star_border, color: AppTheme.primaryColor, size: 18),
                                       ),
                                     ],
                                   ),
@@ -282,17 +293,17 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Analytics",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: AppTheme.titleLarge,
                             ),
                             Row(
                               children: [
                                 Text(
                                   "This Week",
-                                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                                  style: AppTheme.bodyMedium,
                                 ),
-                                const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey),
+                                const Icon(Icons.keyboard_arrow_down, size: 18, color: AppTheme.greyColor),
                               ],
                             ),
                           ],
@@ -319,9 +330,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Reviews",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: AppTheme.titleLarge,
                             ),
                             TextButton(
                               onPressed: () {
@@ -329,23 +340,23 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   _showReviews = true;
                                 });
                               },
-                              child: const Text(
+                              child: Text(
                                 "See All Reviews",
-                                style: TextStyle(color: AppTheme.primaryColor),
+                                style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
                               ),
                             ),
                           ],
                         ),
                         Row(
-                          children: const [
+                          children: [
                             Icon(Icons.star, color: Colors.amber, size: 24),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Text(
                               "0.0",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(width: 8),
-                            Text("Total 0 Reviews", style: TextStyle(fontSize: 14)),
+                            const SizedBox(width: 8),
+                            Text("Total 0 Reviews", style: AppTheme.bodyMedium),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -365,20 +376,16 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                       child: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                            icon: const Icon(Icons.arrow_back_ios, color: AppTheme.textColor),
                             onPressed: () {
                               setState(() {
                                 _showReviews = false;
                               });
                             },
                           ),
-                          const Text(
+                          Text(
                             'Reviews',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTheme.titleLarge,
                           ),
                         ],
                       ),

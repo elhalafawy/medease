@@ -40,16 +40,12 @@ class DoctorReviewsScreen extends StatelessWidget {
               backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                icon: const Icon(Icons.arrow_back_ios, color: app_theme.AppTheme.primaryColor),
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
-              title: const Text(
+              title: Text(
                 'Reviews',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: app_theme.AppTheme.titleLarge.copyWith(color: app_theme.AppTheme.primaryColor),
               ),
               centerTitle: true,
             )
@@ -58,17 +54,17 @@ class DoctorReviewsScreen extends StatelessWidget {
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.mail_outline, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                children: [
+                  const Icon(Icons.mail_outline, size: 64, color: app_theme.AppTheme.greyColor),
+                  const SizedBox(height: 16),
                   Text(
                     'No reviews yet',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: app_theme.AppTheme.titleLarge.copyWith(color: app_theme.AppTheme.greyColor),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'Reviews from patients will appear here.',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    style: app_theme.AppTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -106,18 +102,12 @@ class DoctorReviewsScreen extends StatelessWidget {
                           children: [
                             Text(
                               review['date'] ?? '',
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
+                              style: app_theme.AppTheme.bodyMedium,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               review['title'] ?? '',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                              style: app_theme.AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: app_theme.AppTheme.primaryColor),
                             ),
                             const SizedBox(height: 4),
                             Row(
@@ -129,16 +119,13 @@ class DoctorReviewsScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             Text(
                               review['message'] ?? '',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF4B5563),
-                              ),
+                              style: app_theme.AppTheme.bodyLarge,
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.more_vert, color: Colors.grey),
+                        icon: const Icon(Icons.more_vert, color: app_theme.AppTheme.greyColor),
                         onPressed: () {
                           // TODO: Show review options
                         },

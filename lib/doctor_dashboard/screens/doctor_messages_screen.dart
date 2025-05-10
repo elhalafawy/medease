@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_theme.dart';
 
 class DoctorMessagesScreen extends StatelessWidget {
   const DoctorMessagesScreen({super.key});
@@ -48,20 +49,21 @@ class DoctorMessagesScreen extends StatelessWidget {
       },
     ];
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Messages', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('Messages', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
         backgroundColor: Colors.white,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: AppTheme.primaryColor,
       ),
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: messages.length,
-        separatorBuilder: (context, i) => const Divider(indent: 70, endIndent: 16, height: 1),
+        separatorBuilder: (context, i) => Divider(indent: 70, endIndent: 16, height: 1, color: AppTheme.greyColor.withOpacity(0.15)),
         itemBuilder: (context, i) {
           final msg = messages[i];
           return ListTile(
@@ -90,11 +92,11 @@ class DoctorMessagesScreen extends StatelessWidget {
             ),
             title: Text(
               msg['name'] as String,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
             ),
             subtitle: Text(
               msg['message'] as String,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+              style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -104,19 +106,19 @@ class DoctorMessagesScreen extends StatelessWidget {
               children: [
                 Text(
                   msg['time'] as String,
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
                 ),
                 if ((msg['unread'] as int) > 0)
                   Container(
                     margin: const EdgeInsets.only(top: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.blue[700],
+                      color: AppTheme.primaryColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       msg['unread'].toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: AppTheme.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
               ],
