@@ -9,6 +9,8 @@ import '../../features/doctor/screens/doctors_screen.dart';
 import '../../features/doctor/screens/doctor_details_screen.dart';
 import '../../features/appointment/screens/appointment_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
+import '../../features/auth/screens/change_password_screen.dart';
+import '../../features/profile/screens/notifications_screen.dart';
 import '../../doctor_dashboard/doctor_router.dart';
 import '../utils/navigation_wrapper.dart';
 
@@ -68,6 +70,14 @@ class AppRouter {
       GoRoute(
         path: '/main',
         builder: (context, state) => const MainNavigation(),
+      ),
+      GoRoute(
+        path: '/change-password',
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
     ],
   );
