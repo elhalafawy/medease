@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../doctor/screens/doctor_details_screen.dart';
 import '../../../core/widgets/custom_snackbar.dart';
-import '../../../core/widgets/custom_bottom_bar.dart';
 import '../../../core/utils/navigation_wrapper.dart';
-import 'appointment_schedule_screen.dart';
 
 class AppointmentScreen extends StatefulWidget {
   final Map<String, dynamic>? doctor;

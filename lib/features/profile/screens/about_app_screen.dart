@@ -6,15 +6,15 @@ class AboutAppScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'About App',
-          style: TextStyle(color: Color(0xFF022E5B)),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF022E5B)),
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -27,25 +27,21 @@ class AboutAppScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'MedEase - Your Smart Healthcare Companion',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                color: Color(0xFF022E5B),
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'MedEase helps you easily manage your health records, appointments, and medications in one place. Whether you are a patient or a medical professional, we provide a user-friendly experience to improve your healthcare journey.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Spacer(),
-            const Text(
+            Text(
               'Version 1.0.0',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 8),
             const Text(

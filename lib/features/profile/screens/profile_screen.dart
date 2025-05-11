@@ -11,7 +11,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Container(
           width: double.infinity,
@@ -24,21 +24,14 @@ class ProfileScreen extends StatelessWidget {
                 backgroundImage: AssetImage('assets/images/profile_picture.png'),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Ahmed Elhalafawy',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF022E5B),
-                ),
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'ahmed.elhlafawy@email.com',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 32),
               Expanded(

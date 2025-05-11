@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'doctor_details_screen.dart';
-import '../../../core/widgets/custom_bottom_bar.dart';
-import '../../../core/utils/navigation_wrapper.dart';
 
 class DoctorsScreen extends StatelessWidget {
   final String category;

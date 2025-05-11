@@ -96,7 +96,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.access_time, color: AppTheme.primaryColor, size: 18),
+                        const Icon(Icons.access_time, color: AppTheme.primaryColor, size: 18),
                         const SizedBox(width: 6),
                         Text('10:30am - 5:30pm', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
                       ],
@@ -109,7 +109,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             value: selectedDay,
-                            items: [selectedDay, ...days].toSet().map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+                            items: {selectedDay, ...days}.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
                             onChanged: (v) => setState(() => selectedDay = v ?? 'Day'),
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -126,7 +126,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             value: selectedMonth,
-                            items: [selectedMonth, ...months].toSet().map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+                            items: {selectedMonth, ...months}.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
                             onChanged: (v) => setState(() => selectedMonth = v ?? 'Month'),
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -143,7 +143,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                     ),
                     const SizedBox(height: 18),
                     Text('Schedules', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,

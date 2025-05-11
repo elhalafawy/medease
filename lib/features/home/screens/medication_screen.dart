@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'medication_reminder_screen.dart';
+import '../../../core/theme/app_theme.dart';
 
 
 class MedicationScreen extends StatefulWidget {
@@ -104,23 +105,22 @@ class _MedicationScreenState extends State<MedicationScreen> {
   Widget build(BuildContext context) {
     final meds = showHistory ? _historyMedications : _activeMedications;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-  icon: const Icon(Icons.arrow_back, color: Colors.black),
-  onPressed: () {
-    if (widget.onBack != null) {
-      widget.onBack!();
-    } else {
-      Navigator.pop(context);
-    }
-  },
-),
-
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+          onPressed: () {
+            if (widget.onBack != null) {
+              widget.onBack!();
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        ),
         centerTitle: true,
-        title: const Text('Prescriptions', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600)),
+        title: const Text('Prescriptions', style: AppTheme.titleLarge),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -130,7 +130,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
             const SizedBox(height: 16),
             _buildTabs(),
             const SizedBox(height: 4),
-            const Divider(color: Color(0xFF001F3F), thickness: 1, endIndent: 200),
+            const Divider(color: AppTheme.borderColor, thickness: 1, endIndent: 200),
             const SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
@@ -166,11 +166,11 @@ class _MedicationScreenState extends State<MedicationScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF022E5B),
+                    backgroundColor: AppTheme.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   ),
-                  child: const Text('Add Medication', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+                  child: Text('Add Medication', style: AppTheme.bodyLarge.copyWith(color: Colors.white)),
                 ),
               ),
           ],
@@ -186,18 +186,15 @@ class _MedicationScreenState extends State<MedicationScreen> {
         GestureDetector(
           onTap: () => setState(() => showHistory = false),
           child: Text('Actual',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-                color: showHistory ? Colors.grey : Colors.black,
+              style: AppTheme.bodyLarge.copyWith(
+                color: showHistory ? AppTheme.greyColor : AppTheme.textColor,
               )),
         ),
         GestureDetector(
           onTap: () => setState(() => showHistory = true),
           child: Text('History',
-              style: TextStyle(
-                fontSize: 16,
-                color: showHistory ? Colors.black : const Color(0xFF555555),
+              style: AppTheme.bodyLarge.copyWith(
+                color: showHistory ? AppTheme.textColor : AppTheme.greyColor,
               )),
         ),
       ],
@@ -209,17 +206,19 @@ class _MedicationScreenState extends State<MedicationScreen> {
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(23),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: const Row(
         children: [
-          Icon(Icons.search, color: Colors.grey),
+          Icon(Icons.search, color: AppTheme.greyColor),
           SizedBox(width: 10),
           Expanded(
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Start typing medication name',
+                hintStyle: AppTheme.bodyMedium,
                 border: InputBorder.none,
               ),
             ),
@@ -241,50 +240,57 @@ class _MedicationScreenState extends State<MedicationScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500))),
-              if (onEdit != null)
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Color(0xFF555555)),
-                  onPressed: onEdit,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: AppTheme.bodyLarge),
+                    const SizedBox(height: 4),
+                    Text(subtitle, style: AppTheme.bodyMedium),
+                  ],
                 ),
-              if (onDelete != null)
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: onDelete,
+              ),
+              if (onEdit != null || onDelete != null)
+                Row(
+                  children: [
+                    if (onEdit != null)
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
+                        onPressed: onEdit,
+                      ),
+                    if (onDelete != null)
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: AppTheme.errorColor),
+                        onPressed: onDelete,
+                      ),
+                  ],
                 ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: Color(0xFF555555), fontSize: 14)),
           const SizedBox(height: 8),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCapsuleBox(capsules),
-              _buildCapsuleBox(date),
+              const Icon(Icons.medication_outlined, size: 16, color: AppTheme.greyColor),
+              const SizedBox(width: 4),
+              Text(capsules, style: AppTheme.bodyMedium),
+              const SizedBox(width: 16),
+              const Icon(Icons.calendar_today, size: 16, color: AppTheme.greyColor),
+              const SizedBox(width: 4),
+              Text(date, style: AppTheme.bodyMedium),
             ],
-          )
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCapsuleBox(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Text(label, style: const TextStyle(color: Color(0xFF555555))),
     );
   }
 }

@@ -6,23 +6,19 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
-  icon: const Icon(Icons.arrow_back, color: Colors.black),
-  onPressed: () {
-    Navigator.pop(context);
-
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).appBarTheme.iconTheme?.color),
+          onPressed: () {
+            Navigator.pop(context);
           },
         ),
-        title: const Text(
+        title: Text(
           'Notifications',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
         centerTitle: true,
       ),
@@ -30,28 +26,32 @@ class NotificationsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _buildNotificationCard(
+            context: context,
             icon: Icons.calendar_today,
             title: 'Schedules',
             subtitle: 'Check your schedule Today',
-            color: const Color(0xFFE1ECFF),
+            color: Theme.of(context).cardColor,
           ),
           _buildNotificationCard(
+            context: context,
             icon: Icons.medication,
             title: 'Medicine',
             subtitle: 'Check your schedule Today',
-            color: const Color(0xFFFFF1CE),
+            color: Theme.of(context).cardColor,
           ),
           _buildNotificationCard(
+            context: context,
             icon: Icons.vaccines,
             title: 'Vaccine Update',
             subtitle: 'Check your schedule Today',
-            color: const Color(0xFFE4F9FF),
+            color: Theme.of(context).cardColor,
           ),
           _buildNotificationCard(
+            context: context,
             icon: Icons.update,
             title: 'App Update',
             subtitle: 'Check your schedule Today',
-            color: const Color(0xFFF5E6EB),
+            color: Theme.of(context).cardColor,
           ),
         ],
       ),
@@ -59,6 +59,7 @@ class NotificationsScreen extends StatelessWidget {
   }
 
   Widget _buildNotificationCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -68,11 +69,11 @@ class NotificationsScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.15),
+            color: Theme.of(context).shadowColor.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -86,7 +87,7 @@ class NotificationsScreen extends StatelessWidget {
               color: color,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, size: 28, color: Colors.black),
+            child: Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
           ),
           const SizedBox(width: 16),
           Column(
@@ -94,12 +95,12 @@ class NotificationsScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(color: Colors.grey),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           )

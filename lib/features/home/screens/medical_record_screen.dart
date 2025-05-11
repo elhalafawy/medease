@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'medical_record_details_screen.dart';
+import '../../../core/theme/app_theme.dart';
 
 class MedicalRecordScreen extends StatelessWidget {
   final VoidCallback? onBack;
@@ -9,15 +10,16 @@ class MedicalRecordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text(
           'Medical Record',
-          style: TextStyle(color: Colors.black),
+          style: AppTheme.titleLarge,
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
           onPressed: () {
             if (onBack != null) {
               onBack!();
@@ -34,10 +36,9 @@ class MedicalRecordScreen extends StatelessWidget {
           children: [
             const Text(
               'ALL MEDICAL RECORDS',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: AppTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            // Filtered by year
             _buildFilterTabs(),
             const SizedBox(height: 16),
             _buildRecordItem(
@@ -77,11 +78,11 @@ class MedicalRecordScreen extends StatelessWidget {
            context, 
           MaterialPageRoute(
             builder: (context) => MedicalRecordDetailsScreen(
-          patientName: patientName,
-          diagnosis: diagnosis,
-          tests: tests,
-          medications: medications,
-        ),
+              patientName: patientName,
+              diagnosis: diagnosis,
+              tests: tests,
+              medications: medications,
+            ),
           ),
         );
       },
@@ -91,9 +92,7 @@ class MedicalRecordScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 5),
-          ],
+          border: Border.all(color: AppTheme.borderColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,39 +101,39 @@ class MedicalRecordScreen extends StatelessWidget {
               children: [
                 const Icon(
                   Icons.access_alarm_outlined,
-                  color: Color(0xFF022E5B),
+                  color: AppTheme.primaryColor,
                   size: 24,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   'Patient: $patientName',
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF555555)),
+                  style: AppTheme.bodyMedium,
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Text(
               'Diagnosis: $diagnosis',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF022E5B)),
+              style: AppTheme.bodyLarge,
             ),
             const SizedBox(height: 10),
             Text(
               'Tests: $tests',
-              style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+              style: AppTheme.bodyMedium,
             ),
             const SizedBox(height: 10),
             Text(
               'Medications: $medications',
-              style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+              style: AppTheme.bodyMedium,
             ),
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () {
                 // Show more details
               },
-              child: const Text(
+              child: Text(
                 'Show more',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF022E5B)),
+                style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
               ),
             ),
           ],
@@ -159,12 +158,13 @@ class _FilterTab extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 8),
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.blue.shade50,
+          color: AppTheme.backgroundColor,
           borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppTheme.borderColor),
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          style: AppTheme.bodyMedium,
         ),
       ),
     );

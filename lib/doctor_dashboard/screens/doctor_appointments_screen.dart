@@ -97,7 +97,7 @@ class DoctorAppointmentsScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
+                          const CircleAvatar(
                             radius: 24,
                             backgroundImage: AssetImage('assets/images/profile_picture.png'),
                           ),
@@ -134,14 +134,14 @@ class DoctorAppointmentsScreen extends StatelessWidget {
                                 Row(
                                   children: [
                                     Text('Date', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor, fontWeight: FontWeight.w500)),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: 6),
                                     Text(
                                       appt['date'] ?? '',
                                       style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600),
                                     ),
-                                    const SizedBox(width: 24),
-                                    Text('Time', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor, fontWeight: FontWeight.w500)),
                                     const SizedBox(width: 8),
+                                    Text('Time', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor, fontWeight: FontWeight.w500)),
+                                    const SizedBox(width:4),
                                     Text(
                                       appt['time'] ?? '',
                                       style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600),

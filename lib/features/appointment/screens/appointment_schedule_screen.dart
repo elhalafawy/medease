@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'appointment_details_screen.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 
 class AppointmentScheduleScreen extends StatefulWidget {

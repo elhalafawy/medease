@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../../../core/theme/app_theme.dart';
 
 class MedicationReminderScreen extends StatefulWidget {
   final Function(String name, String dosage, String dateRange, int capsules, DateTime endDate)? onConfirm;
@@ -45,18 +46,18 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
           'Medication reminder',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+          style: AppTheme.titleLarge,
         ),
       ),
       body: SingleChildScrollView(
@@ -68,7 +69,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
             const SizedBox(height: 24),
             _frequencySelector(),
             const SizedBox(height: 24),
-            const Text('Select time', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+            const Text('Select time', style: AppTheme.titleLarge),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
@@ -97,13 +98,13 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF022E5B),
+                  backgroundColor: AppTheme.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 ),
-                child: const Text(
-                  'Confirm Reminder',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white),
+                child: Text(
+                  'Confirm',
+                  style: AppTheme.bodyLarge.copyWith(color: Colors.white),
                 ),
               ),
             )
@@ -117,8 +118,9 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: AppTheme.borderColor),
       ),
       child: Column(
         children: [
@@ -138,13 +140,14 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
         children: [
           Image.asset(iconPath, width: 24, height: 24),
           const SizedBox(width: 10),
-          Text('$label:', style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 16)),
+          Text('$label:', style: AppTheme.bodyMedium),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: controller,
               decoration: InputDecoration(
                 hintText: placeholder,
+                hintStyle: AppTheme.bodyMedium,
                 border: InputBorder.none,
               ),
             ),
@@ -176,12 +179,12 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
           children: [
             Image.asset('assets/icons/image 12.png', width: 24, height: 24),
             const SizedBox(width: 10),
-            const Text('Duration:', style: TextStyle(fontWeight: FontWeight.w300, fontSize: 16)),
+            const Text('Duration:', style: AppTheme.bodyMedium),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 '${_formatDate(startDate!)} - ${_formatDate(endDate)}',
-                style: const TextStyle(fontSize: 16),
+                style: AppTheme.bodyLarge,
               ),
             ),
           ],
@@ -197,9 +200,9 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
         children: [
           Image.asset(iconPath, width: 24, height: 24),
           const SizedBox(width: 10),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w300, fontSize: 16)),
+          Text(label, style: AppTheme.bodyMedium),
           const SizedBox(width: 12),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
+          Expanded(child: Text(value, style: AppTheme.bodyLarge)),
         ],
       ),
     );
@@ -209,7 +212,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Frequency', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+        const Text('Frequency', style: AppTheme.titleLarge),
         const SizedBox(height: 12),
         Wrap(
           spacing: 12,
@@ -221,14 +224,14 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  color: selected ? const Color(0xFF022E5B) : const Color(0xFFF8F8F8),
+                  color: selected ? AppTheme.primaryColor : Colors.white,
                   borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: AppTheme.borderColor),
                 ),
                 child: Text(
                   _frequencyLabel(f),
-                  style: TextStyle(
-                    color: selected ? Colors.white : const Color(0xFF555555),
-                    fontWeight: FontWeight.w600,
+                  style: AppTheme.bodyLarge.copyWith(
+                    color: selected ? Colors.white : AppTheme.textColor,
                   ),
                 ),
               ),
@@ -252,18 +255,16 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
         });
       },
       child: Container(
-        width: 79,
-        height: 42,
-        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF022E5B) : const Color(0xFFF8F8F8),
+          color: selected ? AppTheme.primaryColor : Colors.white,
           borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: AppTheme.borderColor),
         ),
         child: Text(
           time,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: selected ? Colors.white : const Color(0xFF555555),
+          style: AppTheme.bodyLarge.copyWith(
+            color: selected ? Colors.white : AppTheme.textColor,
           ),
         ),
       ),

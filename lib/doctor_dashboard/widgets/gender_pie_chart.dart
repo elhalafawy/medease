@@ -13,21 +13,21 @@ class GenderPieChart extends StatelessWidget {
         centerSpaceRadius: 14,
         sections: [
           PieChartSectionData(
-            color: Color(0xFFEC4899), // pink
+            color: const Color(0xFFEC4899), // pink
             value: 40,
             title: '40%',
             radius: 18,
             titleStyle: AppTheme.bodyMedium.copyWith(color: Colors.white, fontSize: 10),
           ),
           PieChartSectionData(
-            color: Color(0xFF3B82F6), // blue
+            color: const Color(0xFF3B82F6), // blue
             value: 50,
             title: '50%',
             radius: 18,
             titleStyle: AppTheme.bodyMedium.copyWith(color: Colors.white, fontSize: 10),
           ),
           PieChartSectionData(
-            color: Color(0xFF34D399), // green
+            color: const Color(0xFF34D399), // green
             value: 10,
             title: '10%',
             radius: 18,

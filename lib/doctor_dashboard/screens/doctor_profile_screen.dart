@@ -23,7 +23,7 @@ class DoctorProfileScreen extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 4),
-                  Text('My Profile', style: AppTheme.titleLarge),
+                  const Text('My Profile', style: AppTheme.titleLarge),
                 ],
               ),
             ),
@@ -31,7 +31,7 @@ class DoctorProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  CircleAvatar(
+                  const CircleAvatar(
                     radius: 32,
                     backgroundImage: AssetImage('assets/images/doctor_photo.png'),
                   ),
@@ -42,11 +42,11 @@ class DoctorProfileScreen extends StatelessWidget {
                       children: [
                         Text('Dr.Ahmed', style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
                         const SizedBox(height: 2),
-                        Text('Ahmedmo@gmail.com', style: AppTheme.bodyMedium),
+                        const Text('Ahmedmo@gmail.com', style: AppTheme.bodyMedium),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right, color: AppTheme.greyColor),
+                  const Icon(Icons.chevron_right, color: AppTheme.greyColor),
                 ],
               ),
             ),
@@ -147,7 +147,7 @@ class _ProfileListTile extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: AppTheme.primaryColor),
       title: Text(title, style: AppTheme.bodyLarge),
-      trailing: Icon(Icons.chevron_right, color: AppTheme.greyColor),
+      trailing: const Icon(Icons.chevron_right, color: AppTheme.greyColor),
       onTap: onTap,
     );
   }

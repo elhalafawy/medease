@@ -46,7 +46,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                           children: [
                             Row(
                               children: [
-                                CircleAvatar(
+                                const CircleAvatar(
                                   radius: 32,
                                   backgroundImage: AssetImage('assets/images/doctor_photo.png'),
                                 ),
@@ -62,7 +62,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                             color: AppTheme.primaryColor,
                                           ),
                                         ),
-                                        Text(
+                                        const Text(
                                           "👋",
                                           style: AppTheme.titleLarge,
                                         ),
@@ -79,7 +79,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       },
                                       child: Row(
                                         children: [
-                                          Icon(Icons.edit, size: 16, color: AppTheme.greyColor),
+                                          const Icon(Icons.edit, size: 16, color: AppTheme.greyColor),
                                           const SizedBox(width: 4),
                                           Text(
                                             "Edit Profile",
@@ -105,14 +105,14 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    Icon(Icons.notifications_none, size: 32, color: AppTheme.primaryColor),
+                                    const Icon(Icons.notifications_none, size: 32, color: AppTheme.primaryColor),
                                     Positioned(
                                       right: 0,
                                       top: 0,
                                       child: Container(
                                         width: 10,
                                         height: 10,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                           color: AppTheme.errorColor,
                                           shape: BoxShape.circle,
                                         ),
@@ -158,10 +158,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 2),
-                                    SizedBox(height: 65, width: 40, child: GenderPieChart()),
+                                    const SizedBox(height: 65, width: 40, child: GenderPieChart()),
                                     const SizedBox(height: 2),
-                                    Column(
-                                      children: const [
+                                    const Column(
+                                      children: [
                                         _GenderLegend(color: Color(0xFF3B82F6), label: 'Men'),
                                         SizedBox(height: 1),
                                         _GenderLegend(color: Color(0xFFEC4899), label: 'Women'),
@@ -246,7 +246,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   );
                                 },
                                 child: Container(
-                                  width: 108,
+                                  width: 115,
                                   margin: const EdgeInsets.only(right: 0),
                                   padding: const EdgeInsets.all(9),
                                   decoration: BoxDecoration(
@@ -290,7 +290,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         ),
                         const SizedBox(height: 24),
                         // Analytics
-                        Row(
+                        const Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
@@ -303,7 +303,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   "This Week",
                                   style: AppTheme.bodyMedium,
                                 ),
-                                const Icon(Icons.keyboard_arrow_down, size: 18, color: AppTheme.greyColor),
+                                Icon(Icons.keyboard_arrow_down, size: 18, color: AppTheme.greyColor),
                               ],
                             ),
                           ],
@@ -323,14 +323,14 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                               ),
                             ],
                           ),
-                          child: AnalyticsChart(),
+                          child: const AnalyticsChart(),
                         ),
                         const SizedBox(height: 24),
                         // Reviews
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            const Text(
                               "Reviews",
                               style: AppTheme.titleLarge,
                             ),
@@ -349,14 +349,14 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         ),
                         Row(
                           children: [
-                            Icon(Icons.star, color: Colors.amber, size: 24),
+                            const Icon(Icons.star, color: Colors.amber, size: 24),
                             const SizedBox(width: 4),
                             Text(
-                              "0.0",
+                              "4.8",
                               style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 8),
-                            Text("Total 0 Reviews", style: AppTheme.bodyMedium),
+                            const Text("Total 0 Reviews", style: AppTheme.bodyMedium),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -383,7 +383,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                               });
                             },
                           ),
-                          Text(
+                          const Text(
                             'Reviews',
                             style: AppTheme.titleLarge,
                           ),

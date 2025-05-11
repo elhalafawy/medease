@@ -9,7 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
 
 class UploadScreen extends StatefulWidget {
-  const UploadScreen({Key? key}) : super(key: key);
+  const UploadScreen({super.key});
 
   @override
   State<UploadScreen> createState() => _UploadScreenState();

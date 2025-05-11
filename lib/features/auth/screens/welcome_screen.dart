@@ -48,7 +48,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -90,11 +90,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         child: Text(
                           _slides[index]['title']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -103,10 +99,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         child: Text(
                           _slides[index]['desc']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
                     ],
@@ -124,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 3),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(3),
-                    color: _currentPage == index ? Colors.black : Colors.grey[400],
+                    color: _currentPage == index ? Theme.of(context).colorScheme.primary : Colors.grey[400],
                   ),
                 );
               }),
@@ -142,9 +135,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 1),
+                        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1),
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
+                      child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).colorScheme.primary, size: 18),
                     ),
                   ),
                   GestureDetector(
@@ -154,9 +147,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 1),
+                        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1),
                       ),
-                      child: const Icon(Icons.arrow_forward_ios, color: Colors.black, size: 18),
+                      child: Icon(Icons.arrow_forward_ios, color: Theme.of(context).colorScheme.primary, size: 18),
                     ),
                   ),
                 ],

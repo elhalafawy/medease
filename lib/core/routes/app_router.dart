@@ -30,11 +30,11 @@ class AppRouter {
       ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => RegisterScreen(),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const MainNavigation(),
       ),
       GoRoute(
         path: '/doctors',
@@ -58,7 +58,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/doctor-dashboard',
-        pageBuilder: (context, state) => MaterialPage(
+        pageBuilder: (context, state) => const MaterialPage(
           child: Navigator(
             onGenerateRoute: DoctorRouter.generateRoute,
             initialRoute: DoctorRoutes.home,

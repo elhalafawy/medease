@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
-import '../utils/navigation_wrapper.dart';
+import '../theme/app_theme.dart';
 
 class CustomBottomBar extends StatelessWidget {
   final int currentIndex;
+  final Function(int)? onTabChange;
 
-  const CustomBottomBar({super.key, required this.currentIndex});
+  const CustomBottomBar({
+    super.key, 
+    required this.currentIndex,
+    this.onTabChange,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,20 +42,15 @@ class CustomBottomBar extends StatelessWidget {
     final bool isSelected = currentIndex == index;
     return GestureDetector(
       onTap: () {
-        // Smart navigation: if already in MainNavigation, switch tab; else, pushAndRemoveUntil
-        final mainNavState = context.findAncestorStateOfType<MainNavigationState>();
-        if (mainNavState != null) {
-          mainNavState.setTab(index);
+        if (onTabChange != null) {
+          onTabChange!(index);
         } else {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MainNavigation(goToAppointment: index == 2),
-              ),
-              (route) => false,
-            );
-          });
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/',
+            (route) => false,
+            arguments: {'initialTab': index},
+          );
         }
       },
       child: Column(
@@ -59,15 +59,14 @@ class CustomBottomBar extends StatelessWidget {
           Image.asset(
             iconPath,
             height: 24,
-            color: isSelected ? const Color(0xFF022E5B) : Colors.grey.shade400,
+            color: isSelected ? AppTheme.primaryColor : AppTheme.greyColor,
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTheme.bodyMedium.copyWith(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? const Color(0xFF022E5B) : Colors.grey.shade400,
+              color: isSelected ? AppTheme.primaryColor : AppTheme.greyColor,
             ),
           ),
         ],

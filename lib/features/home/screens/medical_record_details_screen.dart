@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_theme.dart';
 
 class MedicalRecordDetailsScreen extends StatelessWidget {
   final String patientName;
@@ -17,15 +18,16 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text(
           'Medical Record Details',
-          style: TextStyle(color: Colors.black),
+          style: AppTheme.titleLarge,
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -38,7 +40,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
           children: [
             const Text(
               'Record Details',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: AppTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
             _buildRecordDetailItem(
@@ -68,28 +70,34 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
     );
   }
 
-  // Widget for displaying each item in the details
   Widget _buildRecordDetailItem({required String label, required String value}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-            textAlign: TextAlign.left,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTheme.bodyLarge,
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: AppTheme.bodyMedium,
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // Buttons for actions (Cancel, Reschedule, etc.)
   Widget _buildActionButtons() {
     return Row(
       children: [
@@ -99,13 +107,13 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
               // Handle Cancel action
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFDB4B4B),
+              backgroundColor: AppTheme.errorColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text(
+            child: Text(
               'Cancel Appointment',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: AppTheme.bodyLarge.copyWith(color: Colors.white),
             ),
           ),
         ),
@@ -116,13 +124,13 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
               // Handle Reschedule action
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF022E5B),
+              backgroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text(
+            child: Text(
               'Reschedule Appointment',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: AppTheme.bodyLarge.copyWith(color: Colors.white),
             ),
           ),
         ),

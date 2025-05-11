@@ -139,7 +139,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     if (parts.length != 2) return email;
     var name = parts[0];
     if (name.length <= 3) return email;
-    var maskedName = name.substring(0, 3) + '*****';
+    var maskedName = '${name.substring(0, 3)}*****';
     return '$maskedName@${parts[1]}';
   }
 }

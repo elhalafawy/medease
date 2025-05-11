@@ -62,7 +62,7 @@ class DoctorReviewsScreen extends StatelessWidget {
                     style: app_theme.AppTheme.titleLarge.copyWith(color: app_theme.AppTheme.greyColor),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     'Reviews from patients will appear here.',
                     style: app_theme.AppTheme.bodyMedium,
                   ),

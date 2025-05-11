@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../../main.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_conditions_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  final ValueNotifier<ThemeMode>? themeModeNotifier;
+  const SettingsScreen({super.key, this.themeModeNotifier});
 
   @override
   Widget build(BuildContext context) {
+    final notifier = themeModeNotifier ?? themeModeNotifierGlobal;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -24,6 +27,14 @@ class SettingsScreen extends StatelessWidget {
         children: [
           const Text('PROFILE', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
           SwitchListTile(
+            value: notifier.value == ThemeMode.dark,
+            onChanged: (val) {
+              notifier.value = val ? ThemeMode.dark : ThemeMode.light;
+            },
+            title: const Text('Dark Mode'),
+            activeColor: const Color(0xFF022E5B),
+          ),
+          SwitchListTile(
             value: true,
             onChanged: (_) {},
             title: const Text('Push Notification'),
@@ -33,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
             value: false,
             onChanged: (_) {},
             title: const Text('Location'),
-            activeColor: Colors.purple.shade100,
+            activeColor: Colors.purple,
           ),
           ListTile(
             title: const Text('Language'),
@@ -61,3 +72,5 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 }
+
+final ValueNotifier<ThemeMode> themeModeNotifierGlobal = themeModeNotifier;

@@ -10,7 +10,7 @@ class OtpVerificationWidget extends StatelessWidget {
     if (parts.length != 2) return email;
     var name = parts[0];
     if (name.length <= 3) return email;
-    var maskedName = name.substring(0, 3) + '*****';
+    var maskedName = '${name.substring(0, 3)}*****';
     return '$maskedName@${parts[1]}';
   }
 
@@ -65,13 +65,13 @@ class OtpVerificationWidget extends StatelessWidget {
   }
 
   Widget _buildOtpField() {
-    return SizedBox(
+    return const SizedBox(
       width: 50,
       child: TextField(
         maxLength: 1,
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           counterText: '',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(12)),

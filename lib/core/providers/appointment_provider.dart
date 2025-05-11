@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 class AppointmentProvider extends ChangeNotifier {
-  List<Map<String, dynamic>> _appointments = [];
+  final List<Map<String, dynamic>> _appointments = [];
 
   List<Map<String, dynamic>> get appointments => _appointments;
 

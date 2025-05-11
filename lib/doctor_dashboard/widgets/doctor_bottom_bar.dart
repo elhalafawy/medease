@@ -6,10 +6,10 @@ class DoctorBottomBar extends StatelessWidget {
   final ValueChanged<int>? onTap;
 
   const DoctorBottomBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

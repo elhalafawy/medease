@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'doctor_main_navigation.dart';
-import 'screens/doctor_home_screen.dart';
-import 'screens/doctor_appointments_screen.dart';
 import 'screens/doctor_reviews_screen.dart';
 
 class DoctorRoutes {

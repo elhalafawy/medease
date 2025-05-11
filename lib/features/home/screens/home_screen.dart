@@ -6,6 +6,7 @@ import 'medication_screen.dart';
 import 'medical_record_screen.dart';
 import '../../appointment/screens/appointment_details_screen.dart';
 import '../../appointment/screens/appointment_schedule_screen.dart';
+import '../../../core/theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -51,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: showAppointmentDetails && selectedAppointment != null
             ? AppointmentDetailsScreen(
@@ -137,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     const SizedBox(height: 32),
                                     const Text(
                                       'New investigations',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF3C4A59)),
+                                      style: AppTheme.titleLarge,
                                     ),
                                     const SizedBox(height: 16),
                                     _buildArticle(
@@ -163,12 +164,12 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Text(
           'Welcome, ${user?.displayName?? "Guest"} 👋', 
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF00264D)),
+          style: AppTheme.headlineMedium,
         ),
         const SizedBox(height: 4),
         const Text(
           'Hope you are doing well today!',
-          style: TextStyle(fontSize: 14, color: Colors.black54),
+          style: AppTheme.bodyMedium,
         ),
       ],
     );
@@ -180,17 +181,18 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 50,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: AppTheme.borderColor),
         borderRadius: BorderRadius.circular(16),
       ),
       child: const Row(
         children: [
-          Icon(Icons.search, color: Colors.grey),
+          Icon(Icons.search, color: AppTheme.greyColor),
           SizedBox(width: 10),
           Expanded(
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Search',
+                hintStyle: AppTheme.bodyMedium,
                 border: InputBorder.none,
               ),
             ),
@@ -232,15 +234,16 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppTheme.borderColor),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 30, color: Colors.black),
+            Icon(icon, size: 30, color: AppTheme.textColor),
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(fontSize: 14),
+              style: AppTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
           ],

@@ -92,7 +92,7 @@ class _DoctorUploadPlaceholder extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('Upload', style: AppTheme.titleLarge),
+        title: const Text('Upload', style: AppTheme.titleLarge),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -112,7 +112,7 @@ class _DoctorProfilePlaceholder extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: Text('Profile', style: AppTheme.titleLarge),
+        title: const Text('Profile', style: AppTheme.titleLarge),
         backgroundColor: Colors.white,
         elevation: 0,
       ),

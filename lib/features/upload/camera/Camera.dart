@@ -44,6 +44,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     _future = _requestCameraPermission(); // Make sure _requestCameraPermission() returns a Future
   }
 
+  @override
   void dispose(){
     WidgetsBinding.instance.removeObserver(this);
     _stopCamera();
