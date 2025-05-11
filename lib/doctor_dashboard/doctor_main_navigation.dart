@@ -5,6 +5,7 @@ import 'screens/doctor_appointments_screen.dart';
 import 'screens/doctor_reviews_screen.dart';
 import 'screens/doctor_book_appointment_screen.dart';
 import 'widgets/doctor_bottom_bar.dart';
+import 'package:medease/doctor_dashboard/screens/doctor_UploadScreen.dart';
 
 class DoctorMainNavigation extends StatefulWidget {
   final bool goToAppointment;
@@ -87,21 +88,10 @@ class DoctorMainNavigationState extends State<DoctorMainNavigation> {
 
 class _DoctorUploadPlaceholder extends StatelessWidget {
   const _DoctorUploadPlaceholder();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      appBar: AppBar(
-        title: const Text('Upload', style: AppTheme.titleLarge),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Text('Upload Screen (Coming Soon)', 
-          style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)
-        ),
-      ),
-    );
+    return const DoctorUploadscreen(); 
   }
 }
 
