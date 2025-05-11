@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_snackbar.dart';
+import '../../../core/theme/app_theme.dart';
+import 'appointment_schedule_screen.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
   final VoidCallback? onBack;
+  final Function(Map<String, dynamic>)? onUpdate;
+  final Function(String)? onCancel;
 
   const AppointmentDetailsScreen({
     super.key,
     required this.appointment,
     this.onBack,
+    this.onUpdate,
+    this.onCancel,
   });
 
   @override
@@ -19,6 +25,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   List<Map<String, dynamic>> _searchResults = [];
+  bool isUpdating = false;
+  bool isCanceling = false;
 
   void _handleSearch(String query) {
     if (query.isEmpty) {
@@ -41,19 +49,281 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           'status': 'Pending',
           'imageUrl': 'assets/images/doctor_photo.png',
         },
-        {
-          'doctorName': 'Dr. Sarah',
-          'specialty': 'Cardiologist',
-          'date': 'Tue 5',
-          'time': '10:30 AM',
-          'status': 'Confirmed',
-          'imageUrl': 'assets/images/doctor_photo.png',
-        },
+
       ].where((appointment) {
         return appointment['doctorName'].toString().toLowerCase().contains(query.toLowerCase()) ||
                appointment['specialty'].toString().toLowerCase().contains(query.toLowerCase());
       }).toList();
     });
+  }
+
+  void _showUpdateDialog() {
+    int selectedDayIndex = 2;
+    int selectedTimeIndex = 0;
+    List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
+    List<String> dates = ['3', '4', '5', '6', '7'];
+    List<String> times = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM'];
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxWidth: MediaQuery.of(context).size.width * 0.9,
+            ),
+            padding: const EdgeInsets.all(0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Update Appointment',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textColor,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundImage: AssetImage(widget.appointment['imageUrl'] ?? widget.appointment['image']),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.appointment['doctorName'] ?? 'Dr. Ahmed',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textColor,
+                                ),
+                              ),
+                              Text(
+                                widget.appointment['specialty'] ?? 'Neurologist',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Appointment",
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 90,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: days.length,
+                      itemBuilder: (context, index) {
+                        final isSelected = index == selectedDayIndex;
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() => selectedDayIndex = index);
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppTheme.primaryColor : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  days[index],
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  dates[index],
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Available Time",
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: List.generate(times.length, (index) {
+                        final isSelected = index == selectedTimeIndex;
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() => selectedTimeIndex = index);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFFEDAE73) : Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: isSelected
+                                  ? [
+                                      const BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Text(
+                              times[index],
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : const Color(0xFF9C9C9C),
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
+                            updatedAppointment['date'] = '${days[selectedDayIndex]} ${dates[selectedDayIndex]}';
+                            updatedAppointment['time'] = times[selectedTimeIndex];
+                            if (widget.onUpdate != null) {
+                              widget.onUpdate!(updatedAppointment);
+                            }
+                            CustomSnackBar.show(
+                              context: context,
+                              message: 'Appointment updated successfully',
+                            );
+                            Navigator.pop(context); // Close the update dialog
+                            Navigator.pop(context); // Return to schedule screen
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Update'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCancelDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Appointment'),
+        content: const Text('Are you sure you want to cancel this appointment?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              // Update appointment status to Canceled
+              final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
+              updatedAppointment['status'] = 'Canceled';
+
+              if (widget.onCancel != null) {
+                widget.onCancel!(widget.appointment['id']);
+              }
+              if (widget.onUpdate != null) {
+                widget.onUpdate!(updatedAppointment);
+              }
+
+              CustomSnackBar.show(
+                context: context,
+                message: 'Appointment cancelled successfully',
+              );
+              Navigator.pop(context); // Return to schedule screen
+            },
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -65,237 +335,283 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
           onPressed: () {
             if (widget.onBack != null) {
               widget.onBack!();
+            } else {
+              Navigator.pop(context);
             }
           },
         ),
-        centerTitle: true,
         title: const Text(
           'Appointment Details',
-          style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF32384B)),
+          style: TextStyle(
+            color: AppTheme.textColor,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Search Appointments'),
-                  content: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: 'Search by doctor name or specialty',
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: _handleSearch,
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _searchController.clear();
-                        setState(() {
-                          _isSearching = false;
-                          _searchResults = [];
-                        });
-                      },
-                      child: const Text('Clear'),
-                    ),
-                  ],
+          if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+            IconButton(
+              icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
+              onPressed: _showUpdateDialog,
+            ),
+          if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+            IconButton(
+              icon: const Icon(Icons.cancel, color: Colors.red),
+              onPressed: _showCancelDialog,
+            ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {
-              CustomSnackBar.show(
-                context: context,
-                message: 'No new notifications',
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundImage: AssetImage(widget.appointment['imageUrl'] ?? widget.appointment['image']),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.appointment['doctorName'] ?? 'Dr. Ahmed',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textColor,
+                              ),
+                            ),
+                            Text(
+                              widget.appointment['specialty'] ?? 'Senior Neurologist and Surgeon',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.backgroundColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildInfoColumn(
+                          Icons.calendar_today,
+                          'Date',
+                          widget.appointment['date'] ?? 'Mon 4',
+                        ),
+                        _buildInfoColumn(
+                          Icons.access_time,
+                          'Time',
+                          widget.appointment['time'] ?? '9:00 AM',
+                        ),
+                        _buildInfoColumn(
+                          Icons.location_on,
+                          'Location',
+                          widget.appointment['location'] ?? 'Medical Center',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Appointment Status',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(widget.appointment['status'] ?? 'Pending').withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            widget.appointment['status'] ?? 'Pending',
+                            style: TextStyle(
+                              color: _getStatusColor(widget.appointment['status'] ?? 'Pending'),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+                          ElevatedButton(
+                            onPressed: _showUpdateDialog,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text('Update'),
+                          ),
+                        if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+                          const SizedBox(width: 10),
+                        if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+                          ElevatedButton(
+                            onPressed: _showCancelDialog,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Additional Information',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow('Patient Name', widget.appointment['patientName'] ?? 'John Doe'),
+                        const Divider(),
+                        _buildInfoRow('Phone Number', widget.appointment['phone'] ?? '+1 234 567 890'),
+                        const Divider(),
+                        _buildInfoRow('Email', widget.appointment['email'] ?? 'john.doe@example.com'),
+                        const Divider(),
+                        _buildInfoRow('Notes', widget.appointment['notes'] ?? 'No additional notes'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      body: _isSearching
-          ? _buildSearchResults()
-          : _buildAppointmentDetails(),
     );
   }
 
-  Widget _buildSearchResults() {
-    if (_searchResults.isEmpty) {
-      return const Center(
-        child: Text('No appointments found'),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final appointment = _searchResults[index];
-        return _buildAppointmentCard(appointment);
-      },
-    );
-  }
-
-  Widget _buildAppointmentDetails() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAppointmentCard(widget.appointment),
-          const SizedBox(height: 24),
-          const Text(
-            'Appointment Information',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+  Widget _buildInfoColumn(IconData icon, String label, String value) {
+    return Column(
+      children: [
+        Icon(icon, color: AppTheme.primaryColor),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 12,
           ),
-          const SizedBox(height: 16),
-          _buildInfoRow('Date', widget.appointment['date']),
-          _buildInfoRow('Time', widget.appointment['time']),
-          _buildInfoRow('Status', widget.appointment['status']),
-          const SizedBox(height: 24),
-          const Text(
-            'Doctor Information',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppTheme.textColor,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(height: 16),
-          _buildInfoRow('Name', widget.appointment['doctorName']),
-          _buildInfoRow('Specialty', widget.appointment['specialty']),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF555555),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAppointmentCard(Map<String, dynamic> appointment) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.grey[300],
-                backgroundImage: AssetImage(appointment['imageUrl']),
-                radius: 23,
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      appointment['doctorName'],
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      appointment['specialty'],
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFFADADAD),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(appointment['status']).withValues(alpha: 26),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  appointment['status'],
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: _getStatusColor(appointment['status']),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF555555)),
-              const SizedBox(width: 6),
-              Text(
-                appointment['date'],
-                style: const TextStyle(fontSize: 12),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: AppTheme.textColor,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(width: 16),
-              const Icon(Icons.access_time_outlined, size: 14, color: Color(0xFF555555)),
-              const SizedBox(width: 6),
-              Text(
-                appointment['time'],
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
+            ),
           ),
         ],
       ),

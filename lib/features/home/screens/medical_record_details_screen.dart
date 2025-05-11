@@ -38,11 +38,20 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Record Details',
-              style: AppTheme.headlineMedium,
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.primaryColor, width: 2),
+                ),
+                child: const CircleAvatar(
+                  radius: 48,
+                  backgroundColor: Colors.white,
+                  backgroundImage: AssetImage('assets/images/profile_picture.png'),
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
             _buildRecordDetailItem(
               label: 'Patient Name:',
               value: patientName,
@@ -62,8 +71,72 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
               label: 'Medications:',
               value: medications,
             ),
-            const SizedBox(height: 24),
-            _buildActionButtons(),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      // Navigate to Lab Results
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                        border: Border.all(color: AppTheme.primaryColor, width: 1),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.science, color: AppTheme.primaryColor, size: 32),
+                          const SizedBox(height: 8),
+                          Text('Lab Results', style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      // Navigate to X-Ray
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                        border: Border.all(color: AppTheme.primaryColor, width: 1),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.medical_information, color: AppTheme.primaryColor, size: 32),
+                          const SizedBox(height: 8),
+                          Text('X-Ray', style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -95,46 +168,6 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () {
-              // Handle Cancel action
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorColor,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: Text(
-              'Cancel Appointment',
-              style: AppTheme.bodyLarge.copyWith(color: Colors.white),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: () {
-              // Handle Reschedule action
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: Text(
-              'Reschedule Appointment',
-              style: AppTheme.bodyLarge.copyWith(color: Colors.white),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medease/features/appointment/doctor_Patient_Notes_Screen.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/utils/navigation_wrapper.dart';
+import '../../../core/theme/app_theme.dart';
 
 class AppointmentScreen extends StatefulWidget {
   final Map<String, dynamic>? doctor;
@@ -45,7 +46,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                 _bookAppointment();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF022E5B),
+                backgroundColor: AppTheme.primaryColor,
               ),
               child: const Text('Confirm'),
             ),
@@ -78,19 +79,15 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         message: 'Appointment booked successfully for ${days[selectedDayIndex]} at ${times[selectedTimeIndex]}',
       );
 
-      Navigator.pop(context);
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MainNavigation(
-              goToAppointment: true,
-              initialAppointments: [newAppointment],
-            ),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainNavigation(
+            goToAppointment: true,
+            initialAppointments: [newAppointment],
           ),
-        );
-      });
+        ),
+      );
     }
   }
 
@@ -103,7 +100,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -124,12 +121,12 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
               borderRadius: BorderRadius.circular(20),
               child: Image.asset(widget.doctor?['image'] ?? 'assets/images/doctor_photo.png'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height:10),
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 50),
               decoration: BoxDecoration(
-                color: const Color(0xFF022E5B),
+                color: AppTheme.primaryColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(

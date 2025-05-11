@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'doctor_details_screen.dart';
+import '../../../core/theme/app_theme.dart';
 
 class DoctorsScreen extends StatelessWidget {
   final String category;
@@ -36,20 +37,20 @@ class DoctorsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF022E5B)),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           onPressed: onBack ?? () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
           'Doctors',
           style: TextStyle(
-            color: Color(0xFF022E5B),
+            color: AppTheme.primaryColor,
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),
         ),
       ),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppTheme.backgroundColor,
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: doctors.length,
@@ -127,14 +128,14 @@ class DoctorsScreen extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF022E5B),
+                                  color: AppTheme.primaryColor,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 doctor['type'],
                                 style: const TextStyle(
-                                  color: Color(0xFFADADAD),
+                                  color: Colors.grey,
                                   fontSize: 13,
                                 ),
                               ),
@@ -144,7 +145,7 @@ class DoctorsScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF022E5B).withOpacity(0.1),
+                            color: AppTheme.primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
@@ -154,7 +155,7 @@ class DoctorsScreen extends StatelessWidget {
                               Text(
                                 doctor['rating'],
                                 style: const TextStyle(
-                                  color: Color(0xFF022E5B),
+                                  color: AppTheme.primaryColor,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -167,13 +168,13 @@ class DoctorsScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Color(0xFF73D0ED)),
+                        const Icon(Icons.location_on, size: 14, color: AppTheme.primaryColor),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             doctor['hospital'],
                             style: const TextStyle(
-                              color: Color(0xFF73D0ED),
+                              color: AppTheme.primaryColor,
                               fontSize: 12,
                             ),
                             maxLines: 1,
@@ -200,7 +201,6 @@ class DoctorsScreen extends StatelessWidget {
                                 style: const TextStyle(
                                   color: Colors.green,
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],

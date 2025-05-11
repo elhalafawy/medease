@@ -3,9 +3,50 @@ import 'home_screen.dart';
 import 'medical_record_details_screen.dart';
 import '../../../core/theme/app_theme.dart';
 
-class MedicalRecordScreen extends StatelessWidget {
+class MedicalRecordScreen extends StatefulWidget {
   final VoidCallback? onBack;
   const MedicalRecordScreen({super.key, this.onBack});
+
+  @override
+  State<MedicalRecordScreen> createState() => _MedicalRecordScreenState();
+}
+
+class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
+  String selectedTab = 'All Records';
+  final List<Map<String, dynamic>> records = [
+    {
+      'patientName': 'Ahmed Elhalafwy',
+      'diagnosis': 'Chronic Back Pain',
+      'tests': 'X-ray, Blood Test',
+      'medications': 'Amoxicillin, Ibuprofen',
+      'date': DateTime(2025, 5, 10),
+    },
+    {
+      'patientName': 'Sara Mostafa',
+      'diagnosis': 'Diabetes',
+      'tests': 'Blood Sugar',
+      'medications': 'Metformin',
+      'date': DateTime(2024, 11, 2),
+    },
+    {
+      'patientName': 'Mohamed Ali',
+      'diagnosis': 'Hypertension',
+      'tests': 'Blood Pressure',
+      'medications': 'Amlodipine',
+      'date': DateTime(2025, 2, 18),
+    },
+  ];
+
+  List<String> get yearsTabs {
+    final years = records.map((r) => r['date'].year.toString()).toSet().toList();
+    years.sort((a, b) => b.compareTo(a));
+    return ['All Records', ...years];
+  }
+
+  List<Map<String, dynamic>> get filteredRecords {
+    if (selectedTab == 'All Records') return records;
+    return records.where((r) => r['date'].year.toString() == selectedTab).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +62,8 @@ class MedicalRecordScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
           onPressed: () {
-            if (onBack != null) {
-              onBack!();
+            if (widget.onBack != null) {
+              widget.onBack!();
             } else {
               Navigator.pop(context);
             }
@@ -34,20 +75,25 @@ class MedicalRecordScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'ALL MEDICAL RECORDS',
-              style: AppTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
+          
+        
             _buildFilterTabs(),
             const SizedBox(height: 16),
-            _buildRecordItem(
-              patientName: 'ِAhmed Elhalafwy',
-              diagnosis: 'Chronic Back Pain',
-              tests: 'X-ray, Blood Test',
-              medications: 'Amoxicillin, Ibuprofen',
+            ...filteredRecords.map((record) => _buildRecordItem(
+              patientName: record['patientName'],
+              diagnosis: record['diagnosis'],
+              tests: record['tests'],
+              medications: record['medications'],
+              date: record['date'],
               context: context,
-            ),
+            )),
+            if (filteredRecords.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Center(
+                  child: Text('No records found for this year.', style: AppTheme.bodyLarge),
+                ),
+              ),
           ],
         ),
       ),
@@ -55,13 +101,30 @@ class MedicalRecordScreen extends StatelessWidget {
   }
 
   Widget _buildFilterTabs() {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        _FilterTab(label: 'All Records'),
-        _FilterTab(label: '2025'),
-        _FilterTab(label: '2024'),
-      ],
+      children: yearsTabs.map((label) {
+        final isSelected = label == selectedTab;
+        return GestureDetector(
+          onTap: () => setState(() => selectedTab = label),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+            decoration: BoxDecoration(
+              color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppTheme.borderColor),
+            ),
+            child: Text(
+              label,
+              style: AppTheme.bodyMedium.copyWith(
+                color: isSelected ? Colors.white : AppTheme.textColor,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -70,6 +133,7 @@ class MedicalRecordScreen extends StatelessWidget {
     required String diagnosis,
     required String tests,
     required String medications,
+    required DateTime date,
     required BuildContext context,
   }) {
     return GestureDetector(
@@ -87,84 +151,81 @@ class MedicalRecordScreen extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.borderColor),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.access_alarm_outlined,
-                  color: AppTheme.primaryColor,
-                  size: 24,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Patient: $patientName',
-                  style: AppTheme.bodyMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Diagnosis: $diagnosis',
-              style: AppTheme.bodyLarge,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Tests: $tests',
-              style: AppTheme.bodyMedium,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Medications: $medications',
-              style: AppTheme.bodyMedium,
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {
-                // Show more details
-              },
-              child: Text(
-                'Show more',
-                style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
-              ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _FilterTab extends StatelessWidget {
-  final String label;
-
-  const _FilterTab({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Filter logic
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-        decoration: BoxDecoration(
-          color: AppTheme.backgroundColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppTheme.borderColor),
-        ),
-        child: Text(
-          label,
-          style: AppTheme.bodyMedium,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.primaryColor, width: 2),
+              ),
+              child: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.medical_services, color: AppTheme.primaryColor, size: 32),
+                radius: 28,
+              ),
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    patientName,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Diagnosis: $diagnosis',
+                    style: AppTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Tests: $tests',
+                    style: AppTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Medications: $medications',
+                    style: AppTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Added on: ${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.arrow_forward, color: AppTheme.primaryColor, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Show more',
+                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

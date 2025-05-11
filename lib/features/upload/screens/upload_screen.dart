@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
+import '../../../core/theme/app_theme.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
@@ -121,9 +122,9 @@ class _UploadScreenState extends State<UploadScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 48),
+            Icon(icon, size: 48, color: AppTheme.primaryColor),
             const SizedBox(height: 8),
-            Text(label, textAlign: TextAlign.center),
+            Text(label, textAlign: TextAlign.center, style: AppTheme.bodyLarge.copyWith(color: AppTheme.textColor)),
           ],
         ),
       ),
@@ -135,7 +136,13 @@ class _UploadScreenState extends State<UploadScreen> {
     final camReady = _camCtrl != null && _camCtrl!.value.isInitialized;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('OCR Flow')),
+      appBar: AppBar(
+        title: const Text('OCR Flow', style: TextStyle(color: AppTheme.textColor)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppTheme.textColor),
+      ),
+      backgroundColor: AppTheme.backgroundColor,
       body: Stack(children: [
         PageView(
           controller: _pageController,
@@ -147,7 +154,7 @@ class _UploadScreenState extends State<UploadScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Text('Medical records', style: TextStyle(fontSize: 24)),
+                  const Text('Upload Documents', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
                   const SizedBox(height: 24),
                   Expanded(
                     child: GridView.count(
@@ -158,7 +165,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         _buildTile('Prescriptions', Icons.medical_services),
                         _buildTile('Lab reports', Icons.science),
                         _buildTile('Medication', Icons.local_pharmacy),
-                        _buildTile('Other', Icons.note),
+                        _buildTile('X-Ray', Icons.medical_information),
                       ],
                     ),
                   ),

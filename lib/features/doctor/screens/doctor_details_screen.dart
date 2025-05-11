@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../appointment/screens/appointment_screen.dart';
+import '../../../core/theme/app_theme.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> doctor;
@@ -16,12 +17,12 @@ class DoctorDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDFD),
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF022E5B)),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
           onPressed: () {
             if (onBack != null) {
               onBack!();
@@ -34,7 +35,7 @@ class DoctorDetailsScreen extends StatelessWidget {
         title: const Text(
           'Doctor Details',
           style: TextStyle(
-            color: Color(0xFF022E5B),
+            color: AppTheme.primaryColor,
             fontWeight: FontWeight.w600,
             fontSize: 20,
           ),
@@ -67,7 +68,7 @@ class DoctorDetailsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
               decoration: BoxDecoration(
-                color: const Color(0xFF022E5B),
+                color: AppTheme.primaryColor,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -99,7 +100,7 @@ class DoctorDetailsScreen extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: Color(0xFF022E5B),
+                color: AppTheme.primaryColor,
               ),
             ),
             const SizedBox(height: 24),
@@ -127,7 +128,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF022E5B),
+                  backgroundColor: AppTheme.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 ),
@@ -163,20 +164,20 @@ class _DoctorStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: const Color(0xFF022E5B), size: 30),
+        Icon(icon, color: AppTheme.primaryColor, size: 30),
         const SizedBox(height: 6),
         Text(
           value,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF022E5B),
+            color: AppTheme.primaryColor,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
           style: const TextStyle(
-            color: Color(0xFFADADAD),
+            color: Colors.grey,
             fontSize: 12,
           ),
         ),
