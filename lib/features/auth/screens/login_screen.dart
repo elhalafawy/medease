@@ -140,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          context.go('/doctor-dashboard');
+                          context.go('/home');
                         });
                       },
                       style: ElevatedButton.styleFrom(

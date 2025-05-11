@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medease/features/appointment/doctor_Patient_Notes_Screen.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/utils/navigation_wrapper.dart';
 
@@ -55,8 +56,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
   Future<void> _bookAppointment() async {
     setState(() => isBooking = true);
-    
-    // Create new appointment data
+
     final newAppointment = {
       'doctorName': widget.doctor?['name'] ?? 'Dr. Ahmed',
       'specialty': widget.doctor?['type'] ?? 'Senior Neurologist and Surgeon',
@@ -66,36 +66,30 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
       'status': 'Pending',
       'imageUrl': widget.doctor?['image'] ?? 'assets/images/doctor_photo.png',
     };
-    
-    // Simulate API call
+
     await Future.delayed(const Duration(seconds: 1));
-    
+
     setState(() => isBooking = false);
-    
+
     if (mounted) {
       CustomSnackBar.show(
         context: context,
         message: 'Appointment booked successfully for ${days[selectedDayIndex]} at ${times[selectedTimeIndex]}',
       );
-      
-      // Navigate to the main navigation with appointments tab selected and pass the new appointment
-      if (mounted) {
-        // First pop the current screen
-        Navigator.pop(context);
-        
-        // Then navigate to the main navigation
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MainNavigation(
-                goToAppointment: true,
-                initialAppointments: [newAppointment],
-              ),
+
+      Navigator.pop(context);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainNavigation(
+              goToAppointment: true,
+              initialAppointments: [newAppointment],
             ),
-          );
-        });
-      }
+          ),
+        );
+      });
     }
   }
 
@@ -254,29 +248,50 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
             const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isBooking ? null : _showConfirmationDialog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF022E5B),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: isBooking ? null : _showConfirmationDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF022E5B),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      ),
+                      child: isBooking
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Text(
+                              'Book Appointment',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                            ),
+                    ),
                   ),
-                  child: isBooking
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  const SizedBox(width: 12),
+                  Ink(
+                    decoration: const ShapeDecoration(
+                      color: Color(0xFF022E5B),
+                      shape: CircleBorder(),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.chat, color: Colors.white),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PatientNotesScreen(),
                           ),
-                        )
-                      : const Text(
-                          'Book Appointment',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-                        ),
-                ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 20),
