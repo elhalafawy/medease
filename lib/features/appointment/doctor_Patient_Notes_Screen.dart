@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
 
-class PatientNotesScreen extends StatelessWidget {
-  const PatientNotesScreen({Key? key}) : super(key: key);
+class PatientNotesScreen extends StatefulWidget {
+  final String date;
+  final String time;
+  final String imageUrl;
+  final VoidCallback onNoteAdded; // Updated: no longer passes count
 
+  const PatientNotesScreen({
+    Key? key,
+    required this.date,
+    required this.time,
+    required this.imageUrl,
+    required this.onNoteAdded,
+  }) : super(key: key);
+
+  @override
+  _PatientNotesScreenState createState() => _PatientNotesScreenState();
+}
+
+class _PatientNotesScreenState extends State<PatientNotesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,25 +33,14 @@ class PatientNotesScreen extends StatelessWidget {
         centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context); // Go back to the previous screen
-          },
+          onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
+            // Doctor Info
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -44,11 +49,11 @@ class PatientNotesScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 30,
-                    backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/150', // Replace with real image
-                    ),
+                    backgroundImage: AssetImage(widget.imageUrl),
+                    onBackgroundImageError: (_, __) =>
+                        const Icon(Icons.person, size: 30),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -76,13 +81,14 @@ class PatientNotesScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            // Schedule Info
             const Text("Schedule", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                ScheduleCard(title: "6 Jun, Sun", subtitle: "Date"),
-                ScheduleCard(title: "10:30am–11:30pm", subtitle: "Time"),
+              children: [
+                ScheduleCard(title: widget.date, subtitle: "Date"),
+                ScheduleCard(title: widget.time, subtitle: "Time"),
               ],
             ),
             const SizedBox(height: 24),
@@ -107,7 +113,8 @@ class PatientNotesScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Go back when Done is pressed
+                  widget.onNoteAdded(); // Notify parent
+                  Navigator.pop(context); // Close screen
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0D1C5B),
@@ -121,18 +128,6 @@ class PatientNotesScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2,
-        selectedItemColor: const Color(0xFF0D1C5B),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.upload), label: "Upload"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today), label: "Appointment"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-        ],
       ),
     );
   }

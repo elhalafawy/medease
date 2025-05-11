@@ -19,6 +19,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   int selectedDayIndex = 2;
   int selectedTimeIndex = 0;
   bool isBooking = false;
+  int notesCount = 0; // Track the number of notes added
 
   final List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
   final List<String> dates = ['3', '4', '5', '6', '7'];
@@ -91,6 +92,12 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         );
       });
     }
+  }
+
+  void _incrementNoteCount() {
+    setState(() {
+      notesCount++;
+    });
   }
 
   @override
@@ -279,16 +286,41 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                       color: Color(0xFF022E5B),
                       shape: CircleBorder(),
                     ),
-                    child: IconButton(
-                      icon: const Icon(Icons.chat, color: Colors.white),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PatientNotesScreen(),
+                    child: Stack(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chat, color: Colors.white),
+                          onPressed: () {
+                            final selectedDate = '${dates[selectedDayIndex]} ${days[selectedDayIndex]}';
+                            final selectedTime = times[selectedTimeIndex];
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PatientNotesScreen(
+                                  date: selectedDate,
+                                  time: selectedTime,
+                                  imageUrl: widget.doctor?['image'] ?? 'assets/images/doctor_photo.png',
+                                  onNoteAdded: _incrementNoteCount, // ✅ call directly
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        if (notesCount > 0)
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: CircleAvatar(
+                              radius: 8,
+                              backgroundColor: Colors.red,
+                              child: Text(
+                                '$notesCount',
+                                style: const TextStyle(fontSize: 12, color: Colors.white),
+                              ),
+                            ),
                           ),
-                        );
-                      },
+                      ],
                     ),
                   ),
                 ],
