@@ -76,7 +76,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {

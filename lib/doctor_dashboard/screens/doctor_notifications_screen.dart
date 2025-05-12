@@ -46,7 +46,7 @@ class DoctorNotificationsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
         title: const Text('Notifications', style: AppTheme.headlineMedium),
         centerTitle: false,

@@ -103,7 +103,7 @@ class _DoctorProfilePlaceholder extends StatelessWidget {
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text('Profile', style: AppTheme.titleLarge),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
       ),
       body: Center(
@@ -123,7 +123,7 @@ class _ComingSoonPlaceholder extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('$title (Coming Soon)', style: AppTheme.titleLarge),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
       ),
       body: Center(

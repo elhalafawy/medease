@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_theme.dart';
 
 class PatientNotesScreen extends StatefulWidget {
   final String date;
@@ -24,7 +25,7 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
         title: const Text(
           'Appointment Details',

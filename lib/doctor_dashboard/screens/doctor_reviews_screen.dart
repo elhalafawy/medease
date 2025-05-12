@@ -37,7 +37,7 @@ class DoctorReviewsScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: showAppBar
           ? AppBar(
-              backgroundColor: Colors.white,
+              backgroundColor: app_theme.AppTheme.appBarBackgroundColor,
               elevation: 0,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios, color: app_theme.AppTheme.primaryColor),

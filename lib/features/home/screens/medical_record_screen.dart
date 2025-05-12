@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'medical_record_details_screen.dart';
 import '../../../core/theme/app_theme.dart';
+import 'lab_reports_screen.dart';
 
 class MedicalRecordScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -57,7 +58,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
           'Medical Record',
           style: AppTheme.titleLarge,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
@@ -75,8 +76,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          
-        
+            _buildLabReportsButton(context),
+            const SizedBox(height: 16),
             _buildFilterTabs(),
             const SizedBox(height: 16),
             ...filteredRecords.map((record) => _buildRecordItem(
@@ -95,6 +96,28 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabReportsButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LabReportsScreen()),
+          );
+        },
+        icon: const Icon(Icons.science, color: Colors.white),
+        label: const Text('Lab & Radiology Reports'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppTheme.primaryColor,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: AppTheme.bodyLarge.copyWith(color: Colors.white),
         ),
       ),
     );

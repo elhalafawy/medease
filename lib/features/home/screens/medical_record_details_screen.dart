@@ -24,7 +24,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
           'Medical Record Details',
           style: AppTheme.titleLarge,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),

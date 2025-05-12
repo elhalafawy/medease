@@ -338,7 +338,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
           onPressed: () {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../core/theme/app_theme.dart';
 
 class OcrResultScreen extends StatelessWidget {
   final String extractedText;
@@ -9,7 +10,10 @@ class OcrResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('OCR Result')),
+      appBar: AppBar(
+        title: const Text('OCR Result'),
+        backgroundColor: AppTheme.appBarBackgroundColor,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(child: Text(extractedText, style: const TextStyle(fontSize: 16))),

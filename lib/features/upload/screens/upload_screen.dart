@@ -138,7 +138,7 @@ class _UploadScreenState extends State<UploadScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('OCR Flow', style: TextStyle(color: AppTheme.textColor)),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppTheme.textColor),
       ),

@@ -4,6 +4,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:medease/features/upload/camera/result_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import "package:flutter/material.dart";
+import '../../../core/theme/app_theme.dart';
 
 void main() {
   runApp(const CameraApp());

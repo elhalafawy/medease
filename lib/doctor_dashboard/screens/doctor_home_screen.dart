@@ -233,7 +233,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                             onPressed: () => Navigator.of(context).pop(),
                                           ),
                                           title: const Text('Appointments'),
-                                          backgroundColor: Colors.white,
+                                          backgroundColor: AppTheme.appBarBackgroundColor,
                                           foregroundColor: Colors.black,
                                           elevation: 0,
                                         ),

@@ -56,7 +56,7 @@ class DoctorMessagesScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text('Messages', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
         foregroundColor: AppTheme.primaryColor,
       ),

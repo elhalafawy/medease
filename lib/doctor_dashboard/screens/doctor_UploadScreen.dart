@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
+import '../../core/theme/app_theme.dart';
 
 class DoctorUploadscreen extends StatefulWidget {
   const DoctorUploadscreen({Key? key}) : super(key: key);
@@ -156,7 +157,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('OCR Flow', style: theme.appBarTheme.titleTextStyle),
-          backgroundColor: theme.appBarTheme.backgroundColor,
+          backgroundColor: AppTheme.appBarBackgroundColor,
           foregroundColor: theme.appBarTheme.foregroundColor,
           elevation: 1,
           systemOverlayStyle: SystemUiOverlayStyle.dark,

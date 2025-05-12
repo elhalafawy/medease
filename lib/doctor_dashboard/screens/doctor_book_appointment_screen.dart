@@ -29,7 +29,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.backgroundColor,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
         title: Text("Doctor's Schedule", style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
         centerTitle: true,
