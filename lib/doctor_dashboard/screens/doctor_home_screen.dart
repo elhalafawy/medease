@@ -22,6 +22,8 @@ class DoctorHomeScreen extends StatefulWidget {
 
 class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   bool _showReviews = false;
+  int newDoctorNotifCount = 3;
+  List<Map<String, dynamic>> doctorAppointments = [];
 
 
   @override
@@ -94,9 +96,25 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
+                                final displayAppointments = doctorAppointments.isEmpty
+                                    ? [
+                                        {
+                                          'patient': 'Menna Ahmed',
+                                          'date': '20.04.2023',
+                                          'time': '16:30 - 18:30',
+                                        },
+                                        {
+                                          'patient': 'Rana Mohamed',
+                                          'date': '22.04.2023',
+                                          'time': '11:00-16:00',
+                                        },
+                                      ]
+                                    : doctorAppointments;
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (_) => const DoctorNotificationsScreen(),
+                                    builder: (_) => DoctorNotificationsScreen(
+                                      appointmentsCount: displayAppointments.length,
+                                    ),
                                   ),
                                 );
                               },
@@ -106,18 +124,19 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   alignment: Alignment.center,
                                   children: [
                                     const Icon(Icons.notifications_none, size: 32, color: AppTheme.primaryColor),
-                                    Positioned(
-                                      right: 0,
-                                      top: 0,
-                                      child: Container(
-                                        width: 10,
-                                        height: 10,
-                                        decoration: const BoxDecoration(
-                                          color: AppTheme.errorColor,
-                                          shape: BoxShape.circle,
+                                    if (newDoctorNotifCount > 0)
+                                      Positioned(
+                                        right: 2,
+                                        top: 0,
+                                        child: CircleAvatar(
+                                          radius: 8,
+                                          backgroundColor: Colors.red,
+                                          child: Text(
+                                            '$newDoctorNotifCount',
+                                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                          ),
                                         ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),

@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
-class DoctorNotificationsScreen extends StatelessWidget {
-  const DoctorNotificationsScreen({super.key});
+class DoctorNotificationsScreen extends StatefulWidget {
+  final int appointmentsCount;
+  const DoctorNotificationsScreen({super.key, required this.appointmentsCount});
+
+  @override
+  State<DoctorNotificationsScreen> createState() => _DoctorNotificationsScreenState();
+}
+
+class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
+  late int newSchedules;
+  int newMessages = 14;
+  int newMedicine = 1;
+  int newVaccine = 0;
+  int newUpdate = 0;
 
   @override
   Widget build(BuildContext context) {
+    newSchedules = widget.appointmentsCount;
     final notifications = [
       {
         'icon': Icons.calendar_month,
         'iconColor': const Color(0xFF2563EB),
         'iconBg': const Color(0xFFE8F1FB),
-        'title': '3 Schedules!',
+        'title': '${widget.appointmentsCount} Schedules!',
         'subtitle': 'Check your schedule Today',
+        'badge': widget.appointmentsCount,
       },
       {
         'icon': Icons.chat,
@@ -20,6 +34,7 @@ class DoctorNotificationsScreen extends StatelessWidget {
         'iconBg': const Color(0xFFFDE8ED),
         'title': '14 Messages',
         'subtitle': 'Check your schedule Today',
+        'badge': newMessages,
       },
       {
         'icon': Icons.medication,
@@ -27,6 +42,7 @@ class DoctorNotificationsScreen extends StatelessWidget {
         'iconBg': const Color(0xFFFFF7E6),
         'title': 'Medicine',
         'subtitle': 'Check your schedule Today',
+        'badge': newMedicine,
       },
       {
         'icon': Icons.vaccines,
@@ -34,6 +50,7 @@ class DoctorNotificationsScreen extends StatelessWidget {
         'iconBg': const Color(0xFFE6F9FB),
         'title': 'Vaccine Update',
         'subtitle': 'Check your schedule Today',
+        'badge': newVaccine,
       },
       {
         'icon': Icons.refresh,
@@ -41,6 +58,7 @@ class DoctorNotificationsScreen extends StatelessWidget {
         'iconBg': const Color(0xFFFDE8ED),
         'title': 'App Update',
         'subtitle': 'Check your schedule Today',
+        'badge': newUpdate,
       },
     ];
     return Scaffold(
@@ -77,14 +95,31 @@ class DoctorNotificationsScreen extends StatelessWidget {
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
-              leading: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _getNotifBgColor(i),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(_getNotifIcon(i), color: _getNotifIconColor(i), size: 28),
+              leading: Stack(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: n['iconBg'] as Color,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(n['icon'] as IconData, color: n['iconColor'] as Color, size: 28),
+                  ),
+                  if ((n['badge'] as int) > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: CircleAvatar(
+                        radius: 10,
+                        backgroundColor: Colors.red,
+                        child: Text(
+                          '${n['badge']}',
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               title: Text(
                 n['title'] as String,

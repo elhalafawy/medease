@@ -103,14 +103,14 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
           Stack(
             alignment: Alignment.topRight,
             children: [
-              IconButton(
+          IconButton(
                 icon: const Icon(Icons.notifications_none, color: AppTheme.primaryColor),
-                onPressed: () {
+            onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-                  );
-                },
+              );
+            },
               ),
               Positioned(
                 right: 8,

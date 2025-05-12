@@ -45,23 +45,23 @@ class DoctorProfileScreen extends StatelessWidget {
               child: GestureDetector(
                 onTap: () => _showEditProfile(context),
                 behavior: HitTestBehavior.opaque,
-                child: Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 32,
-                      backgroundImage: AssetImage('assets/images/doctor_photo.png'),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 32,
+                    backgroundImage: AssetImage('assets/images/doctor_photo.png'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Dr.Ahmed', style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                        const SizedBox(height: 2),
+                        const Text('Ahmedmo@gmail.com', style: AppTheme.bodyMedium),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Dr.Ahmed', style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
-                          const SizedBox(height: 2),
-                          const Text('Ahmedmo@gmail.com', style: AppTheme.bodyMedium),
-                        ],
-                      ),
-                    ),
+                  ),
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -71,7 +71,7 @@ class DoctorProfileScreen extends StatelessWidget {
                       ),
                       child: const Icon(Icons.edit, size: 20, color: AppTheme.primaryColor),
                     ),
-                  ],
+                ],
                 ),
               ),
             ),
@@ -98,7 +98,9 @@ class DoctorProfileScreen extends StatelessWidget {
                     title: 'Notification',
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const DoctorNotificationsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const DoctorNotificationsScreen(appointmentsCount: 2),
+                        ),
                       );
                     },
                   ),
@@ -151,7 +153,7 @@ class DoctorProfileScreen extends StatelessWidget {
                             context: context,
                             barrierDismissible: false,
                             builder: (context) => const _RequestSuccessDialog(),
-                          );
+                      );
                           deletionPending.value = true;
                         }
                       }
