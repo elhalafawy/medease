@@ -7,6 +7,7 @@ import 'medical_record_screen.dart';
 import '../../appointment/screens/appointment_details_screen.dart';
 import '../../appointment/screens/appointment_schedule_screen.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../profile/screens/notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -51,109 +52,159 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    int notificationCount = 3; // يمكنك ربطها بالعدادات الحقيقية لاحقًا
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-        child: showAppointmentDetails && selectedAppointment != null
-            ? AppointmentDetailsScreen(
-                appointment: selectedAppointment!,
-                onBack: () {
-                  setState(() {
-                    selectedAppointment = null;
-                  });
-                },
-              )
-            : showAppointmentSchedule
-                ? AppointmentScheduleScreen(
-                    appointments: appointments,
+        child: Stack(
+          children: [
+            showAppointmentDetails && selectedAppointment != null
+                ? AppointmentDetailsScreen(
+                    appointment: selectedAppointment!,
                     onBack: () {
                       setState(() {
-                        showAppointmentSchedule = false;
-                      });
-                    },
-                    onSelectAppointment: (appointment) {
-                      setState(() {
-                        selectedAppointment = appointment;
-                        showAppointmentDetails = true;
-                        showAppointmentSchedule = false;
+                        selectedAppointment = null;
                       });
                     },
                   )
-            : showDoctorDetails && selectedDoctor != null
-                ? DoctorDetailsScreen(
-                    doctor: selectedDoctor!,
-                    onBack: () {
-                      setState(() {
-                        showDoctorDetails = false;
-                      });
-                    },
-                  )
-                : showDoctors
-                    ? DoctorsScreen(
-                        category: category,
+                : showAppointmentSchedule
+                    ? AppointmentScheduleScreen(
+                        appointments: appointments,
                         onBack: () {
                           setState(() {
-                            showDoctors = false;
+                            showAppointmentSchedule = false;
                           });
                         },
-                        onDoctorTap: (doctor) {
+                        onSelectAppointment: (appointment) {
                           setState(() {
-                            selectedDoctor = doctor;
-                            showDoctorDetails = true;
-                            showDoctors = false;
+                            selectedAppointment = appointment;
+                            showAppointmentDetails = true;
+                            showAppointmentSchedule = false;
                           });
                         },
                       )
-                    : showMedication
-                        ? MedicationScreen(
+                : showDoctorDetails && selectedDoctor != null
+                    ? DoctorDetailsScreen(
+                        doctor: selectedDoctor!,
+                        onBack: () {
+                          setState(() {
+                            showDoctorDetails = false;
+                          });
+                        },
+                      )
+                    : showDoctors
+                        ? DoctorsScreen(
+                            category: category,
                             onBack: () {
                               setState(() {
-                                showMedication = false;
+                                showDoctors = false;
+                              });
+                            },
+                            onDoctorTap: (doctor) {
+                              setState(() {
+                                selectedDoctor = doctor;
+                                showDoctorDetails = true;
+                                showDoctors = false;
                               });
                             },
                           )
-                        : showMedicalRecord
-                            ? MedicalRecordScreen(onBack: () {
-                                if (widget.onTabChange != null) {
-                                  widget.onTabChange!(0);
-                                }
-                                setState(() {
-                                  showMedicalRecord = false;
-                                });
-                              })
-                            : SingleChildScrollView(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Image.asset('assets/images/home_banner.png'),
-                                    const SizedBox(height: 20),
-                                    _buildUserWelcome(),
-                                    const SizedBox(height: 20),
-                                    _buildSearchBar(),
-                                    const SizedBox(height: 24),
-                                    _buildQuickOptions(),
-                                    const SizedBox(height: 24),
-                                    _buildProtectionBanner(),
-                                    const SizedBox(height: 32),
-                                    const Text(
-                                      'New investigations',
-                                      style: AppTheme.titleLarge,
+                        : showMedication
+                            ? MedicationScreen(
+                                onBack: () {
+                                  setState(() {
+                                    showMedication = false;
+                                  });
+                                },
+                              )
+                            : showMedicalRecord
+                                ? MedicalRecordScreen(onBack: () {
+                                    if (widget.onTabChange != null) {
+                                      widget.onTabChange!(0);
+                                    }
+                                    setState(() {
+                                      showMedicalRecord = false;
+                                    });
+                                  })
+                                : SingleChildScrollView(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Image.asset('assets/images/home_banner.png'),
+                                        const SizedBox(height: 20),
+                                        _buildUserWelcome(),
+                                        const SizedBox(height: 20),
+                                        _buildSearchBar(),
+                                        const SizedBox(height: 24),
+                                        _buildQuickOptions(),
+                                        const SizedBox(height: 24),
+                                        _buildProtectionBanner(),
+                                        const SizedBox(height: 32),
+                                        const Text(
+                                          'New investigations',
+                                          style: AppTheme.titleLarge,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        _buildArticle(
+                                          title: 'What is the Replication Crisis?',
+                                          subtitle: 'This article will look at this subject, providing a brief overview.',
+                                          image: 'assets/images/article_1.png',
+                                        ),
+                                        _buildArticle(
+                                          title: 'Cardiology and pregnancy?',
+                                          subtitle: 'Although approximately 86% of practicing cardiologists surveyed...',
+                                          image: 'assets/images/article_2.png',
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 16),
-                                    _buildArticle(
-                                      title: 'What is the Replication Crisis?',
-                                      subtitle: 'This article will look at this subject, providing a brief overview.',
-                                      image: 'assets/images/article_1.png',
-                                    ),
-                                    _buildArticle(
-                                      title: 'Cardiology and pregnancy?',
-                                      subtitle: 'Although approximately 86% of practicing cardiologists surveyed...',
-                                      image: 'assets/images/article_2.png',
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+            // Notification icon (always visible at top right)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                  );
+                },
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.notifications_none, color: AppTheme.primaryColor, size: 28),
+                    ),
+                    if (notificationCount > 0)
+                      Positioned(
+                        right: 2,
+                        top: 2,
+                        child: CircleAvatar(
+                          radius: 9,
+                          backgroundColor: Colors.red,
+                          child: Text(
+                            '$notificationCount',
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

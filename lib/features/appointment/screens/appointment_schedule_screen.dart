@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/theme/app_theme.dart';
 import 'appointment_details_screen.dart';
+import '../../profile/screens/notifications_screen.dart';
 
 class AppointmentScheduleScreen extends StatefulWidget {
   final List<Map<String, dynamic>> appointments;
@@ -99,14 +100,31 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
               // TODO: Implement search functionality
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {
-              CustomSnackBar.show(
-                context: context,
-                message: 'No new notifications',
-              );
-            },
+          Stack(
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none, color: AppTheme.primaryColor),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                  );
+                },
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: CircleAvatar(
+                  radius: 9,
+                  backgroundColor: Colors.red,
+                  child: Text(
+                    '1', // عدد الإشعارات (مثلاً تأكيد الحجز)
+                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: 8),
         ],

@@ -29,6 +29,7 @@ class DoctorsScreen extends StatelessWidget {
         'price': '300 EGP',
         'availability': 'Available Today',
         'nextSlot': '10:00 AM',
+        'about': 'Dr. Ahmed is the top most Neurologist specialist in Crist Hospital in London, UK. He achived several awards for his wonderful contribution.',
       },
     ];
 

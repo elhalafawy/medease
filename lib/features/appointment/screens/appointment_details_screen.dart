@@ -144,53 +144,63 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     alignment: Alignment.centerLeft,
                     child: const Text(
                       "Appointment",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Color(0xFF232B3E)),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SizedBox(
-                    height: 90,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: days.length,
-                      itemBuilder: (context, index) {
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.07),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: List.generate(days.length, (index) {
                         final isSelected = index == selectedDayIndex;
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() => selectedDayIndex = index);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: isSelected ? AppTheme.primaryColor : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  days[index],
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black,
-                                    fontWeight: FontWeight.bold,
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => selectedDayIndex = index),
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isSelected ? const Color(0xFF7DDCFF) : Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: isSelected ? const Color(0xFF7DDCFF) : Colors.grey.shade300, width: 2),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    days[index],
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : const Color(0xFF232B3E),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  dates[index],
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black,
-                                    fontWeight: FontWeight.bold,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    dates[index],
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : const Color(0xFF232B3E),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
-                      },
+                      }),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -199,7 +209,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     alignment: Alignment.centerLeft,
                     child: const Text(
                       "Available Time",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Color(0xFF232B3E)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -211,21 +221,19 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       children: List.generate(times.length, (index) {
                         final isSelected = index == selectedTimeIndex;
                         return GestureDetector(
-                          onTap: () {
-                            setState(() => selectedTimeIndex = index);
-                          },
+                          onTap: () => setState(() => selectedTimeIndex = index),
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFFEDAE73) : Colors.white,
+                              color: isSelected ? const Color(0xFFF5B183) : const Color(0xFFF3F3F3),
                               borderRadius: BorderRadius.circular(30),
-                              border: Border.all(color: Colors.grey.shade300),
+                              border: Border.all(color: isSelected ? const Color(0xFFF5B183) : Colors.grey.shade300),
                               boxShadow: isSelected
                                   ? [
                                       const BoxShadow(
-                                        color: Colors.black26,
+                                        color: Colors.black12,
                                         blurRadius: 4,
-                                        offset: Offset(0, 4),
+                                        offset: Offset(0, 2),
                                       ),
                                     ]
                                   : [],
@@ -269,7 +277,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             Navigator.pop(context); // Return to schedule screen
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
+                            backgroundColor: const Color(0xFF14375A),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -544,11 +552,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow('Patient Name', widget.appointment['patientName'] ?? 'John Doe'),
+                        _buildInfoRow('Patient Name', widget.appointment['patientName'] ?? 'Ahmed Elhaafawy'),
                         const Divider(),
-                        _buildInfoRow('Phone Number', widget.appointment['phone'] ?? '+1 234 567 890'),
+                        _buildInfoRow('Phone Number', widget.appointment['phone'] ?? '01150504999'),
                         const Divider(),
-                        _buildInfoRow('Email', widget.appointment['email'] ?? 'john.doe@example.com'),
+                        _buildInfoRow('Email', widget.appointment['email'] ?? 'Ahmed.elhalafawy@gmail.com'),
                         const Divider(),
                         _buildInfoRow('Notes', widget.appointment['notes'] ?? 'No additional notes'),
                       ],

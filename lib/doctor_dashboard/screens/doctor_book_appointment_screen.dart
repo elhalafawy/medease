@@ -9,20 +9,39 @@ class DoctorBookAppointmentScreen extends StatefulWidget {
 }
 
 class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScreen> {
-  int? selectedSchedule;
-  String selectedDay = 'Day';
-  String selectedMonth = 'Month';
+  int selectedDayIndex = 0;
+  late List<DateTime> next7Days;
+  Map<int, Map<String, TimeOfDay?>> dayAvailability = {};
 
-  final List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-  final List<String> months = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
-  final List<String> schedules = [
-    '10:30am - 11:30am',
-    '11:30am - 12:30pm',
-    '12:30am - 1:30pm',
-    '2:30am - 3:30pm',
-    '3:30am - 4:30pm',
-    '4:30am - 5:30pm',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    next7Days = List.generate(7, (i) => now.add(Duration(days: i)));
+    for (int i = 0; i < 7; i++) {
+      dayAvailability[i] = {'from': null, 'to': null};
+    }
+  }
+
+  Future<void> _pickTime(int dayIdx, String type) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: dayAvailability[dayIdx]![type] ?? TimeOfDay(hour: 9, minute: 0),
+    );
+    if (picked != null) {
+      setState(() {
+        dayAvailability[dayIdx]![type] = picked;
+      });
+    }
+  }
+
+  String _formatTime(TimeOfDay? t) {
+    if (t == null) return '--:--';
+    final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+    final m = t.minute.toString().padLeft(2, '0');
+    final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$h:$m $period';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,83 +121,118 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                       ],
                     ),
                     const SizedBox(height: 18),
-                    Text('Select Date', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
+                    Text('Select Day', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
                     const SizedBox(height: 10),
+                    SizedBox(
+                      height: 90,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: next7Days.length,
+                        itemBuilder: (context, idx) {
+                          final d = next7Days[idx];
+                          final isSelected = idx == selectedDayIndex;
+                          return GestureDetector(
+                            onTap: () => setState(() => selectedDayIndex = idx),
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: isSelected ? AppTheme.bookingDayColor : Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.15)),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.weekday % 7],
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : AppTheme.primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    "${d.day}/${d.month}",
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : AppTheme.primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Text('Select Available Time', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: selectedDay,
-                            items: {selectedDay, ...days}.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
-                            onChanged: (v) => setState(() => selectedDay = v ?? 'Day'),
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                              filled: true,
-                              fillColor: AppTheme.primaryColor.withOpacity(0.03),
-                              border: OutlineInputBorder(
+                          child: GestureDetector(
+                            onTap: () => _pickTime(selectedDayIndex, 'from'),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.08)),
+                                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.08)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('From', style: AppTheme.bodyLarge),
+                                  Text(_formatTime(dayAvailability[selectedDayIndex]!['from']), style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                                ],
                               ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: selectedMonth,
-                            items: {selectedMonth, ...months}.map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
-                            onChanged: (v) => setState(() => selectedMonth = v ?? 'Month'),
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                              filled: true,
-                              fillColor: AppTheme.primaryColor.withOpacity(0.03),
-                              border: OutlineInputBorder(
+                          child: GestureDetector(
+                            onTap: () => _pickTime(selectedDayIndex, 'to'),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppTheme.primaryColor.withOpacity(0.08)),
+                                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.08)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('To', style: AppTheme.bodyLarge),
+                                  Text(_formatTime(dayAvailability[selectedDayIndex]!['to']), style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                                ],
                               ),
                             ),
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 18),
-                    Text('Schedules', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: List.generate(schedules.length, (i) => _ScheduleChip(
-                        label: schedules[i],
-                        selected: selectedSchedule == i,
-                        onTap: () => setState(() => selectedSchedule = i),
-                      )),
                     ),
                     const SizedBox(height: 28),
-                    Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withOpacity(0.07),
-                            borderRadius: BorderRadius.circular(14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
                           ),
-                          padding: const EdgeInsets.all(12),
-                          child: const Icon(Icons.chat_bubble_outline, color: AppTheme.primaryColor),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            onPressed: () {},
-                            child: Text('Confirm Schedules', style: AppTheme.bodyLarge.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
+                        onPressed: () {
+                          // TODO: Save dayAvailability to backend or local storage
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Availability saved!')),
+                          );
+                        },
+                        child: Text('Save Availability', style: AppTheme.bodyLarge.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
                     ),
                   ],
                 ),
@@ -186,34 +240,6 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ScheduleChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _ScheduleChip({required this.label, this.selected = false, required this.onTap});
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? AppTheme.primaryColor : AppTheme.primaryColor.withOpacity(0.07),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.primaryColor.withOpacity(0.08)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : AppTheme.primaryColor,
-          ),
-        ),
       ),
     );
   }

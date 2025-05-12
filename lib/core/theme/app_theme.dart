@@ -12,6 +12,22 @@ class AppTheme {
   static const Color errorColor = Color(0xFFE53935);
   static const Color successColor = Color(0xFF43A047);
   static const Color warningColor = Color(0xFFFFA000);
+  // Booking colors
+  static const Color bookingDayColor = Color(0xFF73D0ED); // Day selection
+  static const Color bookingTimeColor = Color(0xFFEDAE73); // Time selection
+  // Notification icon and background colors
+  static const Color notifCalendarIcon = Color(0xFF2563EB);
+  static const Color notifCalendarBg = Color(0xFFE8F1FB);
+  static const Color notifChatIcon = Color(0xFFEA4E6D);
+  static const Color notifChatBg = Color(0xFFFDE8ED);
+  static const Color notifMedicineIcon = Color(0xFFF5B100);
+  static const Color notifMedicineBg = Color(0xFFFFF7E6);
+  static const Color notifVaccineIcon = Color(0xFF22D3EE);
+  static const Color notifVaccineBg = Color(0xFFE6F9FB);
+  static const Color notifUpdateIcon = Color(0xFFB91C1C);
+  static const Color notifUpdateBg = Color(0xFFFDE8ED);
+  static const Color notifCardBorder = Color(0xFFE5EAF2);
+  static const Color notifPageBg = Color(0xFFF9FAFB);
   // Dark mode specific
   static const Color darkBackground = Color(0xFF181A20);
   static const Color darkSurface = Color(0xFF23262F);

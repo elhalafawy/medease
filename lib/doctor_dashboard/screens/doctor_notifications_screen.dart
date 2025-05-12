@@ -44,7 +44,7 @@ class DoctorNotificationsScreen extends StatelessWidget {
       },
     ];
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppTheme.notifPageBg,
       appBar: AppBar(
         backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
@@ -66,7 +66,7 @@ class DoctorNotificationsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFFE5EAF2)),
+              border: Border.all(color: AppTheme.notifCardBorder),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withAlpha(8),
@@ -81,10 +81,10 @@ class DoctorNotificationsScreen extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: n['iconBg'] as Color,
+                  color: _getNotifBgColor(i),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(n['icon'] as IconData, color: n['iconColor'] as Color, size: 28),
+                child: Icon(_getNotifIcon(i), color: _getNotifIconColor(i), size: 28),
               ),
               title: Text(
                 n['title'] as String,
@@ -102,5 +102,56 @@ class DoctorNotificationsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Color _getNotifIconColor(int i) {
+    switch (i) {
+      case 0:
+        return AppTheme.notifCalendarIcon;
+      case 1:
+        return AppTheme.notifChatIcon;
+      case 2:
+        return AppTheme.notifMedicineIcon;
+      case 3:
+        return AppTheme.notifVaccineIcon;
+      case 4:
+        return AppTheme.notifUpdateIcon;
+      default:
+        return AppTheme.primaryColor;
+    }
+  }
+
+  Color _getNotifBgColor(int i) {
+    switch (i) {
+      case 0:
+        return AppTheme.notifCalendarBg;
+      case 1:
+        return AppTheme.notifChatBg;
+      case 2:
+        return AppTheme.notifMedicineBg;
+      case 3:
+        return AppTheme.notifVaccineBg;
+      case 4:
+        return AppTheme.notifUpdateBg;
+      default:
+        return Colors.white;
+    }
+  }
+
+  IconData _getNotifIcon(int i) {
+    switch (i) {
+      case 0:
+        return Icons.calendar_month;
+      case 1:
+        return Icons.chat;
+      case 2:
+        return Icons.medication;
+      case 3:
+        return Icons.vaccines;
+      case 4:
+        return Icons.refresh;
+      default:
+        return Icons.notifications;
+    }
   }
 }
