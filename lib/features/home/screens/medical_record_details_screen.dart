@@ -96,7 +96,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.science, color: AppTheme.primaryColor, size: 32),
+                          const Icon(Icons.science, color: AppTheme.primaryColor, size: 32),
                           const SizedBox(height: 8),
                           Text('Lab Results', style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
                         ],
@@ -127,7 +127,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.medical_information, color: AppTheme.primaryColor, size: 32),
+                          const Icon(Icons.medical_information, color: AppTheme.primaryColor, size: 32),
                           const SizedBox(height: 8),
                           Text('X-Ray', style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
                         ],

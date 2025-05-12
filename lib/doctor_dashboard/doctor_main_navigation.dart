@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 import 'screens/doctor_home_screen.dart';
-import 'screens/doctor_appointments_screen.dart';
-import 'screens/doctor_reviews_screen.dart';
 import 'screens/doctor_book_appointment_screen.dart';
 import 'widgets/doctor_bottom_bar.dart';
 import 'package:medease/doctor_dashboard/screens/doctor_UploadScreen.dart';
+import 'screens/patient_profile_screen.dart';
 
 class DoctorMainNavigation extends StatefulWidget {
   final bool goToAppointment;
@@ -73,7 +72,7 @@ class DoctorMainNavigationState extends State<DoctorMainNavigation> {
       case 2:
         return const DoctorBookAppointmentScreen();
       case 3:
-        return const _ComingSoonPlaceholder(title: 'Patient');
+        return const PatientProfileScreen();
       default:
         return DoctorHomeScreen(
           onTabChange: (index) {

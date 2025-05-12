@@ -321,11 +321,11 @@ class AppTheme {
         fillColor: darkInput,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: darkBorder),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: darkBorder),
+          borderSide: const BorderSide(color: darkBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -337,8 +337,8 @@ class AppTheme {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         errorStyle: const TextStyle(color: errorColor, fontWeight: FontWeight.w600),
-        labelStyle: TextStyle(color: darkText, fontWeight: FontWeight.w500),
-        hintStyle: TextStyle(color: darkGrey, fontWeight: FontWeight.normal),
+        labelStyle: const TextStyle(color: darkText, fontWeight: FontWeight.w500),
+        hintStyle: const TextStyle(color: darkGrey, fontWeight: FontWeight.normal),
       ),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
@@ -417,7 +417,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: darkSurface,
         selectedColor: primaryColor,
-        labelStyle: TextStyle(color: darkText),
+        labelStyle: const TextStyle(color: darkText),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/theme/app_theme.dart';
 import 'appointment_details_screen.dart';
 import '../../profile/screens/notifications_screen.dart';
@@ -112,7 +111,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
               );
             },
               ),
-              Positioned(
+              const Positioned(
                 right: 8,
                 top: 8,
                 child: CircleAvatar(
@@ -120,7 +119,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                   backgroundColor: Colors.red,
                   child: Text(
                     '1', // عدد الإشعارات (مثلاً تأكيد الحجز)
-                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -301,14 +300,14 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                     const SizedBox(height: 14),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
+                        const Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
                         const SizedBox(width: 6),
                         Text(
                           appointment['date'] ?? 'Mon 4',
                           style: const TextStyle(fontSize: 14, color: Colors.black87),
                         ),
                         const SizedBox(width: 18),
-                        Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
+                        const Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
                         const SizedBox(width: 6),
                         Text(
                           appointment['time'] ?? '9:00 AM',

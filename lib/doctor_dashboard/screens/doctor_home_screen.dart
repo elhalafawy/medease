@@ -7,7 +7,6 @@ import 'doctor_reviews_screen.dart';
 import 'doctor_appointments_screen.dart';
 import 'doctor_messages_screen.dart';
 import 'doctor_notifications_screen.dart';
-import '../../features/profile/screens/edit_profile_screen.dart';
 import 'doctor_profile_screen.dart';
 
 
@@ -81,11 +80,11 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       },
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.edit, size: 16, color: AppTheme.greyColor),
+                                          const Icon(Icons.account_circle, size: 16, color: AppTheme.primaryColor),
                                           const SizedBox(width: 4),
                                           Text(
-                                            "Edit Profile",
-                                            style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor),
+                                            "Doctor Profile",
+                                            style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),

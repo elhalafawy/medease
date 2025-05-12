@@ -49,7 +49,7 @@ class DoctorMessagesScreen extends StatelessWidget {
       },
     ];
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
@@ -63,7 +63,7 @@ class DoctorMessagesScreen extends StatelessWidget {
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: messages.length,
-        separatorBuilder: (context, i) => Divider(indent: 70, endIndent: 16, height: 1, color: AppTheme.greyColor.withOpacity(0.15)),
+        separatorBuilder: (context, i) => Divider(indent: 70, endIndent: 16, height: 1, color: AppTheme.primaryColor.withOpacity(0.08)),
         itemBuilder: (context, i) {
           final msg = messages[i];
           return ListTile(
@@ -73,6 +73,7 @@ class DoctorMessagesScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundImage: AssetImage(msg['avatar'] as String),
+                  backgroundColor: AppTheme.primaryColor.withOpacity(0.08),
                 ),
                 if (msg['online'] == true)
                   Positioned(

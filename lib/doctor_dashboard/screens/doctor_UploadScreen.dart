@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
 
 class DoctorUploadscreen extends StatefulWidget {
-  const DoctorUploadscreen({Key? key}) : super(key: key);
+  const DoctorUploadscreen({super.key});
 
   @override
   State<DoctorUploadscreen> createState() => _UploadScreenState();
@@ -222,7 +222,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.photo, size: 32, color: Colors.white),
+                            icon: const Icon(Icons.photo, size: 32, color: Colors.white),
                             onPressed: () async {
                               final img = await ImagePicker().pickImage(source: ImageSource.gallery);
                               if (img != null) await _doOCR(img);
@@ -241,7 +241,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                             child: const Icon(Icons.camera_alt, size: 32),
                           ),
                           IconButton(
-                            icon: Icon(Icons.insert_drive_file, size: 32, color: Colors.white),
+                            icon: const Icon(Icons.insert_drive_file, size: 32, color: Colors.white),
                             onPressed: () {},
                           ),
                         ],

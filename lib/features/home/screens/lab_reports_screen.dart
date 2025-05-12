@@ -27,7 +27,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
       'status': 'Normal Results',
       'result': 'Normal Results',
       'desc': '',
-      'statusColor': Color(0xFF1A7C3E),
+      'statusColor': const Color(0xFF1A7C3E),
     },
     {
       'title': 'Lipid Panel',
@@ -35,7 +35,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
       'status': 'Requires Attention',
       'result': 'Requires Attention',
       'desc': '',
-      'statusColor': Color(0xFFFFA800),
+      'statusColor': const Color(0xFFFFA800),
     },
     {
       'title': 'Thyroid Function Test',
@@ -43,7 +43,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
       'status': 'Follow-Up Needed',
       'result': 'Follow-Up Needed',
       'desc': '',
-      'statusColor': Color(0xFFFF3B30),
+      'statusColor': const Color(0xFFFF3B30),
     },
   ];
 
@@ -54,7 +54,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
       'status': 'Normal',
       'result': 'Normal',
       'desc': '',
-      'statusColor': Color(0xFF1A7C3E),
+      'statusColor': const Color(0xFF1A7C3E),
     },
     {
       'title': 'Abdominal Ultrasound',
@@ -62,7 +62,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
       'status': 'Requires Attention',
       'result': 'Requires Attention',
       'desc': '',
-      'statusColor': Color(0xFFFFA800),
+      'statusColor': const Color(0xFFFFA800),
     },
   ];
 
@@ -156,7 +156,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
             Text('By date', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
           ],
         ),
-        Icon(Icons.sync, size: 22, color: AppTheme.greyColor),
+        const Icon(Icons.sync, size: 22, color: AppTheme.greyColor),
       ],
     );
   }
@@ -179,7 +179,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
               Expanded(
                 child: Text(report['title'], style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
               ),
-              Icon(Icons.more_vert, color: AppTheme.greyColor),
+              const Icon(Icons.more_vert, color: AppTheme.greyColor),
             ],
           ),
           const SizedBox(height: 4),
@@ -208,7 +208,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
                   icon: const Icon(Icons.remove_red_eye, color: AppTheme.primaryColor),
                   label: Text('View Report', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppTheme.primaryColor),
+                    side: const BorderSide(color: AppTheme.primaryColor),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
@@ -221,7 +221,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
                   icon: const Icon(Icons.download, color: AppTheme.primaryColor),
                   label: Text('Download', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppTheme.primaryColor),
+                    side: const BorderSide(color: AppTheme.primaryColor),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
@@ -240,7 +240,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 60),
-          Icon(Icons.science, size: 60, color: AppTheme.greyColor),
+          const Icon(Icons.science, size: 60, color: AppTheme.greyColor),
           const SizedBox(height: 18),
           Text('No lab reports found', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
           const SizedBox(height: 8),

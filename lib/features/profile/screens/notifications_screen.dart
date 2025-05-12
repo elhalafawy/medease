@@ -43,7 +43,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => AppointmentScheduleScreen(appointments: const []),
+              builder: (_) => const AppointmentScheduleScreen(appointments: []),
             ),
           );
         },

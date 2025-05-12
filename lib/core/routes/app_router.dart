@@ -4,7 +4,6 @@ import '../../features/auth/screens/splash_screen.dart';
 import '../../features/auth/screens/welcome_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
-import '../../features/home/screens/home_screen.dart';
 import '../../features/doctor/screens/doctors_screen.dart';
 import '../../features/doctor/screens/doctor_details_screen.dart';
 import '../../features/appointment/screens/appointment_screen.dart';
@@ -28,7 +27,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/login',
-        builder: (context, state) => LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: '/register',

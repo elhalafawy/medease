@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart' as app_theme;
 import '../widgets/doctor_bottom_bar.dart';
 
@@ -34,18 +33,18 @@ class DoctorReviewsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Map<String, String>> displayReviews = reviews.isEmpty ? exampleReviews : reviews;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: app_theme.AppTheme.backgroundColor,
       appBar: showAppBar
           ? AppBar(
-              backgroundColor: app_theme.AppTheme.appBarBackgroundColor,
+              backgroundColor: app_theme.AppTheme.primaryColor,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: app_theme.AppTheme.primaryColor),
+                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
               title: Text(
                 'Reviews',
-                style: app_theme.AppTheme.titleLarge.copyWith(color: app_theme.AppTheme.primaryColor),
+                style: app_theme.AppTheme.titleLarge.copyWith(color: Colors.white),
               ),
               centerTitle: true,
             )
@@ -62,9 +61,9 @@ class DoctorReviewsScreen extends StatelessWidget {
                     style: app_theme.AppTheme.titleLarge.copyWith(color: app_theme.AppTheme.greyColor),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Reviews from patients will appear here.',
-                    style: app_theme.AppTheme.bodyMedium,
+                    style: app_theme.AppTheme.bodyMedium.copyWith(color: app_theme.AppTheme.greyColor),
                   ),
                 ],
               ),
@@ -76,15 +75,15 @@ class DoctorReviewsScreen extends StatelessWidget {
                 final review = displayReviews[index];
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: app_theme.AppTheme.primaryColor.withOpacity(0.10),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
@@ -94,6 +93,7 @@ class DoctorReviewsScreen extends StatelessWidget {
                       const CircleAvatar(
                         backgroundImage: AssetImage('assets/images/profile_picture.png'),
                         radius: 24,
+                        backgroundColor: app_theme.AppTheme.primaryColor,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -102,7 +102,7 @@ class DoctorReviewsScreen extends StatelessWidget {
                           children: [
                             Text(
                               review['date'] ?? '',
-                              style: app_theme.AppTheme.bodyMedium,
+                              style: app_theme.AppTheme.bodyMedium.copyWith(color: app_theme.AppTheme.greyColor),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -113,13 +113,13 @@ class DoctorReviewsScreen extends StatelessWidget {
                             Row(
                               children: List.generate(
                                 int.tryParse(review['rating'] ?? '0') ?? 0,
-                                (i) => const Icon(Icons.star, size: 16, color: Colors.amber),
+                                (i) => Icon(Icons.star, size: 16, color: Colors.amber.shade700),
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               review['message'] ?? '',
-                              style: app_theme.AppTheme.bodyLarge,
+                              style: app_theme.AppTheme.bodyLarge.copyWith(color: app_theme.AppTheme.textColor, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),

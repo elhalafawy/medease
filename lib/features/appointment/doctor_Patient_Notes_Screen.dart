@@ -8,12 +8,12 @@ class PatientNotesScreen extends StatefulWidget {
   final VoidCallback onNoteAdded; // Updated: no longer passes count
 
   const PatientNotesScreen({
-    Key? key,
+    super.key,
     required this.date,
     required this.time,
     required this.imageUrl,
     required this.onNoteAdded,
-  }) : super(key: key);
+  });
 
   @override
   _PatientNotesScreenState createState() => _PatientNotesScreenState();
@@ -57,10 +57,10 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
                         const Icon(Icons.person, size: 30),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text("Dr. Ahmed",
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
@@ -98,7 +98,7 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
             TextField(
               decoration: InputDecoration(
                 hintText: "Write a message for the doctor",
-                hintStyle: TextStyle(color: Colors.grey),
+                hintStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.all(16),
@@ -139,10 +139,10 @@ class ScheduleCard extends StatelessWidget {
   final String subtitle;
 
   const ScheduleCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

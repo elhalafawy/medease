@@ -188,7 +188,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                 ],
               ),
               child: IconButton(
-                icon: Icon(Icons.favorite_border, color: AppTheme.primaryColor),
+                icon: const Icon(Icons.favorite_border, color: AppTheme.primaryColor),
                 onPressed: () {},
               ),
             ),
@@ -250,7 +250,7 @@ class _AboutMeSectionState extends State<_AboutMeSection> {
         if (!expanded && widget.about.length > 60)
           TextButton(
             onPressed: () => setState(() => expanded = true),
-            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size(0, 0)),
+            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
             child: const Text('Read More...', style: TextStyle(color: AppTheme.primaryColor)),
         ),
       ],

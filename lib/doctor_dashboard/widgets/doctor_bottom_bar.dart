@@ -32,7 +32,7 @@ class DoctorBottomBar extends StatelessWidget {
           _buildNavItem(context, "assets/icons/ic_home.png", "Home", 0),
           _buildNavItem(context, "assets/icons/ic_upload.png", "Upload", 1),
           _buildNavItem(context, "assets/icons/ic_appointment.png", "Appointment", 2),
-          _buildNavItem(context, "assets/icons/ic_profile.png", "Profile", 3),
+          _buildNavItem(context, "assets/icons/ic_profile.png", "Patient", 3),
         ],
       ),
     );

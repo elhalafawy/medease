@@ -325,9 +325,9 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                           ),
                           const SizedBox(width: 12),
                           Ink(
-                            decoration: ShapeDecoration(
+                            decoration: const ShapeDecoration(
                               color: AppTheme.bookingDayColor,
-                              shape: const CircleBorder(),
+                              shape: CircleBorder(),
                             ),
                             child: Stack(
                               children: [

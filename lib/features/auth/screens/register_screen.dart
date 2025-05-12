@@ -4,9 +4,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/otp_verification_widget.dart';
-import '../../../core/firebase/auth_service.dart';
-import 'verify_email_screen.dart';
-import '../../../core/theme/app_theme.dart';
 import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {

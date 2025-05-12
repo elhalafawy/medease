@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
 import 'medical_record_details_screen.dart';
 import '../../../core/theme/app_theme.dart';
 import 'lab_reports_screen.dart';
@@ -89,8 +88,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
               context: context,
             )),
             if (filteredRecords.isEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 40),
+              const Padding(
+                padding: EdgeInsets.only(top: 40),
                 child: Center(
                   child: Text('No records found for this year.', style: AppTheme.bodyLarge),
                 ),
@@ -108,7 +107,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => LabReportsScreen()),
+            MaterialPageRoute(builder: (context) => const LabReportsScreen()),
           );
         },
         icon: const Icon(Icons.science, color: Colors.white),
@@ -197,8 +196,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
               ),
               child: const CircleAvatar(
                 backgroundColor: Colors.white,
-                child: Icon(Icons.medical_services, color: AppTheme.primaryColor, size: 32),
                 radius: 28,
+                child: Icon(Icons.medical_services, color: AppTheme.primaryColor, size: 32),
               ),
             ),
             const SizedBox(width: 18),
@@ -208,7 +207,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 children: [
                   Text(
                     patientName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textColor,
@@ -237,7 +236,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Icon(Icons.arrow_forward, color: AppTheme.primaryColor, size: 18),
+                      const Icon(Icons.arrow_forward, color: AppTheme.primaryColor, size: 18),
                       const SizedBox(width: 4),
                       Text(
                         'Show more',

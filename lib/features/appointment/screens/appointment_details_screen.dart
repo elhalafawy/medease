@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/theme/app_theme.dart';
-import 'appointment_schedule_screen.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
@@ -169,7 +168,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           child: GestureDetector(
                             onTap: () => setState(() => selectedDayIndex = index),
                             child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                               decoration: BoxDecoration(
                                 color: isSelected ? const Color(0xFF7DDCFF) : Colors.white,
                                 borderRadius: BorderRadius.circular(14),
@@ -485,7 +484,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                           decoration: BoxDecoration(
                             color: _getStatusColor(widget.appointment['status'] ?? 'Pending').withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
@@ -511,7 +510,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             child: const Text('Update'),
                           ),
                         if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 6),
                         if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
                           ElevatedButton(
                             onPressed: _showCancelDialog,

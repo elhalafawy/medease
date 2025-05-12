@@ -123,7 +123,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
         title: const Text('Prescriptions', style: AppTheme.titleLarge),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Column(
           children: [
             _buildSearchBar(),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/profile/screens/settings_screen.dart';
-import '../../features/profile/screens/notifications_screen.dart';
 import 'doctor_messages_screen.dart';
 import 'doctor_notifications_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
@@ -298,8 +297,8 @@ class _EditDoctorProfileSheetState extends State<_EditDoctorProfileSheet> {
                     if (_formKey.currentState!.validate()) {
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text('Profile updated successfully!'),
+                        const SnackBar(
+                          content: Text('Profile updated successfully!'),
                           backgroundColor: Colors.green,
                           behavior: SnackBarBehavior.floating,
                         ),
@@ -336,15 +335,15 @@ class _EditDoctorProfileSheetState extends State<_EditDoctorProfileSheet> {
             fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppTheme.borderColor),
+              borderSide: const BorderSide(color: AppTheme.borderColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppTheme.borderColor),
+              borderSide: const BorderSide(color: AppTheme.borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+              borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),

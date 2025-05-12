@@ -4,8 +4,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'forgot_password_screen.dart';  
-import 'verify_email_screen.dart';
-import '../widgets/login_success_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -140,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          context.go('/doctor-dashboard');
+                          context.go('/home');
                         });
                       },
                       style: ElevatedButton.styleFrom(
