@@ -137,9 +137,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () async {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                        final email = _email.text.toLowerCase();
+                        if (email.contains('ahmed')) {
                           context.go('/home');
-                        });
+                        } else if (email.contains('doctor')) {
+                          context.go('/doctor-dashboard');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Invalid email format'),
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
