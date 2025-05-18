@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../core/theme/app_theme.dart';
 
 class MedicationReminderScreen extends StatefulWidget {
   final Function(String name, String dosage, String dateRange, int capsules, DateTime endDate)? onConfirm;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'medical_record_details_screen.dart';
-import '../../../core/theme/app_theme.dart';
 import 'lab_reports_screen.dart';
 
 class MedicalRecordScreen extends StatefulWidget {

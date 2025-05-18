@@ -318,7 +318,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               updatedAppointment['status'] = 'Canceled';
 
               if (widget.onCancel != null) {
-                widget.onCancel!(widget.appointment['id']);
+                widget.onCancel!(widget.appointment['id']?.toString() ?? '');
               }
               if (widget.onUpdate != null) {
                 widget.onUpdate!(updatedAppointment);
@@ -347,7 +347,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: theme.appBarTheme.backgroundColor,
@@ -361,10 +361,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Appointment Details',
-          style: TextStyle(
-            color: AppTheme.textColor,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -388,10 +388,15 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: theme.colorScheme.background,
-
-
-                
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12.withOpacity(0.07),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -408,18 +413,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           children: [
                             Text(
                               widget.appointment['doctorName'] ?? 'Dr. Ahmed',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.textColor,
-                              ),
+                              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                             ),
                             Text(
                               widget.appointment['specialty'] ?? 'Senior Neurologist and Surgeon',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7)),
                             ),
                           ],
                         ),
@@ -431,7 +429,14 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12.withOpacity(0.07),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -463,25 +468,21 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Appointment Status',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textColor,
-                    ),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: const [
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
+                          color: Colors.black12.withOpacity(0.07),
                           blurRadius: 10,
-                          offset: Offset(0, 2),
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -495,7 +496,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           ),
                           child: Text(
                             widget.appointment['status'] ?? 'Pending',
-                            style: TextStyle(
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               color: _getStatusColor(widget.appointment['status'] ?? 'Pending'),
                               fontWeight: FontWeight.bold,
                             ),
@@ -530,25 +531,21 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Additional Information',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textColor,
-                    ),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: const [
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
+                          color: Colors.black12.withOpacity(0.07),
                           blurRadius: 10,
-                          offset: Offset(0, 2),
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),

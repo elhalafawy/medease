@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           'Welcome, ${user?.displayName?? "Guest"} 👋', 
           style: theme.textTheme.headlineMedium?.copyWith(
-            color: theme.colorScheme.onBackground.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
         const SizedBox(height: 4),

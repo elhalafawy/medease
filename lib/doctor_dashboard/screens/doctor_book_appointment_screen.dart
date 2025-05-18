@@ -15,6 +15,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
   TimeOfDay? fromTime;
   TimeOfDay? toTime;
   Set<int> unavailableTimes = {};
+  List<Map<String, dynamic>> confirmedAppointments = [];
 
   @override
   void initState() {
@@ -113,6 +114,15 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
+                  setState(() {
+                    for (var idx in selectedDayIndices) {
+                      confirmedAppointments.add({
+                        'day': next7Days[idx],
+                        'from': fromTime,
+                        'to': toTime,
+                      });
+                    }
+                  });
                   _resetForm();
                 },
                 style: ElevatedButton.styleFrom(
@@ -138,21 +148,22 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        title: Text("Doctor's Schedule", style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
+        title: Text("Doctor's Schedule", style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
         centerTitle: true,
-        foregroundColor: AppTheme.primaryColor,
+        foregroundColor: theme.colorScheme.primary,
       ),
       body: Stack(
         children: [
           Container(
             width: double.infinity,
             height: 240,
-            color: AppTheme.backgroundColor,
+            color: theme.scaffoldBackgroundColor,
             child: Image.asset(
               'assets/images/doctor_photo.png',
               fit: BoxFit.fitWidth,
@@ -165,11 +176,11 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
             maxChildSize: 0.95,
             builder: (context, scrollController) => Container(
               decoration: BoxDecoration(
-                color: AppTheme.backgroundColor,
+                color: theme.scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.04),
+                    color: theme.colorScheme.primary.withOpacity(0.04),
                     blurRadius: 12,
                     offset: const Offset(0, -2),
                   ),
@@ -187,28 +198,28 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         height: 5,
                         margin: const EdgeInsets.only(bottom: 18),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.08),
+                          color: theme.colorScheme.primary.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                     ),
                     Row(
                       children: [
-                        Text('Dr.Ahmed', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
+                        Text('Dr.Ahmed', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
                         const Spacer(),
                         const Icon(Icons.star, color: Color(0xFFF5B100), size: 20),
                         const SizedBox(width: 4),
-                        Text('4.8', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                        Text('4.8', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text('Neurologist  |  Hospital', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor)),
+                    Text('Neurologist  |  Hospital', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.access_time, color: AppTheme.primaryColor, size: 18),
+                        Icon(Icons.access_time, color: theme.colorScheme.primary, size: 18),
                         const SizedBox(width: 6),
-                        Text('10:30am - 5:30pm', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                        Text('10:30am - 5:30pm', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                       ],
                     ),
                     const SizedBox(height: 18),
@@ -236,9 +247,9 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                               margin: const EdgeInsets.only(right: 12),
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: isSelected ? AppTheme.bookingDayColor : Colors.white,
+                                color: isSelected ? Color(0xFF7DDCFF) : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.15)),
+                                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15)),
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -246,7 +257,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                   Text(
                                     ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.weekday % 7],
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : AppTheme.primaryColor,
+                                      color: isSelected ? Colors.white : theme.colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -254,7 +265,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                   Text(
                                     "${d.day}/${d.month}",
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : AppTheme.primaryColor,
+                                      color: isSelected ? Colors.white : theme.colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -282,13 +293,13 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.08)),
+                                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.08)),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('From', style: AppTheme.bodyLarge),
-                                  Text(_formatTime(fromTime), style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                                  Text('From', style: theme.textTheme.bodyLarge),
+                                  Text(_formatTime(fromTime), style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
@@ -309,13 +320,13 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppTheme.primaryColor.withOpacity(0.08)),
+                                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.08)),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text('To', style: AppTheme.bodyLarge),
-                                  Text(_formatTime(toTime), style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                                  Text('To', style: theme.textTheme.bodyLarge),
+                                  Text(_formatTime(toTime), style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
@@ -323,9 +334,9 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         ),
                       ],
                     ),
-                    if (fromTime != null && toTime != null && selectedDayIndices.isNotEmpty) ...[
+                     if (fromTime != null && toTime != null && selectedDayIndices.isNotEmpty) ...[
                       const SizedBox(height: 18),
-                      Text('Available Time', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
+                      Text('Available Time', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 44,
@@ -350,30 +361,30 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? AppTheme.primaryColor
+                                      ? theme.colorScheme.primary
                                       : isUnavailable
-                                          ? AppTheme.greyColor.withOpacity(0.2)
+                                          ? theme.colorScheme.primary.withOpacity(0.2)
                                           : Colors.white,
                                   borderRadius: BorderRadius.circular(22),
                                   border: Border.all(
                                     color: isSelected
-                                        ? AppTheme.primaryColor
+                                        ? theme.colorScheme.primary
                                         : isUnavailable
-                                            ? AppTheme.greyColor
-                                            : AppTheme.primaryColor.withOpacity(0.15),
+                                            ? theme.colorScheme.surface
+                                            : theme.colorScheme.primary.withOpacity(0.15),
                                   ),
                                   boxShadow: isSelected
-                                      ? [BoxShadow(color: AppTheme.primaryColor.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))]
+                                      ? [BoxShadow(color: theme.colorScheme.primary.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))]
                                       : [],
                                 ),
                                 child: Text(
                                   availableTimes[i],
-                                  style: AppTheme.bodyLarge.copyWith(
+                                  style: theme.textTheme.bodyLarge?.copyWith(
                                     color: isSelected
                                         ? Colors.white
                                         : isUnavailable
-                                            ? AppTheme.greyColor
-                                            : AppTheme.primaryColor,
+                                            ? theme.colorScheme.surface
+                                            : theme.colorScheme.primary,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -392,18 +403,71 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                             _showSuccessDialog();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
+                            backgroundColor: theme.colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            textStyle: AppTheme.titleLarge,
+                            textStyle: theme.textTheme.titleLarge,
                           ),
                           child: const Text('Confirm'),
                         ),
                       ),
                     ),
+                    if (confirmedAppointments.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      Text('Confirmed Appointments:', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: confirmedAppointments.length,
+                        itemBuilder: (context, idx) {
+                          final appt = confirmedAppointments[idx];
+                          final day = appt['day'] as DateTime;
+                          final from = appt['from'] as TimeOfDay?;
+                          final to = appt['to'] as TimeOfDay?;
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            child: ListTile(
+                              title: Text(
+                                '${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][day.weekday % 7]} - ${day.day}/${day.month}',
+                                style: theme.textTheme.bodyLarge,
+                              ),
+                              subtitle: Text(
+                                'From: ${from?.format(context) ?? '--:--'}  To: ${to?.format(context) ?? '--:--'}',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, color: Colors.blue),
+                                    onPressed: () {
+                                      setState(() {
+                                        selectedDayIndices = [next7Days.indexWhere((d) => d == appt['day'])];
+                                        fromTime = appt['from'];
+                                        toTime = appt['to'];
+                                        confirmedAppointments.removeAt(idx);
+                                      });
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        confirmedAppointments.removeAt(idx);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),

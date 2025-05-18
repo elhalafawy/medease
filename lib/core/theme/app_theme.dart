@@ -243,7 +243,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       primaryColor: primaryColor,
-      scaffoldBackgroundColor: const Color(0xFFF8F8F8),
+      scaffoldBackgroundColor: const Color(0xFFF3F4F6),
       colorScheme: const ColorScheme.light(
         primary: Color(0xFF022E5B),
         secondary: Color(0xFF00264D),
@@ -253,7 +253,6 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: Color(0xFF022E5B),
         onError: Colors.white,
-        background: Color(0xFFF8F8F8),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFFF8F8F8),
@@ -361,9 +360,9 @@ class AppTheme {
       cardTheme: CardTheme(
         color: Colors.white,
         elevation: 4,
-        shadowColor: Colors.black.withAlpha((13*255).toInt()),
+        shadowColor: Colors.black12,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          borderRadius: BorderRadius.circular(16),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
@@ -419,7 +418,6 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: darkText,
         onError: Colors.white,
-        background: darkBackground,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: darkSurface,
@@ -591,10 +589,8 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: nightText,
         onError: Colors.black,
-        background: nightBackground,
       ),
       cardColor: nightSurface,
-      dialogBackgroundColor: nightDialog,
       appBarTheme: const AppBarTheme(
         backgroundColor: nightSurface,
         elevation: 0,
@@ -665,11 +661,11 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: nightPrimary, width: 2),
+          borderSide: const BorderSide(color: nightPrimary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: nightError, width: 1.2),
+          borderSide: const BorderSide(color: nightError, width: 1.2),
         ),
         labelStyle: const TextStyle(
           fontSize: 14,

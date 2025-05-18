@@ -90,17 +90,18 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text('Medical Records', style: AppTheme.titleLarge),
+        title: Text('Medical Records', style: theme.textTheme.titleLarge),
       ),
       body: Column(
         children: [
@@ -115,13 +116,13 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                   icon: const Icon(Icons.add),
                   label: const Text('Create New Record'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
+                    backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    textStyle: AppTheme.bodyLarge,
+                    textStyle: theme.textTheme.bodyLarge,
                   ),
                 ),
               ),
@@ -156,20 +157,21 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
   Widget _tabButton(String label, int index) {
     final bool selected = selectedTab == index;
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () => setState(() => selectedTab = index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.primaryColor : Colors.white,
+          color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.primaryColor),
+          border: Border.all(color: theme.colorScheme.primary),
         ),
         child: Center(
           child: Text(
             label,
-            style: AppTheme.bodyLarge.copyWith(
-              color: selected ? Colors.white : AppTheme.primaryColor,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),

@@ -155,6 +155,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
         return true;
       },
       child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text('OCR Flow', style: theme.appBarTheme.titleTextStyle),
           backgroundColor: AppTheme.appBarBackgroundColor,

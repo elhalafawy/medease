@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../appointment/screens/appointment_screen.dart';
-import '../../../core/theme/app_theme.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> doctor;

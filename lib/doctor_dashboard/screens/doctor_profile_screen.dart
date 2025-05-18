@@ -21,8 +21,9 @@ class DoctorProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -35,7 +36,7 @@ class DoctorProfileScreen extends StatelessWidget {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 4),
-                  const Text('My Profile', style: AppTheme.titleLarge),
+                  Text('My Profile', style: theme.textTheme.titleLarge),
                 ],
               ),
             ),
@@ -55,16 +56,16 @@ class DoctorProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Dr.Ahmed', style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                        Text('Dr.Ahmed', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
                         const SizedBox(height: 2),
-                        const Text('Ahmedmo@gmail.com', style: AppTheme.bodyMedium),
+                        Text('Ahmedmo@gmail.com', style: theme.textTheme.bodyMedium),
                       ],
                     ),
                   ),
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: AppTheme.backgroundColor,
+                        color: theme.colorScheme.surface,
                         shape: BoxShape.circle,
                         border: Border.all(color: AppTheme.borderColor),
                       ),

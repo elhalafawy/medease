@@ -31,9 +31,10 @@ class DoctorReviewsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Map<String, String>> displayReviews = reviews.isEmpty ? exampleReviews : reviews;
     return Scaffold(
-      backgroundColor: app_theme.AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: showAppBar
           ? AppBar(
               backgroundColor: app_theme.AppTheme.primaryColor,
@@ -77,7 +78,7 @@ class DoctorReviewsScreen extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(

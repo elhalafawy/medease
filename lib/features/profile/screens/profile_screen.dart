@@ -45,14 +45,14 @@ class ProfileScreen extends StatelessWidget {
                 'Ahmed Elhalafawy',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onBackground,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: AppTheme.kPaddingSmall),
               Text(
                 'ahmed.elhlafawy@email.com',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onBackground.withOpacity(0.7),
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
               ),
               const SizedBox(height: AppTheme.kPaddingXLarge),

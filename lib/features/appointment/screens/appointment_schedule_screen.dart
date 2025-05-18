@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
 import 'appointment_details_screen.dart';
 import '../../profile/screens/notifications_screen.dart';
 

@@ -61,8 +61,9 @@ class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
         'badge': newUpdate,
       },
     ];
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.notifPageBg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,

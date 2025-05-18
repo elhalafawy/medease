@@ -72,7 +72,7 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
                   Row(
                     children: [
                       Text("4.8", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)),
-                      Icon(Icons.star, color: Colors.amber, size: 20),
+                      const Icon(Icons.star, color: Colors.amber, size: 20),
                     ],
                   )
                 ],

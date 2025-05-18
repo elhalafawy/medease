@@ -26,9 +26,10 @@ class PatientProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final DateTime birthDate = DateTime(2002, 1, 1);
     final String age = calculateAge(birthDate);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

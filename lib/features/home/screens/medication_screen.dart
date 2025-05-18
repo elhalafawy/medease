@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'medication_reminder_screen.dart';
-import '../../../core/theme/app_theme.dart';
 
 
 class MedicationScreen extends StatefulWidget {

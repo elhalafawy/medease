@@ -27,8 +27,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -59,8 +60,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       children: [
                                         Text(
                                           "Welcome Dr.Ahmed, ",
-                                          style: AppTheme.titleLarge.copyWith(
-                                            color: AppTheme.primaryColor,
+                                          style: theme.textTheme.titleLarge?.copyWith(
+                                            color: theme.colorScheme.primary,
                                           ),
                                         ),
                                         const Text(
@@ -84,7 +85,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                           const SizedBox(width: 4),
                                           Text(
                                             "Doctor Profile",
-                                            style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                                            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -155,12 +156,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 margin: const EdgeInsets.only(right: 10),
                                 padding: const EdgeInsets.all(9),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.backgroundColor,
+                                  color: theme.colorScheme.surface,
                                   borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2), width: 1),
+                                  border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 1),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppTheme.primaryColor.withOpacity(0.08),
+                                      color: theme.colorScheme.primary.withOpacity(0.08),
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
                                     ),
@@ -172,7 +173,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   children: [
                                     Text(
                                       "Gender",
-                                      style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 14),
+                                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 14),
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 2),
@@ -204,12 +205,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   margin: const EdgeInsets.only(right: 10),
                                   padding: const EdgeInsets.all(9),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.backgroundColor,
+                                    color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2), width: 1),
+                                    border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 1),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppTheme.primaryColor.withOpacity(0.08),
+                                        color: theme.colorScheme.primary.withOpacity(0.08),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -221,15 +222,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                     children: [
                                       Text(
                                         "0",
-                                        style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 18),
+                                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 18),
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 2),
-                                      Text("Messages", style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 13), textAlign: TextAlign.center),
+                                      Text("Messages", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 13), textAlign: TextAlign.center),
                                       const SizedBox(height: 6),
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryColor.withOpacity(0.08),
+                                          color: theme.colorScheme.primary.withOpacity(0.08),
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
@@ -268,12 +269,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   margin: const EdgeInsets.only(right: 0),
                                   padding: const EdgeInsets.all(9),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.backgroundColor,
+                                    color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2), width: 1),
+                                    border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 1),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppTheme.primaryColor.withOpacity(0.08),
+                                        color: theme.colorScheme.primary.withOpacity(0.08),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -285,15 +286,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                     children: [
                                       Text(
                                         "0",
-                                        style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 18),
+                                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 18),
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 2),
-                                      Text("Appointments", style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 13), textAlign: TextAlign.center),
+                                      Text("Appointments", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 13), textAlign: TextAlign.center),
                                       const SizedBox(height: 6),
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryColor.withOpacity(0.08),
+                                          color: theme.colorScheme.primary.withOpacity(0.08),
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
@@ -360,7 +361,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                               },
                               child: Text(
                                 "See All Reviews",
-                                style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
+                                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary),
                               ),
                             ),
                           ],
@@ -371,7 +372,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                             const SizedBox(width: 4),
                             Text(
                               "4.8",
-                              style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 8),
                             const Text("Total 0 Reviews", style: AppTheme.bodyMedium),

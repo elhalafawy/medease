@@ -4,7 +4,7 @@ import '../../features/upload/screens/upload_screen.dart';
 import '../../features/appointment/screens/appointment_schedule_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../widgets/custom_bottom_bar.dart';
-import '../theme/app_theme.dart' hide CustomBottomBar; // Modified import
+// Modified import
 
 class MainNavigation extends StatefulWidget {
   final bool goToAppointment;
