@@ -52,9 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     int notificationCount = 3; // يمكنك ربطها بالعدادات الحقيقية لاحقًا
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -175,12 +176,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 6,
+                            color: theme.colorScheme.primary.withOpacity(0.1),
+                            blurRadius: 10,
                           ),
                         ],
                       ),
@@ -210,12 +211,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildUserWelcome() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Welcome, ${user?.displayName?? "Guest"} 👋', 
-          style: AppTheme.headlineMedium,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: theme.colorScheme.onBackground.withOpacity(0.7),
+          ),
         ),
         const SizedBox(height: 4),
         const Text(
@@ -227,11 +231,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSearchBar() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         border: Border.all(color: AppTheme.borderColor),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -254,6 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickOptions() {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -277,6 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategory(String label, IconData icon, Color color, [VoidCallback? onTap]) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -294,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 8),
             Text(
               label,
-              style: AppTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
           ],
@@ -304,6 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProtectionBanner() {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFDBE3F7),
@@ -345,11 +353,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildArticle({required String title, required String subtitle, required String image}) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
       ),

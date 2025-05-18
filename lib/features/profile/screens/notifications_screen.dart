@@ -32,6 +32,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final notifications = [
       {
         'icon': Icons.calendar_month,
@@ -121,12 +122,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('App Update'),
-              content: const Text('You are already on the latest update.'),
+              backgroundColor: theme.colorScheme.surface,
+              title: Text(
+                'App Update',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              content: Text(
+                'You are already on the latest update.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
+                  child: Text(
+                    'OK',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -136,15 +153,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
     ];
     return Scaffold(
-      backgroundColor: AppTheme.notifPageBg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        title: const Text('Notifications', style: AppTheme.headlineMedium),
+        title: Text(
+          'Notifications',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: false,
-        foregroundColor: AppTheme.textColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 22),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            size: 22,
+            color: theme.colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -158,12 +184,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             onTap: n['onTap'] != null ? () => (n['onTap'] as void Function(BuildContext))(context) : null,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppTheme.notifCardBorder),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(8),
+                    color: theme.colorScheme.shadow.withOpacity(0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -188,10 +216,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         top: 0,
                         child: CircleAvatar(
                           radius: 10,
-                          backgroundColor: Colors.red,
+                          backgroundColor: theme.colorScheme.error,
                           child: Text(
                             '${n['badge']}',
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onError,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -199,13 +230,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
                 title: Text(
                   n['title'] as String,
-                  style: AppTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     n['subtitle'] as String,
-                    style: AppTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
                   ),
                 ),
               ),
@@ -224,15 +259,17 @@ class _FavoritesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.only(
-        left: 20, right: 20,
+        left: 20,
+        right: 20,
         top: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -241,30 +278,75 @@ class _FavoritesWidget extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, size: 22, color: AppTheme.textColor),
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 22,
+                  color: theme.colorScheme.onSurface,
+                ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               const SizedBox(width: 8),
-              const Text('Favorites', style: AppTheme.titleLarge),
+              Text(
+                'Favorites',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 24),
-          ...doctors.map((doctor) => GestureDetector(
-                onTap: () => onDoctorTap(doctor),
-                child: Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: AssetImage(doctor['image']),
-                      radius: 28,
-                    ),
-                    title: Text(doctor['name'], style: AppTheme.titleLarge),
-                    subtitle: Text(doctor['type'], style: AppTheme.bodyMedium),
-                    trailing: const Icon(Icons.chevron_right, color: AppTheme.primaryColor),
+          const SizedBox(height: 16),
+          if (doctors.isEmpty)
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.favorite_border,
+                    size: 48,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
                   ),
-                ),
-              )),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No favorite doctors yet',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: doctors.length,
+              itemBuilder: (context, index) {
+                final doctor = doctors[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: AssetImage(doctor['image']),
+                  ),
+                  title: Text(
+                    doctor['name'],
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  subtitle: Text(
+                    doctor['type'],
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                  onTap: () => onDoctorTap(doctor),
+                );
+              },
+            ),
         ],
       ),
     );

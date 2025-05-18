@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           title: 'MedEase',
           theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
+          darkTheme: AppTheme.nightTheme,
           themeMode: themeMode,
           routerConfig: AppRouter.router,
           debugShowCheckedModeBanner: false,

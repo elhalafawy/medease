@@ -99,19 +99,23 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Book Appointment',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: Stack(
@@ -120,7 +124,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
           Container(
             width: double.infinity,
             height: 240,
-            color: AppTheme.backgroundColor,
+            color: theme.scaffoldBackgroundColor,
             child: Image.asset(
               widget.doctor?['image'] ?? 'assets/images/doctor_photo.png',
               fit: BoxFit.cover,
@@ -134,11 +138,11 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
             maxChildSize: 0.95,
             builder: (context, scrollController) => Container(
               decoration: BoxDecoration(
-                color: AppTheme.backgroundColor,
+                color: theme.scaffoldBackgroundColor,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.04),
+                    color: theme.colorScheme.primary.withOpacity(0.04),
                     blurRadius: 12,
                     offset: const Offset(0, -2),
                   ),
@@ -156,7 +160,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                         height: 5,
                         margin: const EdgeInsets.only(bottom: 18),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.08),
+                          color: theme.colorScheme.primary.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -166,7 +170,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 5),
                       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                       decoration: BoxDecoration(
-                        color: AppTheme.primaryColor,
+                        color: theme.colorScheme.primary,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
@@ -174,16 +178,23 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                         children: [
                           Text(
                             widget.doctor?['name'] ?? "Dr. Ahmed",
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             widget.doctor?['type'] ?? "Senior Neurologist and Surgeon",
-                            style: const TextStyle(color: Colors.white70),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onPrimary.withOpacity(0.7),
+                            ),
                           ),
                           Text(
                             widget.doctor?['hospital'] ?? "Mirpur Medical College and Hospital",
-                            style: const TextStyle(color: Colors.white70),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onPrimary.withOpacity(0.7),
+                            ),
                           ),
                         ],
                       ),
@@ -191,20 +202,23 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                     const SizedBox(height: 24),
                     Container(
                       alignment: Alignment.centerLeft,
-                      child: const Text(
+                      child: Text(
                         "Appointment",
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Color(0xFF232B3E)),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.07),
+                            color: theme.shadowColor.withOpacity(0.07),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -227,19 +241,17 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                                   children: [
                                     Text(
                                       days[index],
-                                      style: TextStyle(
-                                        color: isSelected ? Colors.white : const Color(0xFF232B3E),
+                                      style: theme.textTheme.bodyLarge?.copyWith(
+                                        color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 15,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       dates[index],
-                                      style: TextStyle(
-                                        color: isSelected ? Colors.white : const Color(0xFF232B3E),
+                                      style: theme.textTheme.bodyLarge?.copyWith(
+                                        color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 15,
                                       ),
                                     ),
                                   ],
@@ -271,15 +283,15 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                             decoration: BoxDecoration(
-                              color: isSelected ? AppTheme.bookingTimeColor : Colors.white,
+                              color: isSelected ? AppTheme.bookingTimeColor : theme.colorScheme.surface,
                               borderRadius: BorderRadius.circular(30),
-                              border: Border.all(color: Colors.grey.shade300),
+                              border: Border.all(color: theme.dividerColor),
                               boxShadow: isSelected
                                   ? [
-                                      const BoxShadow(
-                                        color: Colors.black26,
+                                      BoxShadow(
+                                        color: theme.shadowColor.withOpacity(0.18),
                                         blurRadius: 4,
-                                        offset: Offset(0, 4),
+                                        offset: const Offset(0, 4),
                                       ),
                                     ]
                                   : [],
@@ -287,7 +299,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
                             child: Text(
                               times[index],
                               style: TextStyle(
-                                color: isSelected ? Colors.white : const Color(0xFF9C9C9C),
+                                color: isSelected ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.7),
                                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                               ),
                             ),

@@ -10,60 +10,131 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final notifier = themeModeNotifier ?? themeModeNotifierGlobal;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(
+          'Settings',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         children: [
-          const Text('PROFILE', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          Text(
+            'PROFILE',
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           SwitchListTile(
             value: notifier.value == ThemeMode.dark,
             onChanged: (val) {
               notifier.value = val ? ThemeMode.dark : ThemeMode.light;
             },
-            title: const Text('Dark Mode'),
-            activeColor: const Color(0xFF022E5B),
+            title: Text(
+              'Night Mode',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            activeColor: theme.colorScheme.primary,
+            activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
+            inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.2),
+            inactiveThumbColor: theme.colorScheme.onSurface.withOpacity(0.5),
           ),
           SwitchListTile(
             value: true,
             onChanged: (_) {},
-            title: const Text('Push Notification'),
-            activeColor: const Color(0xFF022E5B),
+            title: Text(
+              'Push Notification',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            activeColor: theme.colorScheme.primary,
+            activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
+            inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.2),
+            inactiveThumbColor: theme.colorScheme.onSurface.withOpacity(0.5),
           ),
           SwitchListTile(
             value: false,
             onChanged: (_) {},
-            title: const Text('Location'),
-            activeColor: Colors.purple,
+            title: Text(
+              'Location',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            activeColor: theme.colorScheme.primary,
+            activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
+            inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.2),
+            inactiveThumbColor: theme.colorScheme.onSurface.withOpacity(0.5),
           ),
           ListTile(
-            title: const Text('Language'),
-            trailing: const Text('English'),
+            title: Text(
+              'Language',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            trailing: Text(
+              'English',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
             onTap: () {},
           ),
           const SizedBox(height: 20),
-          const Text('OTHER', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          Text(
+            'OTHER',
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           ListTile(
-            title: const Text('Privacy Policy'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            title: Text(
+              'Privacy Policy',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            trailing: Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()));
             },
           ),
           ListTile(
-            title: const Text('Terms and Conditions'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            title: Text(
+              'Terms and Conditions',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            trailing: Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
+            ),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const TermsConditionsScreen()));
             },

@@ -16,6 +16,7 @@ class DoctorsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Map<String, dynamic>> doctors = [
       {
         'name': 'Dr. Ahmed',
@@ -35,23 +36,22 @@ class DoctorsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: onBack ?? () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Doctors',
-          style: TextStyle(
-            color: AppTheme.primaryColor,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w600,
-            fontSize: 20,
           ),
         ),
       ),
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: doctors.length,
@@ -64,6 +64,7 @@ class DoctorsScreen extends StatelessWidget {
   }
 
   Widget _buildDoctorCard(BuildContext context, Map<String, dynamic> doctor) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         if (onDoctorTap != null) {
@@ -87,12 +88,12 @@ class DoctorsScreen extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE8E8E8)),
+          border: Border.all(color: AppTheme.borderColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: theme.colorScheme.shadow.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -126,18 +127,16 @@ class DoctorsScreen extends StatelessWidget {
                             children: [
                               Text(
                                 doctor['name'],
-                                style: const TextStyle(
-                                  fontSize: 16,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w600,
-                                  color: AppTheme.primaryColor,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 doctor['type'],
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 13,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
                                 ),
                               ),
                             ],
@@ -146,7 +145,7 @@ class DoctorsScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withOpacity(0.1),
+                            color: theme.colorScheme.onSurface.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
@@ -155,9 +154,8 @@ class DoctorsScreen extends StatelessWidget {
                               const SizedBox(width: 2),
                               Text(
                                 doctor['rating'],
-                                style: const TextStyle(
-                                  color: AppTheme.primaryColor,
-                                  fontSize: 12,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -169,14 +167,13 @@ class DoctorsScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: AppTheme.primaryColor),
+                        Icon(Icons.location_on, size: 14, color: theme.colorScheme.onSurface),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             doctor['hospital'],
-                            style: const TextStyle(
-                              color: AppTheme.primaryColor,
-                              fontSize: 12,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -199,9 +196,8 @@ class DoctorsScreen extends StatelessWidget {
                               const SizedBox(width: 2),
                               Text(
                                 doctor['price'],
-                                style: const TextStyle(
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   color: Colors.green,
-                                  fontSize: 12,
                                 ),
                               ),
                             ],
@@ -211,18 +207,17 @@ class DoctorsScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF022E5B).withOpacity(0.1),
+                            color: theme.colorScheme.onSurface.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.access_time, size: 14, color: Color(0xFF022E5B)),
+                              Icon(Icons.access_time, size: 14, color: theme.colorScheme.onSurface),
                               const SizedBox(width: 2),
                               Text(
                                 doctor['availability'],
-                                style: const TextStyle(
-                                  color: Color(0xFF022E5B),
-                                  fontSize: 12,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

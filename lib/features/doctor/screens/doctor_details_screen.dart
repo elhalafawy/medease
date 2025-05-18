@@ -16,13 +16,14 @@ class DoctorDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () {
             if (onBack != null) {
               onBack!();
@@ -32,25 +33,24 @@ class DoctorDetailsScreen extends StatelessWidget {
           },
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Doctor Details',
-          style: TextStyle(
-            color: AppTheme.primaryColor,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w600,
-            fontSize: 20,
           ),
         ),
       ),
       body: Stack(
-          children: [
+        children: [
           // Doctor image at the top
           Container(
-                width: double.infinity,
+            width: double.infinity,
             height: 260,
-            color: AppTheme.backgroundColor,
-                child: Image.asset(
-                  doctor['image'],
-                  fit: BoxFit.cover,
+            color: theme.scaffoldBackgroundColor,
+            child: Image.asset(
+              doctor['image'],
+              fit: BoxFit.cover,
               alignment: Alignment.topCenter,
             ),
           ),
@@ -61,11 +61,11 @@ class DoctorDetailsScreen extends StatelessWidget {
             maxChildSize: 0.95,
             builder: (context, scrollController) => Container(
               decoration: BoxDecoration(
-                color: AppTheme.backgroundColor,
+                color: theme.colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.04),
+                    color: theme.colorScheme.primary.withOpacity(0.04),
                     blurRadius: 12,
                     offset: const Offset(0, -2),
                   ),
@@ -83,92 +83,108 @@ class DoctorDetailsScreen extends StatelessWidget {
                         height: 5,
                         margin: const EdgeInsets.only(bottom: 18),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.08),
+                          color: theme.colorScheme.onSurface.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(8),
-              ),
+                        ),
                       ),
                     ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    doctor['name'],
-                                style: AppTheme.headlineMedium.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-                    ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doctor['name'],
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                  Text(
-                    doctor['type'],
-                                style: AppTheme.bodyMedium.copyWith(color: AppTheme.textColor.withOpacity(0.7)),
-                  ),
-                ],
-              ),
-            ),
-                        const Icon(Icons.star, color: Color(0xFFF5B100), size: 22),
+                              Text(
+                                doctor['type'],
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.star, color: Colors.amber[600], size: 22),
                         const SizedBox(width: 4),
                         Text(
                           doctor['rating'],
-                          style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onSurface,
+                          ),
                         ),
                         Text(
                           ' (${doctor['reviews']} reviews)',
-                          style: AppTheme.bodyMedium.copyWith(color: AppTheme.textColor.withOpacity(0.6)),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
                       doctor['hospital'],
-                      style: AppTheme.bodyMedium.copyWith(color: AppTheme.textColor.withOpacity(0.7)),
-            ),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
                     const SizedBox(height: 22),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                         _StatCircle(icon: Icons.person, value: doctor['patients'], label: 'Patients'),
                         _StatCircle(icon: Icons.verified_user, value: doctor['experience'], label: 'Years'),
                         _StatCircle(icon: Icons.star_border, value: doctor['rating'], label: 'Rating'),
                         _StatCircle(icon: Icons.chat, value: doctor['reviews'], label: 'Reviews'),
-              ],
-            ),
-            const SizedBox(height: 24),
-                    Text('About Me', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'About Me',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     _AboutMeSection(about: doctor['about'] ?? 'No information.'),
                     const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AppointmentScreen(
-                        doctor: doctor,
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AppointmentScreen(
+                                doctor: doctor,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                        ),
+                        child: Text(
+                          'Book Appointment',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                        ),
                       ),
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  ],
                 ),
-                child: const Text(
-                  'Book Appointment',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
               ),
             ),
           ),
@@ -178,17 +194,17 @@ class DoctorDetailsScreen extends StatelessWidget {
             right: 32,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.colorScheme.surface,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: theme.colorScheme.shadow.withOpacity(0.08),
                     blurRadius: 6,
                   ),
                 ],
               ),
               child: IconButton(
-                icon: const Icon(Icons.favorite_border, color: AppTheme.primaryColor),
+                icon: Icon(Icons.favorite_border, color: theme.colorScheme.primary),
                 onPressed: () {},
               ),
             ),
@@ -206,21 +222,33 @@ class _StatCircle extends StatelessWidget {
   const _StatCircle({required this.icon, required this.value, required this.label});
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Container(
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: AppTheme.primaryColor.withOpacity(0.08),
+            color: theme.colorScheme.primary.withOpacity(0.08),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: AppTheme.primaryColor, size: 26),
+          child: Icon(icon, color: theme.colorScheme.primary, size: 26),
         ),
         const SizedBox(height: 6),
-        Text(value, style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+        Text(
+          value,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.6),
+          ),
+        ),
       ],
     );
   }
@@ -237,6 +265,7 @@ class _AboutMeSectionState extends State<_AboutMeSection> {
   bool expanded = false;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final maxLines = expanded ? null : 2;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,14 +274,21 @@ class _AboutMeSectionState extends State<_AboutMeSection> {
           widget.about,
           maxLines: maxLines,
           overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-          style: AppTheme.bodyMedium.copyWith(color: AppTheme.textColor.withOpacity(0.85)),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.85),
+          ),
         ),
         if (!expanded && widget.about.length > 60)
           TextButton(
             onPressed: () => setState(() => expanded = true),
-            style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
-            child: const Text('Read More...', style: TextStyle(color: AppTheme.primaryColor)),
-        ),
+            child: Text(
+              'Read more',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
       ],
     );
   }
