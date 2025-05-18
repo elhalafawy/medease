@@ -50,17 +50,18 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Medical Record',
-          style: AppTheme.titleLarge,
+          style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface),
         ),
-        backgroundColor: AppTheme.backgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () {
             if (widget.onBack != null) {
               widget.onBack!();
@@ -75,9 +76,9 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildLabReportsButton(context),
+            _buildLabReportsButton(context, theme),
             const SizedBox(height: 16),
-            _buildFilterTabs(),
+            _buildFilterTabs(theme),
             const SizedBox(height: 16),
             ...filteredRecords.map((record) => _buildRecordItem(
               patientName: record['patientName'],
@@ -86,12 +87,13 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
               medications: record['medications'],
               date: record['date'],
               context: context,
+              theme: theme,
             )),
             if (filteredRecords.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: 40),
+              Padding(
+                padding: const EdgeInsets.only(top: 40),
                 child: Center(
-                  child: Text('No records found for this year.', style: AppTheme.bodyLarge),
+                  child: Text('No records found for this year.', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
                 ),
               ),
           ],
@@ -100,7 +102,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     );
   }
 
-  Widget _buildLabReportsButton(BuildContext context) {
+  Widget _buildLabReportsButton(BuildContext context, ThemeData theme) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -110,19 +112,18 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
             MaterialPageRoute(builder: (context) => const LabReportsScreen()),
           );
         },
-        icon: const Icon(Icons.science, color: Colors.white),
-        label: const Text('Lab & Radiology Reports'),
+        icon: Icon(Icons.science, color: theme.colorScheme.onPrimary),
+        label: Text('Lab & Radiology Reports', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onPrimary)),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryColor,
+          backgroundColor: theme.colorScheme.primary,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: AppTheme.bodyLarge.copyWith(color: Colors.white),
         ),
       ),
     );
   }
 
-  Widget _buildFilterTabs() {
+  Widget _buildFilterTabs(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: yearsTabs.map((label) {
@@ -133,14 +134,14 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 8),
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
             decoration: BoxDecoration(
-              color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
+              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.borderColor),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: Text(
               label,
-              style: AppTheme.bodyMedium.copyWith(
-                color: isSelected ? Colors.white : AppTheme.textColor,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -157,6 +158,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     required String medications,
     required DateTime date,
     required BuildContext context,
+    required ThemeData theme,
   }) {
     return GestureDetector(
       onTap: () {
@@ -176,11 +178,11 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: theme.shadowColor.withAlpha(20),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -192,12 +194,12 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.primaryColor, width: 2),
+                border: Border.all(color: theme.colorScheme.primary, width: 2),
               ),
-              child: const CircleAvatar(
-                backgroundColor: Colors.white,
+              child: CircleAvatar(
+                backgroundColor: theme.colorScheme.surface,
                 radius: 28,
-                child: Icon(Icons.medical_services, color: AppTheme.primaryColor, size: 32),
+                child: Icon(Icons.medical_services, color: theme.colorScheme.primary, size: 32),
               ),
             ),
             const SizedBox(width: 18),
@@ -207,40 +209,36 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 children: [
                   Text(
                     patientName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textColor,
-                    ),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Diagnosis: $diagnosis',
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Tests: $tests',
-                    style: AppTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Medications: $medications',
-                    style: AppTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Added on: ${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      const Icon(Icons.arrow_forward, color: AppTheme.primaryColor, size: 18),
+                      Icon(Icons.arrow_forward, color: theme.colorScheme.primary, size: 18),
                       const SizedBox(width: 4),
                       Text(
                         'Show more',
-                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),

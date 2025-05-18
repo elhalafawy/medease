@@ -45,19 +45,20 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Medication reminder',
-          style: AppTheme.titleLarge,
+          style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface),
         ),
       ),
       body: SingleChildScrollView(
@@ -65,16 +66,16 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _infoCard(),
+            _infoCard(theme),
             const SizedBox(height: 24),
-            _frequencySelector(),
+            _frequencySelector(theme),
             const SizedBox(height: 24),
-            const Text('Select time', style: AppTheme.titleLarge),
+            Text('Select time', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: times.map((t) => _timeButton(t)).toList(),
+              children: times.map((t) => _timeButton(theme, t)).toList(),
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -98,13 +99,13 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
+                  backgroundColor: theme.colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 ),
                 child: Text(
                   'Confirm',
-                  style: AppTheme.bodyLarge.copyWith(color: Colors.white),
+                  style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onPrimary),
                 ),
               ),
             )
@@ -114,40 +115,46 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     );
   }
 
-  Widget _infoCard() {
+  Widget _infoCard(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: AppTheme.borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          _textInputRow('assets/icons/image 10.png', 'Name', _nameController, 'ex: Amoxicillin'),
-          _textInputRow('assets/icons/image 13.png', 'Dosage', _dosageController, 'ex: 250mg'),
-          _dateRangePickerRow(),
-          _infoRow('assets/icons/image 14.png', 'Frequency:', _frequencyLabel(frequency)),
+          _textInputRow(theme, 'assets/icons/image 10.png', 'Name', _nameController, 'ex: Amoxicillin'),
+          _textInputRow(theme, 'assets/icons/image 13.png', 'Dosage', _dosageController, 'ex: 250mg'),
+          _dateRangePickerRow(theme),
+          _infoRow(theme, 'assets/icons/image 14.png', 'Frequency:', _frequencyLabel(frequency)),
         ],
       ),
     );
   }
 
-  Widget _textInputRow(String iconPath, String label, TextEditingController controller, String placeholder) {
+  Widget _textInputRow(ThemeData theme, String iconPath, String label, TextEditingController controller, String placeholder) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Image.asset(iconPath, width: 24, height: 24),
           const SizedBox(width: 10),
-          Text('$label:', style: AppTheme.bodyMedium),
+          Text('$label:', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: controller,
               decoration: InputDecoration(
                 hintText: placeholder,
-                hintStyle: AppTheme.bodyMedium,
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
                 border: InputBorder.none,
               ),
             ),
@@ -157,7 +164,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     );
   }
 
-  Widget _dateRangePickerRow() {
+  Widget _dateRangePickerRow(ThemeData theme) {
     return InkWell(
       onTap: () async {
         DateTimeRange? picked = await showDateRangePicker(
@@ -179,12 +186,12 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
           children: [
             Image.asset('assets/icons/image 12.png', width: 24, height: 24),
             const SizedBox(width: 10),
-            const Text('Duration:', style: AppTheme.bodyMedium),
+            Text('Duration:', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 '${_formatDate(startDate!)} - ${_formatDate(endDate)}',
-                style: AppTheme.bodyLarge,
+                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
               ),
             ),
           ],
@@ -193,26 +200,26 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     );
   }
 
-  Widget _infoRow(String iconPath, String label, String value) {
+  Widget _infoRow(ThemeData theme, String iconPath, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
           Image.asset(iconPath, width: 24, height: 24),
           const SizedBox(width: 10),
-          Text(label, style: AppTheme.bodyMedium),
+          Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)),
           const SizedBox(width: 12),
-          Expanded(child: Text(value, style: AppTheme.bodyLarge)),
+          Expanded(child: Text(value, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface))),
         ],
       ),
     );
   }
 
-  Widget _frequencySelector() {
+  Widget _frequencySelector(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Frequency', style: AppTheme.titleLarge),
+        Text('Frequency', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 12,
@@ -224,14 +231,20 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  color: selected ? AppTheme.primaryColor : Colors.white,
+                  color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: AppTheme.borderColor),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.shadowColor.withOpacity(0.10),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Text(
                   _frequencyLabel(f),
-                  style: AppTheme.bodyLarge.copyWith(
-                    color: selected ? Colors.white : AppTheme.textColor,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -242,7 +255,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     );
   }
 
-  Widget _timeButton(String time) {
+  Widget _timeButton(ThemeData theme, String time) {
     final selected = selectedTimes.contains(time);
     return GestureDetector(
       onTap: () {
@@ -257,14 +270,20 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.primaryColor : Colors.white,
+          color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: AppTheme.borderColor),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withOpacity(0.10),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(
           time,
-          style: AppTheme.bodyLarge.copyWith(
-            color: selected ? Colors.white : AppTheme.textColor,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
           ),
         ),
       ),

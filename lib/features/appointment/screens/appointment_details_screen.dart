@@ -63,6 +63,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     List<String> dates = ['3', '4', '5', '6', '7'];
     List<String> times = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM'];
 
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -296,6 +298,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   void _showCancelDialog() {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -341,11 +345,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
           onPressed: () {
@@ -382,12 +387,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.background,
+
+
+                
               ),
               child: Column(
                 children: [
@@ -426,7 +430,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppTheme.backgroundColor,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -471,7 +475,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: const [
                         BoxShadow(
@@ -538,7 +542,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: const [
                         BoxShadow(
@@ -571,9 +575,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   Widget _buildInfoColumn(IconData icon, String label, String value) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(icon, color: AppTheme.primaryColor),
+        Icon(icon, color: theme.colorScheme.primary),
         const SizedBox(height: 8),
         Text(
           label,
@@ -595,6 +600,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -626,6 +632,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   Color _getStatusColor(String status) {
+    final theme = Theme.of(context);
     switch (status.toLowerCase()) {
       case 'pending':
         return Colors.orange;

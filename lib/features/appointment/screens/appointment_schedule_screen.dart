@@ -58,6 +58,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     // Filter appointments based on selected tab
     final filteredAppointments = _appointments.where((appointment) {
       switch (selectedTab) {
@@ -73,12 +74,12 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () {
             if (widget.onBack != null) {
               widget.onBack!();
@@ -88,28 +89,26 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
           },
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Appointment Schedule',
-          style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textColor),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {
-              // TODO: Implement search functionality
-            },
+            icon: Icon(Icons.search, color: theme.colorScheme.onSurface),
+            onPressed: () {},
           ),
           Stack(
             alignment: Alignment.topRight,
             children: [
-          IconButton(
-                icon: const Icon(Icons.notifications_none, color: AppTheme.primaryColor),
-            onPressed: () {
+              IconButton(
+                icon: Icon(Icons.notifications_none, color: theme.colorScheme.primary),
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-              );
-            },
+                  );
+                },
               ),
               const Positioned(
                 right: 8,
@@ -118,7 +117,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                   radius: 9,
                   backgroundColor: Colors.red,
                   child: Text(
-                    '1', // عدد الإشعارات (مثلاً تأكيد الحجز)
+                    '1',
                     style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -131,7 +130,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
       body: Column(
         children: [
           const SizedBox(height: 16),
-          _buildTabs(),
+          _buildTabs(theme),
           const SizedBox(height: 12),
           Expanded(
             child: filteredAppointments.isEmpty
@@ -142,14 +141,13 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                         Icon(
                           Icons.calendar_today_outlined,
                           size: 64,
-                          color: Colors.grey[400],
+                          color: theme.colorScheme.onSurface.withAlpha(80),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No ${selectedTab.toLowerCase()} appointments',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurface.withAlpha(160),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -160,7 +158,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: filteredAppointments.length,
                     itemBuilder: (context, index) {
-                      return _buildAppointmentCard(filteredAppointments[index]);
+                      return _buildAppointmentCard(filteredAppointments[index], theme);
                     },
                   ),
           ),
@@ -169,12 +167,12 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
     );
   }
 
-  Widget _buildTabs() {
+  Widget _buildTabs(ThemeData theme) {
     List<String> tabs = ['Upcoming', 'Completed', 'Canceled'];
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: AppTheme.backgroundColor,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -186,16 +184,16 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
               child: Container(
                 height: 46,
                 decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                  color: isSelected ? theme.colorScheme.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   tab,
-                  style: TextStyle(
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    color: isSelected ? Colors.white : AppTheme.textColor,
+                    color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -206,7 +204,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
     );
   }
 
-  Widget _buildAppointmentCard(Map<String, dynamic> appointment) {
+  Widget _buildAppointmentCard(Map<String, dynamic> appointment, ThemeData theme) {
     return GestureDetector(
       onTap: () {
         if (widget.onSelectAppointment != null) {
@@ -228,11 +226,11 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: theme.shadowColor.withAlpha(20),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -246,7 +244,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.primaryColor, width: 1),
+                  border: Border.all(color: theme.colorScheme.primary, width: 1),
                 ),
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[200],
@@ -264,10 +262,10 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                         Expanded(
                           child: Text(
                             appointment['doctorName'] ?? 'Dr. Ahmed',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: AppTheme.textColor,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -300,18 +298,18 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                     const SizedBox(height: 14),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
+                         Icon(Icons.calendar_today, size: 16, color:  theme.colorScheme.onSurface),
                         const SizedBox(width: 6),
                         Text(
                           appointment['date'] ?? 'Mon 4',
-                          style: const TextStyle(fontSize: 14, color: Colors.black87),
+                          style:  TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                         ),
                         const SizedBox(width: 18),
-                        const Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
+                         Icon(Icons.access_time, size: 16, color: theme.colorScheme.onSurface),
                         const SizedBox(width: 6),
                         Text(
                           appointment['time'] ?? '9:00 AM',
-                          style: const TextStyle(fontSize: 14, color: Colors.black87),
+                          style:  TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                         ),
                       ],
                     ),

@@ -42,8 +42,8 @@ class AppTheme {
   static const Color warningColor = Color(0xFFFFA000);
   
   // Booking colors
-  static const Color bookingDayColor = Color(0xFF73D0ED); // Day selection
-  static const Color bookingTimeColor = Color(0xFFEDAE73); // Time selection
+  static const Color bookingDayColor = Color(0xFF73D0ED); 
+  static const Color bookingTimeColor = Color(0xFFEDAE73); 
   // Notification icon and background colors
   static const Color notifCalendarIcon = Color(0xFF2563EB);
   static const Color notifCalendarBg = Color(0xFFE8F1FB);
@@ -64,17 +64,17 @@ class AppTheme {
 
 
 
-  // Night mode colors
-  static const Color nightBackground = Color.fromARGB(255, 10, 10, 10); // Pure black for OLED screens
-  static const Color nightSurface = Color(0xFF121212);
-  static const Color nightCard = Color(0xFF1A1A1A);
-  static const Color nightDialog = Color(0xFF1A1A1A);
-  static const Color nightInput = Color(0xFF1A1A1A);
-  static const Color nightBorder = Color(0xFF2A2A2A);
-  static const Color nightText = Color(0xFFE0E0E0);
-  static const Color nightGrey = Color(0xFF9E9E9E);
-  static const Color nightPrimary = Color.fromARGB(255, 2, 50, 104); // lighter blue
-  static const Color nightSecondary = Color.fromARGB(255, 0, 47, 93); // lighter blue
+  // Night mode colors 
+  static const Color nightBackground = Color(0xFF18191A); 
+  static const Color nightSurface = Color(0xFF242526);    
+  static const Color nightCard = Color(0xFF242526);
+  static const Color nightDialog = Color(0xFF242526);
+  static const Color nightInput = Color(0xFF242526);
+  static const Color nightBorder = Color(0xFF3A3B3C);
+  static const Color nightText = Color(0xFFE4E6EB);      
+  static const Color nightGrey = Color(0xFFB0B3B8);       
+  static const Color nightPrimary = Color.fromARGB(255, 2, 50, 104); 
+  static const Color nightSecondary = Color.fromARGB(255, 0, 47, 93); 
   static const Color nightError = Color(0xFFB71C1C);
   static const Color nightSuccess = Color(0xFF1B5E20);
   static const Color nightWarning = Color(0xFFE65100);
@@ -361,7 +361,7 @@ class AppTheme {
       cardTheme: CardTheme(
         color: Colors.white,
         elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withAlpha((13*255).toInt()),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
         ),
@@ -593,6 +593,8 @@ class AppTheme {
         onError: Colors.black,
         background: nightBackground,
       ),
+      cardColor: nightSurface,
+      dialogBackgroundColor: nightDialog,
       appBarTheme: const AppBarTheme(
         backgroundColor: nightSurface,
         elevation: 0,
@@ -745,6 +747,15 @@ class AppTheme {
       ),
     );
   }
+
+  // Home screen tile colors (pastel for light, muted for night)
+  static const Color tilePinkLight = Color(0xFFFFE4E0); // Pastel pink
+  static const Color tileBlueLight = Color(0xFFE7F0FF); // Pastel blue
+  static const Color tileYellowLight = Color(0xFFFFF4DC); // Pastel yellow
+
+  static const Color tilePinkNight = Color(0xFF3A2B2B); // Muted dark pink
+  static const Color tileBlueNight = Color(0xFF232B3A); // Muted dark blue
+  static const Color tileYellowNight = Color(0xFF39362B); // Muted dark yellow
 }
 
 class CustomBottomBar extends StatelessWidget {
@@ -764,7 +775,7 @@ class CustomBottomBar extends StatelessWidget {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 13),
+            color: Colors.black.withAlpha((13*255).toInt()),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

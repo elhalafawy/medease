@@ -6,16 +6,17 @@ class TermsConditionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).appBarTheme.iconTheme?.color),
+           icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text("Terms & Conditions", style: Theme.of(context).appBarTheme.titleTextStyle),
+        title: Text("Terms & Conditions", style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
         centerTitle: true,
       ),
       body: Padding(

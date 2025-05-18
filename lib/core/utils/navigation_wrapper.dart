@@ -47,8 +47,9 @@ class MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: _buildCurrentScreen(),
       bottomNavigationBar: CustomBottomBar(
         currentIndex: _currentIndex,

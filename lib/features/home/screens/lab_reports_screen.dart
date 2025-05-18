@@ -68,14 +68,15 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final reports = selectedTab == 0 ? labReports : radiologyReports;
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () {
             if (widget.onBack != null) {
               widget.onBack!();
@@ -85,24 +86,24 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
           },
         ),
         centerTitle: true,
-        title: const Text('lab reports', style: AppTheme.titleLarge),
+        title: Text('lab reports', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
-            _buildTabs(),
+            _buildTabs(theme),
             const SizedBox(height: 8),
-            _buildSortAndFilter(),
+            _buildSortAndFilter(theme),
             const SizedBox(height: 12),
             Expanded(
               child: reports.isEmpty
-                  ? _buildEmptyState()
+                  ? _buildEmptyState(theme)
                   : ListView.builder(
                       itemCount: reports.length,
                       itemBuilder: (context, index) {
                         final report = reports[index];
-                        return _buildReportCard(report);
+                        return _buildReportCard(report, theme);
                       },
                     ),
             ),
@@ -112,32 +113,32 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
     );
   }
 
-  Widget _buildTabs() {
+  Widget _buildTabs(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _tabButton('Lab Tests', 0),
+        _tabButton('Lab Tests', 0, theme),
         const SizedBox(width: 12),
-        _tabButton('Radiology', 1),
+        _tabButton('Radiology', 1, theme),
       ],
     );
   }
 
-  Widget _tabButton(String label, int index) {
+  Widget _tabButton(String label, int index, ThemeData theme) {
     final bool selected = selectedTab == index;
     return GestureDetector(
       onTap: () => setState(() => selectedTab = index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppTheme.primaryColor : Colors.white,
+          color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.primaryColor),
+          border: Border.all(color: theme.colorScheme.primary),
         ),
         child: Text(
           label,
-          style: AppTheme.bodyLarge.copyWith(
-            color: selected ? Colors.white : AppTheme.primaryColor,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -145,30 +146,30 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
     );
   }
 
-  Widget _buildSortAndFilter() {
+  Widget _buildSortAndFilter(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            const Icon(Icons.sort, size: 20, color: AppTheme.greyColor),
+            Icon(Icons.sort, size: 20, color: theme.colorScheme.onSurface.withAlpha(153)),
             const SizedBox(width: 4),
-            Text('By date', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+            Text('By date', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
           ],
         ),
-        const Icon(Icons.sync, size: 22, color: AppTheme.greyColor),
+        Icon(Icons.sync, size: 22, color: theme.colorScheme.onSurface.withAlpha(153)),
       ],
     );
   }
 
-  Widget _buildReportCard(Map<String, dynamic> report) {
+  Widget _buildReportCard(Map<String, dynamic> report, ThemeData theme) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: [BoxShadow(color: theme.shadowColor.withAlpha(20), blurRadius: 4)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,27 +178,27 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(report['title'], style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
+                child: Text(report['title'], style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
               ),
-              const Icon(Icons.more_vert, color: AppTheme.greyColor),
+              Icon(Icons.more_vert, color: theme.colorScheme.onSurface.withAlpha(153)),
             ],
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              Text(report['date'], style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+              Text(report['date'], style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
               if (report['result'] != null && report['result'].toString().isNotEmpty) ...[
                 const Text(' . '),
                 Text(
                   report['result'],
-                  style: AppTheme.bodyMedium.copyWith(color: report['statusColor'], fontWeight: FontWeight.w500),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: report['statusColor'], fontWeight: FontWeight.w500),
                 ),
               ],
             ],
           ),
           if (report['desc'] != null && report['desc'].toString().isNotEmpty) ...[
             const SizedBox(height: 2),
-            Text(report['desc'], style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+            Text(report['desc'], style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
           ],
           const SizedBox(height: 12),
           Row(
@@ -205,10 +206,10 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {},
-                  icon: const Icon(Icons.remove_red_eye, color: AppTheme.primaryColor),
-                  label: Text('View Report', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                  icon: Icon(Icons.remove_red_eye, color: theme.colorScheme.primary),
+                  label: Text('View Report', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
+                    side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
@@ -218,10 +219,10 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {},
-                  icon: const Icon(Icons.download, color: AppTheme.primaryColor),
-                  label: Text('Download', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                  icon: Icon(Icons.download, color: theme.colorScheme.primary),
+                  label: Text('Download', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
+                    side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
@@ -234,19 +235,19 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 60),
-          const Icon(Icons.science, size: 60, color: AppTheme.greyColor),
+          Icon(Icons.science, size: 60, color: theme.colorScheme.onSurface.withAlpha(153)),
           const SizedBox(height: 18),
-          Text('No lab reports found', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
+          Text('No lab reports found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
           const SizedBox(height: 8),
           Text(
             'Your test reports will appear here\nonce they are available.',
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153)),
             textAlign: TextAlign.center,
           ),
         ],

@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    int notificationCount = 3; // يمكنك ربطها بالعدادات الحقيقية لاحقًا
+    int notificationCount = 3; 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -260,20 +260,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildQuickOptions() {
     final theme = Theme.of(context);
+    final isNight = theme.brightness == Brightness.dark;
+    final tileColors = [
+      isNight ? AppTheme.tilePinkNight : AppTheme.tilePinkLight,
+      isNight ? AppTheme.tileBlueNight : AppTheme.tileBlueLight,
+      isNight ? AppTheme.tileYellowNight : AppTheme.tileYellowLight,
+    ];
+    final textColors = [
+      isNight ? AppTheme.nightText : AppTheme.textColor,
+      isNight ? AppTheme.nightText : AppTheme.textColor,
+      isNight ? AppTheme.nightText : AppTheme.textColor,
+    ];
+    final iconColors = [
+      isNight ? AppTheme.nightText : AppTheme.textColor,
+      isNight ? AppTheme.nightText : AppTheme.textColor,
+      isNight ? AppTheme.nightText : AppTheme.textColor,
+    ];
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildCategory('Doctors', Icons.person, const Color(0xFFFFE4E0), () {
+        _buildCategory('Doctors', Icons.person, tileColors[0], textColors[0], iconColors[0], () {
           setState(() {
             showDoctors = true;
           });
         }),
-        _buildCategory('Medicine', Icons.medication_outlined, const Color(0xFFE7F0FF), () {
+        _buildCategory('Medicine', Icons.medication_outlined, tileColors[1], textColors[1], iconColors[1], () {
           setState(() {
             showMedication = true;
           });
         }),
-        _buildCategory('Medical\nRecords', Icons.folder, const Color(0xFFFFF4DC), () {
+        _buildCategory('Medical\nRecords', Icons.folder, tileColors[2], textColors[2], iconColors[2], () {
           setState(() {
             showMedicalRecord = true;
           });
@@ -282,8 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategory(String label, IconData icon, Color color, [VoidCallback? onTap]) {
-    final theme = Theme.of(context);
+  Widget _buildCategory(String label, IconData icon, Color color, Color textColor, Color iconColor, [VoidCallback? onTap]) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -297,11 +312,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 30, color: AppTheme.textColor),
+            Icon(icon, size: 30, color: iconColor),
             const SizedBox(height: 8),
             Text(
               label,
-              style: theme.textTheme.bodyLarge,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: textColor),
               textAlign: TextAlign.center,
             ),
           ],
@@ -389,4 +404,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

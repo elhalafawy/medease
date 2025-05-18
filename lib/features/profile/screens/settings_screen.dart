@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_conditions_screen.dart';
@@ -36,7 +35,7 @@ class SettingsScreen extends StatelessWidget {
           Text(
             'PROFILE',
             style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withAlpha(153),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -52,9 +51,9 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             activeColor: theme.colorScheme.primary,
-            activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
-            inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.2),
-            inactiveThumbColor: theme.colorScheme.onSurface.withOpacity(0.5),
+            activeTrackColor: theme.colorScheme.primary.withAlpha(127),
+            inactiveTrackColor: theme.colorScheme.onSurface.withAlpha(51),
+            inactiveThumbColor: theme.colorScheme.onSurface.withAlpha(127),
           ),
           SwitchListTile(
             value: true,
@@ -66,9 +65,9 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             activeColor: theme.colorScheme.primary,
-            activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
-            inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.2),
-            inactiveThumbColor: theme.colorScheme.onSurface.withOpacity(0.5),
+            activeTrackColor: theme.colorScheme.primary.withAlpha(127),
+            inactiveTrackColor: theme.colorScheme.onSurface.withAlpha(51),
+            inactiveThumbColor: theme.colorScheme.onSurface.withAlpha(127),
           ),
           SwitchListTile(
             value: false,
@@ -80,9 +79,9 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
             activeColor: theme.colorScheme.primary,
-            activeTrackColor: theme.colorScheme.primary.withOpacity(0.5),
-            inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.2),
-            inactiveThumbColor: theme.colorScheme.onSurface.withOpacity(0.5),
+            activeTrackColor: theme.colorScheme.primary.withAlpha(127),
+            inactiveTrackColor: theme.colorScheme.onSurface.withAlpha(51),
+            inactiveThumbColor: theme.colorScheme.onSurface.withAlpha(127),
           ),
           ListTile(
             title: Text(
@@ -94,7 +93,7 @@ class SettingsScreen extends StatelessWidget {
             trailing: Text(
               'English',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withAlpha(178),
               ),
             ),
             onTap: () {},
@@ -103,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
           Text(
             'OTHER',
             style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withAlpha(153),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -117,7 +116,7 @@ class SettingsScreen extends StatelessWidget {
             trailing: Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              color: theme.colorScheme.onSurface.withAlpha(85),
             ),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()));
@@ -133,7 +132,7 @@ class SettingsScreen extends StatelessWidget {
             trailing: Icon(
               Icons.arrow_forward_ios,
               size: 16,
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              color: theme.colorScheme.onSurface.withAlpha(85),
             ),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const TermsConditionsScreen()));

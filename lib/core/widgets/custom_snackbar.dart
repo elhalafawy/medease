@@ -7,13 +7,14 @@ class CustomSnackBar {
     bool isError = false,
     Duration duration = const Duration(seconds: 2),
   }) {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           message,
-          style: const TextStyle(color: Colors.white),
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary),
         ),
-        backgroundColor: isError ? Colors.red : Colors.green,
+        backgroundColor: isError ? theme.colorScheme.error : theme.colorScheme.primary,
         duration: duration,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(

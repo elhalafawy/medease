@@ -6,10 +6,11 @@ class AboutAppScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         title: Text(
           'About App',

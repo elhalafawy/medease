@@ -22,18 +22,19 @@ class PatientNotesScreen extends StatefulWidget {
 class _PatientNotesScreenState extends State<PatientNotesScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Appointment Details',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
         ),
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -45,7 +46,7 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -53,37 +54,32 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
                   CircleAvatar(
                     radius: 30,
                     backgroundImage: AssetImage(widget.imageUrl),
-                    onBackgroundImageError: (_, __) =>
-                        const Icon(Icons.person, size: 30),
+                    onBackgroundImageError: (_, __) => Icon(Icons.person, size: 30, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Dr. Ahmed",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        SizedBox(height: 4),
-                        Text("Neurologist | hospital",
-                            style: TextStyle(color: Colors.grey)),
-                        SizedBox(height: 4),
-                        Text("Hourly Rate: 25.00 EGP",
-                            style: TextStyle(color: Colors.grey)),
+                        Text("Dr. Ahmed", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+                        const SizedBox(height: 4),
+                        Text("Neurologist | hospital", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
+                        const SizedBox(height: 4),
+                        Text("Hourly Rate: 25.00 EGP", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
                       ],
                     ),
                   ),
-                  const Row(
+                  Row(
                     children: [
-                      Text("4.8"),
-                      Icon(Icons.star, color: Colors.amber),
+                      Text("4.8", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)),
+                      Icon(Icons.star, color: Colors.amber, size: 20),
                     ],
                   )
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            // Schedule Info
-            const Text("Schedule", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text("Schedule", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -93,14 +89,14 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
               ],
             ),
             const SizedBox(height: 24),
-            const Text("Message", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text("Message", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
             const SizedBox(height: 12),
             TextField(
               decoration: InputDecoration(
                 hintText: "Write a message for the doctor",
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.5)),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.colorScheme.surface,
                 contentPadding: const EdgeInsets.all(16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -114,17 +110,17 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  widget.onNoteAdded(); // Notify parent
-                  Navigator.pop(context); // Close screen
+                  widget.onNoteAdded();
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D1C5B),
+                  backgroundColor: theme.colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text("Done", style: TextStyle(fontSize: 16)),
+                child: Text("Done", style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary)),
               ),
             ),
           ],
@@ -146,20 +142,19 @@ class ScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: MediaQuery.of(context).size.width * 0.42,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+          Text(title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, color: theme.colorScheme.onSurface)),
           const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: Colors.grey)),
+          Text(subtitle, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
         ],
       ),
     );

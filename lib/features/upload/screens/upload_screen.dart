@@ -78,6 +78,7 @@ class _UploadScreenState extends State<UploadScreen> {
   }
 
   Widget _buildDots() {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(5, (i) {
@@ -86,7 +87,7 @@ class _UploadScreenState extends State<UploadScreen> {
           width: _pageIndex == i ? 12 : 8,
           height: _pageIndex == i ? 12 : 8,
           decoration: BoxDecoration(
-            color: _pageIndex == i ? Colors.teal : Colors.grey,
+            color: _pageIndex == i ? theme.colorScheme.primary : theme.colorScheme.onSurface.withAlpha(80),
             shape: BoxShape.circle,
           ),
         );
@@ -95,19 +96,22 @@ class _UploadScreenState extends State<UploadScreen> {
   }
 
   Widget _frameOverlay() {
+    final theme = Theme.of(context);
     return Container(
       width: 250,
       height: 350,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 3),
+        border: Border.all(color: theme.colorScheme.onPrimary, width: 3),
         borderRadius: BorderRadius.circular(12),
       ),
     );
   }
 
   Widget _buildTile(String label, IconData icon) {
+    final theme = Theme.of(context);
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: theme.colorScheme.surface,
       child: InkWell(
         onTap: () {
           setState(() {
@@ -122,9 +126,9 @@ class _UploadScreenState extends State<UploadScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 48, color: AppTheme.primaryColor),
+            Icon(icon, size: 48, color: theme.colorScheme.primary),
             const SizedBox(height: 8),
-            Text(label, textAlign: TextAlign.center, style: AppTheme.bodyLarge.copyWith(color: AppTheme.textColor)),
+            Text(label, textAlign: TextAlign.center, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface)),
           ],
         ),
       ),
@@ -133,28 +137,28 @@ class _UploadScreenState extends State<UploadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final camReady = _camCtrl != null && _camCtrl!.value.isInitialized;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('OCR Flow', style: TextStyle(color: AppTheme.textColor)),
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        title: Text('OCR Flow', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppTheme.textColor),
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       ),
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(children: [
         PageView(
           controller: _pageController,
           onPageChanged: (i) => setState(() => _pageIndex = i),
           children: [
-
             // Page 0: Home grid
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Text('Upload Documents', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                  Text('Upload Documents', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.primary)),
                   const SizedBox(height: 24),
                   Expanded(
                     child: GridView.count(
@@ -172,7 +176,6 @@ class _UploadScreenState extends State<UploadScreen> {
                 ],
               ),
             ),
-
             // Page 1: Live camera
             if (!camReady)
               const Center(child: CircularProgressIndicator())
@@ -189,7 +192,7 @@ class _UploadScreenState extends State<UploadScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.photo, size: 32),
+                        icon: Icon(Icons.photo, size: 32, color: theme.colorScheme.primary),
                         onPressed: () async {
                           final img = await ImagePicker().pickImage(source: ImageSource.gallery);
                           if (img != null) await _doOCR(img);
@@ -204,10 +207,11 @@ class _UploadScreenState extends State<UploadScreen> {
                             print('Capture failed: $e');
                           }
                         },
-                        child: const Icon(Icons.camera_alt, size: 32),
+                        backgroundColor: theme.colorScheme.primary,
+                        child: Icon(Icons.camera_alt, size: 32, color: theme.colorScheme.onPrimary),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.insert_drive_file, size: 32),
+                        icon: Icon(Icons.insert_drive_file, size: 32, color: theme.colorScheme.primary),
                         onPressed: () {},
                       ),
                     ],
@@ -215,12 +219,10 @@ class _UploadScreenState extends State<UploadScreen> {
                 ),
               ],
             ),
-
             // Page 2: Original image
             _imageFile == null
-              ? const Center(child: Text('No image yet'))
+              ? Center(child: Text('No image yet', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface)))
               : Image.file(File(_imageFile!.path), fit: BoxFit.contain),
-
             // Page 3: Crop overlay
             _imageFile == null ? const SizedBox() : Stack(
               children: [
@@ -228,28 +230,31 @@ class _UploadScreenState extends State<UploadScreen> {
                 Center(child: Opacity(opacity: .4, child: _frameOverlay())),
               ],
             ),
-
             // Page 4: OCR result
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Text('Result OCR', style: TextStyle(fontSize: 24)),
+                  Text('Result OCR', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
                   const SizedBox(height: 16),
-                  Expanded(child: SingleChildScrollView(child: Text(_ocrText))),
+                  Expanded(child: SingleChildScrollView(child: Text(_ocrText, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface)))),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.copy),
+                        icon: Icon(Icons.copy, color: theme.colorScheme.primary),
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: _ocrText));
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied')));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Copied', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary)), backgroundColor: theme.colorScheme.primary),
+                          );
                         },
                       ),
                       IconButton(
-                        icon: const Icon(Icons.share),
-                        onPressed: () => Share.share(_ocrText),
+                        icon: Icon(Icons.share, color: theme.colorScheme.primary),
+                        onPressed: () {
+                          if (_ocrText.isNotEmpty) Share.share(_ocrText);
+                        },
                       ),
                     ],
                   ),
@@ -258,8 +263,12 @@ class _UploadScreenState extends State<UploadScreen> {
             ),
           ],
         ),
-
-        Positioned(bottom: 16, left: 0, right: 0, child: _buildDots()),
+        Positioned(
+          bottom: 24,
+          left: 0,
+          right: 0,
+          child: _buildDots(),
+        ),
       ]),
     );
   }

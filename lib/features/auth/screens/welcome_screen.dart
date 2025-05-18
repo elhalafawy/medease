@@ -46,9 +46,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -58,11 +58,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: TextButton(
                   onPressed: () => context.go('/login'),
-                  child: const Text(
+                  child: Text(
                     'Skip',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -90,7 +89,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         child: Text(
                           _slides[index]['title']!,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -99,7 +98,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         child: Text(
                           _slides[index]['desc']!,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(200)),
                         ),
                       ),
                     ],
@@ -117,7 +116,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 3),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(3),
-                    color: _currentPage == index ? Theme.of(context).colorScheme.primary : Colors.grey[400],
+                    color: _currentPage == index ? theme.colorScheme.primary : theme.colorScheme.onSurface.withAlpha(80),
                   ),
                 );
               }),
@@ -135,9 +134,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1),
+                        border: Border.all(color: theme.colorScheme.primary, width: 1),
                       ),
-                      child: Icon(Icons.arrow_back_ios_new, color: Theme.of(context).colorScheme.primary, size: 18),
+                      child: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.primary, size: 18),
                     ),
                   ),
                   GestureDetector(
@@ -147,9 +146,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       height: 48,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1),
+                        border: Border.all(color: theme.colorScheme.primary, width: 1),
                       ),
-                      child: Icon(Icons.arrow_forward_ios, color: Theme.of(context).colorScheme.primary, size: 18),
+                      child: Icon(Icons.arrow_forward_ios, color: theme.colorScheme.primary, size: 18),
                     ),
                   ),
                 ],

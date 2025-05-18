@@ -103,14 +103,15 @@ class _MedicationScreenState extends State<MedicationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final meds = showHistory ? _historyMedications : _activeMedications;
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () {
             if (widget.onBack != null) {
               widget.onBack!();
@@ -120,17 +121,17 @@ class _MedicationScreenState extends State<MedicationScreen> {
           },
         ),
         centerTitle: true,
-        title: const Text('Prescriptions', style: AppTheme.titleLarge),
+        title: Text('Prescriptions', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Column(
           children: [
-            _buildSearchBar(),
+            _buildSearchBar(theme),
             const SizedBox(height: 16),
-            _buildTabs(),
+            _buildTabs(theme),
             const SizedBox(height: 4),
-            const Divider(color: AppTheme.borderColor, thickness: 1, endIndent: 200),
+            Divider(color: theme.dividerColor, thickness: 1, endIndent: 200),
             const SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
@@ -138,6 +139,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
                 itemBuilder: (context, index) {
                   final med = meds[index];
                   return _buildMedicationCard(
+                    theme: theme,
                     title: med['name'],
                     subtitle: med['desc'],
                     capsules: med['capsules'],
@@ -152,25 +154,38 @@ class _MedicationScreenState extends State<MedicationScreen> {
             if (!showHistory)
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MedicationReminderScreen(
-                          onConfirm: (name, dosage, dateRange, capsuleCount, endDate) {
-                            _addMedication(name, dosage, dateRange, capsuleCount, endDate);
-                          },
-                        ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.shadowColor.withOpacity(0.10),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                    ],
+                    borderRadius: BorderRadius.circular(100),
                   ),
-                  child: Text('Add Medication', style: AppTheme.bodyLarge.copyWith(color: Colors.white)),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MedicationReminderScreen(
+                            onConfirm: (name, dosage, dateRange, capsuleCount, endDate) {
+                              _addMedication(name, dosage, dateRange, capsuleCount, endDate);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                      shadowColor: Colors.transparent,
+                    ),
+                    child: Text('Add Medication', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onPrimary)),
+                  ),
                 ),
               ),
           ],
@@ -179,46 +194,46 @@ class _MedicationScreenState extends State<MedicationScreen> {
     );
   }
 
-  Widget _buildTabs() {
+  Widget _buildTabs(ThemeData theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         GestureDetector(
           onTap: () => setState(() => showHistory = false),
           child: Text('Actual',
-              style: AppTheme.bodyLarge.copyWith(
-                color: showHistory ? AppTheme.greyColor : AppTheme.textColor,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: showHistory ? theme.disabledColor : theme.colorScheme.onSurface,
               )),
         ),
         GestureDetector(
           onTap: () => setState(() => showHistory = true),
           child: Text('History',
-              style: AppTheme.bodyLarge.copyWith(
-                color: showHistory ? AppTheme.textColor : AppTheme.greyColor,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: showHistory ? theme.colorScheme.onSurface : theme.disabledColor,
               )),
         ),
       ],
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(ThemeData theme) {
     return Container(
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(23),
-        border: Border.all(color: AppTheme.borderColor),
+        
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.search, color: AppTheme.greyColor),
-          SizedBox(width: 10),
+          Icon(Icons.search, color: theme.disabledColor),
+          const SizedBox(width: 10),
           Expanded(
             child: TextField(
               decoration: InputDecoration(
                 hintText: 'Start typing medication name',
-                hintStyle: AppTheme.bodyMedium,
+                hintStyle: theme.textTheme.bodyMedium,
                 border: InputBorder.none,
               ),
             ),
@@ -229,6 +244,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
   }
 
   Widget _buildMedicationCard({
+    required ThemeData theme,
     required String title,
     required String subtitle,
     required String capsules,
@@ -240,9 +256,16 @@ class _MedicationScreenState extends State<MedicationScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: AppTheme.borderColor),
+        
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,9 +277,9 @@ class _MedicationScreenState extends State<MedicationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: AppTheme.bodyLarge),
+                    Text(title, style: theme.textTheme.bodyLarge),
                     const SizedBox(height: 4),
-                    Text(subtitle, style: AppTheme.bodyMedium),
+                    Text(subtitle, style: theme.textTheme.bodyMedium),
                   ],
                 ),
               ),
@@ -265,12 +288,12 @@ class _MedicationScreenState extends State<MedicationScreen> {
                   children: [
                     if (onEdit != null)
                       IconButton(
-                        icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
+                        icon: Icon(Icons.edit, color: theme.colorScheme.primary),
                         onPressed: onEdit,
                       ),
                     if (onDelete != null)
                       IconButton(
-                        icon: const Icon(Icons.delete, color: AppTheme.errorColor),
+                        icon: Icon(Icons.delete, color: theme.colorScheme.error),
                         onPressed: onDelete,
                       ),
                   ],
@@ -280,13 +303,13 @@ class _MedicationScreenState extends State<MedicationScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.medication_outlined, size: 16, color: AppTheme.greyColor),
+              Icon(Icons.medication_outlined, size: 16, color: theme.disabledColor),
               const SizedBox(width: 4),
-              Text(capsules, style: AppTheme.bodyMedium),
+              Text(capsules, style: theme.textTheme.bodyMedium),
               const SizedBox(width: 16),
-              const Icon(Icons.calendar_today, size: 16, color: AppTheme.greyColor),
+              Icon(Icons.calendar_today, size: 16, color: theme.disabledColor),
               const SizedBox(width: 4),
-              Text(date, style: AppTheme.bodyMedium),
+              Text(date, style: theme.textTheme.bodyMedium),
             ],
           ),
         ],
