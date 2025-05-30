@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../doctor/screens/doctor_details_screen.dart';
 import '../../doctor/screens/doctors_screen.dart';
 import 'medication_screen.dart';
@@ -8,6 +8,8 @@ import '../../appointment/screens/appointment_details_screen.dart';
 import '../../appointment/screens/appointment_schedule_screen.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../profile/screens/notifications_screen.dart';
+import '../../../core/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -41,21 +43,17 @@ class _HomeScreenState extends State<HomeScreen> {
       'imageUrl': 'assets/images/doctor_photo.png',
     },
   ];
-  User? user;
   String category = 'All';
 
   @override
-  void initState() {
-    super.initState();
-    user = FirebaseAuth.instance.currentUser;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
     final theme = Theme.of(context);
-    int notificationCount = 3; 
+    final isDarkMode = theme.brightness == Brightness.dark;
+    int notificationCount = 3;
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: isDarkMode ? AppTheme.nightBackground : AppTheme.backgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -127,42 +125,46 @@ class _HomeScreenState extends State<HomeScreen> {
                                     });
                                   })
                                 : SingleChildScrollView(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppTheme.kPaddingXLarge,
+                                      vertical: AppTheme.kPaddingLarge,
+                                    ),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Image.asset('assets/images/home_banner.png'),
-                                        const SizedBox(height: 20),
-                                        _buildUserWelcome(),
-                                        const SizedBox(height: 20),
-                                        _buildSearchBar(),
-                                        const SizedBox(height: 24),
-                                        _buildQuickOptions(),
-                                        const SizedBox(height: 24),
-                                        _buildProtectionBanner(),
-                                        const SizedBox(height: 32),
-                                        const Text(
+                                        const SizedBox(height: AppTheme.kPaddingXLarge),
+                                        _buildUserWelcome(authProvider, isDarkMode),
+                                        const SizedBox(height: AppTheme.kPaddingXLarge),
+                                        _buildSearchBar(isDarkMode),
+                                        const SizedBox(height: AppTheme.kPaddingXLarge),
+                                        _buildQuickOptions(isDarkMode),
+                                        const SizedBox(height: AppTheme.kPaddingXLarge),
+                                        _buildProtectionBanner(isDarkMode),
+                                        const SizedBox(height: AppTheme.kPaddingXLarge),
+                                        Text(
                                           'New investigations',
-                                          style: AppTheme.titleLarge,
+                                          style: isDarkMode ? AppTheme.nightTitleLarge : AppTheme.titleLarge,
                                         ),
-                                        const SizedBox(height: 16),
+                                        const SizedBox(height: AppTheme.kPaddingLarge),
                                         _buildArticle(
                                           title: 'What is the Replication Crisis?',
                                           subtitle: 'This article will look at this subject, providing a brief overview.',
                                           image: 'assets/images/article_1.png',
+                                          isDarkMode: isDarkMode,
                                         ),
                                         _buildArticle(
                                           title: 'Cardiology and pregnancy?',
                                           subtitle: 'Although approximately 86% of practicing cardiologists surveyed...',
                                           image: 'assets/images/article_2.png',
+                                          isDarkMode: isDarkMode,
                                         ),
                                       ],
                                     ),
                                   ),
-            // Notification icon (always visible at top right)
             Positioned(
-              top: 8,
-              right: 8,
+              top: AppTheme.kPaddingMedium,
+              right: AppTheme.kPaddingMedium,
               child: GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -174,18 +176,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   alignment: Alignment.topRight,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(AppTheme.kPaddingSmall),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
+                        color: isDarkMode ? AppTheme.nightCard : Colors.white,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: theme.colorScheme.primary.withOpacity(0.1),
-                            blurRadius: 10,
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: AppTheme.kElevationMedium,
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.notifications_none, color: AppTheme.primaryColor, size: 28),
+                      child: Icon(
+                        Icons.notifications_none,
+                        color: isDarkMode ? AppTheme.nightPrimary : AppTheme.primaryColor,
+                        size: 28,
+                      ),
                     ),
                     if (notificationCount > 0)
                       Positioned(
@@ -193,10 +199,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         top: 2,
                         child: CircleAvatar(
                           radius: 9,
-                          backgroundColor: Colors.red,
+                          backgroundColor: AppTheme.errorColor,
                           child: Text(
                             '$notificationCount',
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: AppTheme.kFontSizeXS,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -210,45 +220,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildUserWelcome() {
-    final theme = Theme.of(context);
+  Widget _buildUserWelcome(AuthProvider authProvider, bool isDarkMode) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Welcome, ${user?.displayName?? "Guest"} 👋', 
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
-          ),
+          'Welcome, ${authProvider.userName ?? "Guest"} 👋',
+          style: isDarkMode ? AppTheme.nightHeadlineMedium : AppTheme.headlineMedium,
         ),
-        const SizedBox(height: 4),
-        const Text(
+        const SizedBox(height: AppTheme.kPaddingSmall),
+        Text(
           'Hope you are doing well today!',
-          style: AppTheme.bodyMedium,
+          style: isDarkMode ? AppTheme.nightBodyMedium : AppTheme.bodyMedium,
         ),
       ],
     );
   }
 
-  Widget _buildSearchBar() {
-    final theme = Theme.of(context);
+  Widget _buildSearchBar(bool isDarkMode) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.kPaddingLarge),
       height: 50,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border.all(color: AppTheme.borderColor),
-        borderRadius: BorderRadius.circular(16),
+        color: isDarkMode ? AppTheme.nightInput : Colors.white,
+        border: Border.all(color: isDarkMode ? AppTheme.nightBorder : AppTheme.borderColor),
+        borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusLarge),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.search, color: AppTheme.greyColor),
-          SizedBox(width: 10),
+          Icon(
+            Icons.search,
+            color: isDarkMode ? AppTheme.nightGrey : AppTheme.greyColor,
+          ),
+          const SizedBox(width: AppTheme.kPaddingMedium),
           Expanded(
             child: TextField(
+              style: isDarkMode ? AppTheme.nightBodyLarge : AppTheme.bodyLarge,
               decoration: InputDecoration(
                 hintText: 'Search',
-                hintStyle: AppTheme.bodyMedium,
+                hintStyle: isDarkMode ? AppTheme.nightBodyMedium : AppTheme.bodyMedium,
                 border: InputBorder.none,
               ),
             ),
@@ -258,65 +268,70 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuickOptions() {
-    final theme = Theme.of(context);
-    final isNight = theme.brightness == Brightness.dark;
-    final tileColors = [
-      isNight ? AppTheme.tilePinkNight : AppTheme.tilePinkLight,
-      isNight ? AppTheme.tileBlueNight : AppTheme.tileBlueLight,
-      isNight ? AppTheme.tileYellowNight : AppTheme.tileYellowLight,
-    ];
-    final textColors = [
-      isNight ? AppTheme.nightText : AppTheme.textColor,
-      isNight ? AppTheme.nightText : AppTheme.textColor,
-      isNight ? AppTheme.nightText : AppTheme.textColor,
-    ];
-    final iconColors = [
-      isNight ? AppTheme.nightText : AppTheme.textColor,
-      isNight ? AppTheme.nightText : AppTheme.textColor,
-      isNight ? AppTheme.nightText : AppTheme.textColor,
-    ];
+  Widget _buildQuickOptions(bool isDarkMode) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildCategory('Doctors', Icons.person, tileColors[0], textColors[0], iconColors[0], () {
-          setState(() {
-            showDoctors = true;
-          });
-        }),
-        _buildCategory('Medicine', Icons.medication_outlined, tileColors[1], textColors[1], iconColors[1], () {
-          setState(() {
-            showMedication = true;
-          });
-        }),
-        _buildCategory('Medical\nRecords', Icons.folder, tileColors[2], textColors[2], iconColors[2], () {
-          setState(() {
-            showMedicalRecord = true;
-          });
-        }),
+        _buildCategory(
+          'Doctors',
+          Icons.person,
+          const Color(0xFFFFE4E0),
+          () {
+            setState(() {
+              showDoctors = true;
+            });
+          },
+          isDarkMode,
+        ),
+        _buildCategory(
+          'Medicine',
+          Icons.medication_outlined,
+          const Color(0xFFE7F0FF),
+          () {
+            setState(() {
+              showMedication = true;
+            });
+          },
+          isDarkMode,
+        ),
+        _buildCategory(
+          'Medical\nRecords',
+          Icons.folder,
+          const Color(0xFFFFF4DC),
+          () {
+            setState(() {
+              showMedicalRecord = true;
+            });
+          },
+          isDarkMode,
+        ),
       ],
     );
   }
 
-  Widget _buildCategory(String label, IconData icon, Color color, Color textColor, Color iconColor, [VoidCallback? onTap]) {
+  Widget _buildCategory(String label, IconData icon, Color color, [VoidCallback? onTap, bool isDarkMode = false]) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 95,
         height: 90,
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppTheme.borderColor),
+          color: isDarkMode ? AppTheme.nightCard : color,
+          borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusLarge),
+          border: Border.all(color: isDarkMode ? AppTheme.nightBorder : AppTheme.borderColor),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 30, color: iconColor),
-            const SizedBox(height: 8),
+            Icon(
+              icon,
+              size: 30,
+              color: isDarkMode ? AppTheme.nightText : AppTheme.textColor,
+            ),
+            const SizedBox(height: AppTheme.kPaddingSmall),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: textColor),
+              style: isDarkMode ? AppTheme.nightBodyLarge : AppTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
           ],
@@ -325,74 +340,90 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProtectionBanner() {
-    final theme = Theme.of(context);
+  Widget _buildProtectionBanner(bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFDBE3F7),
-        borderRadius: BorderRadius.circular(20),
+        color: isDarkMode ? AppTheme.nightCard : const Color(0xFFDBE3F7),
+        borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusXLarge),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppTheme.kPaddingLarge),
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Early protection for your health',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppTheme.kFontSizeMD,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF00194A),
+                    color: isDarkMode ? AppTheme.nightText : AppTheme.secondaryColor,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppTheme.kPaddingMedium),
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00194A),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: isDarkMode ? AppTheme.nightPrimary : AppTheme.secondaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusMedium),
+                    ),
                     elevation: 0,
                   ),
-                  child: const Text('Learn more'),
+                  child: Text(
+                    'Learn more',
+                    style: isDarkMode ? AppTheme.nightLabelLarge : AppTheme.labelLarge,
+                  ),
                 )
               ],
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppTheme.kPaddingMedium),
           Image.asset('assets/images/doctor_male.png', height: 80),
         ],
       ),
     );
   }
 
-  Widget _buildArticle({required String title, required String subtitle, required String image}) {
-    final theme = Theme.of(context);
+  Widget _buildArticle({
+    required String title,
+    required String subtitle,
+    required String image,
+    bool isDarkMode = false,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppTheme.kPaddingLarge),
+      padding: const EdgeInsets.all(AppTheme.kPaddingMedium),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+        color: isDarkMode ? AppTheme.nightCard : Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusLarge),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: AppTheme.kElevationMedium,
+          ),
+        ],
       ),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusMedium),
             child: Image.asset(image, width: 70, height: 70, fit: BoxFit.cover),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppTheme.kPaddingMedium),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
+                Text(
+                  title,
+                  style: isDarkMode ? AppTheme.nightTitleMedium : AppTheme.titleMedium,
+                ),
+                const SizedBox(height: AppTheme.kPaddingSmall),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: Colors.grey),
+                  style: isDarkMode ? AppTheme.nightBodyMedium : AppTheme.bodyMedium,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 )

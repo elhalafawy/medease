@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/supabase/auth_service.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
-
-  @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
-}
-
-class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+class ForgotPasswordScreen extends StatelessWidget {
+  ForgotPasswordScreen({Key? key}) : super(key: key);
   final TextEditingController _emailController = TextEditingController();
+  final AuthService _authService = AuthService();
 
-  Future<void> resetPassword() async {
+  Future<void> resetPassword(BuildContext context) async {
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.text.trim());
+      await _authService.resetPassword(_emailController.text.trim());
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Password reset email sent!")));
-      Navigator.of(context).pop(); // Close the dialog after successful email submission.
+      Navigator.of(context).pop();
+    } on AuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
@@ -53,7 +51,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: resetPassword,
+                onPressed: () => resetPassword(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF022E5B),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),

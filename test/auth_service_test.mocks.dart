@@ -17,6 +17,7 @@ import 'package:google_sign_in_platform_interface/google_sign_in_platform_interf
     as _i10;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:supabase_flutter/supabase_flutter.dart' as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -160,6 +161,56 @@ class _FakeDiagnosticsNode_10 extends _i1.SmartFake
     _i6.DiagnosticLevel? minLevel = _i6.DiagnosticLevel.info,
   }) =>
       super.toString();
+}
+
+class _FakeAuthResponse_0 extends _i1.SmartFake implements _i2.AuthResponse {
+  _FakeAuthResponse_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeSession_1 extends _i1.SmartFake implements _i2.Session {
+  _FakeSession_1(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeUser_2 extends _i1.SmartFake implements _i2.User {
+  _FakeUser_2(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeGoTrueClient_3 extends _i1.SmartFake implements _i2.GoTrueClient {
+  _FakeGoTrueClient_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+class _FakeAuthState_4 extends _i1.SmartFake implements _i2.AuthState {
+  _FakeAuthState_4(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
 }
 
 /// A class which mocks [FirebaseAuth].
@@ -1339,4 +1390,99 @@ class MockBuildContext extends _i1.Mock implements _i5.BuildContext {
           ),
         ),
       ) as _i6.DiagnosticsNode);
+}
+
+class MockSupabaseClient extends _i1.Mock implements _i2.SupabaseClient {
+  MockSupabaseClient() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i2.GoTrueClient get auth => (super.noSuchMethod(
+        Invocation.getter(#auth),
+        returnValue: _FakeGoTrueClient_3(
+          this,
+          Invocation.getter(#auth),
+        ),
+      ) as _i2.GoTrueClient);
+
+  @override
+  _i7.Stream<_i2.AuthState> get onAuthStateChange => (super.noSuchMethod(
+        Invocation.getter(#onAuthStateChange),
+        returnValue: _i7.Stream<_i2.AuthState>.empty(),
+      ) as _i7.Stream<_i2.AuthState>);
+
+  @override
+  _i7.Future<_i2.AuthResponse> signInWithPassword({
+    required String? email,
+    required String? password,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #signInWithPassword,
+          [],
+          {
+            #email: email,
+            #password: password,
+          },
+        ),
+        returnValue: _i7.Future<_i2.AuthResponse>.value(_FakeAuthResponse_0(
+          this,
+          Invocation.method(
+            #signInWithPassword,
+            [],
+            {
+              #email: email,
+              #password: password,
+            },
+          ),
+        )),
+      ) as _i7.Future<_i2.AuthResponse>);
+
+  @override
+  _i7.Future<_i2.AuthResponse> signUp({
+    required String? email,
+    required String? password,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #signUp,
+          [],
+          {
+            #email: email,
+            #password: password,
+          },
+        ),
+        returnValue: _i7.Future<_i2.AuthResponse>.value(_FakeAuthResponse_0(
+          this,
+          Invocation.method(
+            #signUp,
+            [],
+            {
+              #email: email,
+              #password: password,
+            },
+          ),
+        )),
+      ) as _i7.Future<_i2.AuthResponse>);
+
+  @override
+  _i7.Future<void> signOut() => (super.noSuchMethod(
+        Invocation.method(
+          #signOut,
+          [],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
+
+  @override
+  _i7.Future<void> resetPasswordForEmail(String? email) => (super.noSuchMethod(
+        Invocation.method(
+          #resetPasswordForEmail,
+          [email],
+        ),
+        returnValue: _i7.Future<void>.value(),
+        returnValueForMissingStub: _i7.Future<void>.value(),
+      ) as _i7.Future<void>);
 }

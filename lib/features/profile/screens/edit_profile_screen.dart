@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../../core/theme/app_theme.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -33,69 +34,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       initialDate: _selectedDate ?? DateTime(2002, 1, 1),
       firstDate: DateTime(1900),
       lastDate: now,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              surface: Theme.of(context).colorScheme.surface,
-              onSurface: Theme.of(context).colorScheme.onSurface,
-              primary: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
     }
   }
 
-  InputDecoration _inputDecoration(ThemeData theme) {
-    return InputDecoration(
-      filled: true,
-      fillColor: theme.colorScheme.surface,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.2)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: theme.colorScheme.primary),
-      ),
-      hintStyle: theme.textTheme.bodyLarge?.copyWith(
-        color: theme.colorScheme.onSurface.withOpacity(0.5),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFFF8F8F8),
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: AppTheme.appBarBackgroundColor,
         elevation: 0,
-        title: Text(
-          'Edit Profile',
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: theme.colorScheme.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        foregroundColor: const Color(0xFF022E5B),
+        title: const Text('Edit Profile'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -105,95 +58,61 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Center(
               child: GestureDetector(
                 onTap: _pickImage,
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: theme.colorScheme.surface,
-                      backgroundImage: _profileImage != null
-                          ? FileImage(_profileImage!)
-                          : const AssetImage('assets/images/profile_picture.png') as ImageProvider,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: theme.colorScheme.surface,
-                            width: 2,
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(4),
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 20,
-                          color: theme.colorScheme.onPrimary,
-                        ),
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _profileImage != null
+                      ? FileImage(_profileImage!)
+                      : const AssetImage('assets/images/profile_picture.png') as ImageProvider,
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
+                      padding: const EdgeInsets.all(4),
+                      child: const Icon(Icons.camera_alt, size: 20, color: Color(0xFF022E5B)),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
             const SizedBox(height: 32),
-            Text(
+            const Text(
               'Full Name',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _nameController,
-              decoration: _inputDecoration(theme),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
+              decoration: _inputDecoration(),
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'Email',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _emailController,
-              decoration: _inputDecoration(theme),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
+              decoration: _inputDecoration(),
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'Phone',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _phoneController,
-              decoration: _inputDecoration(theme),
+              decoration: _inputDecoration(),
               keyboardType: TextInputType.phone,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
             ),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'Date of Birth',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             GestureDetector(
@@ -202,19 +121,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: theme.colorScheme.outline.withOpacity(0.2),
-                  ),
+                  border: Border.all(color: Colors.transparent),
                 ),
                 child: Text(
                   _selectedDate != null
                       ? '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}'
                       : 'Select date',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
             ),
@@ -224,13 +139,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () async {
-                  Navigator.pop(context);
+                  Navigator.pop(context); // Pop EditProfileScreen
                   await Future.delayed(const Duration(milliseconds: 300));
                   showDialog(
                     context: context,
                     barrierDismissible: false,
                     builder: (context) => Dialog(
-                      backgroundColor: theme.colorScheme.surface,
+                      backgroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       child: Padding(
                         padding: const EdgeInsets.all(24),
@@ -242,19 +157,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               height: 120,
                             ),
                             const SizedBox(height: 24),
-                            Text(
+                            const Text(
                               'Profile Updated!',
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                color: theme.colorScheme.primary,
+                              style: TextStyle(
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
+                                color: Color(0xFF00264D),
                               ),
                             ),
                             const SizedBox(height: 16),
-                            Text(
+                            const Text(
                               'Your profile has been updated successfully.',
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -263,19 +180,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.primary,
+                                backgroundColor: const Color(0xFF00264D),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                                 child: Text(
                                   'Continue',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -286,21 +200,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primary,
+                  backgroundColor: const Color(0xFF022E5B),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(
+                child: const Text(
                   'Save Changes',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
@@ -14,33 +14,16 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   bool isLoading = false;
 
   Future<void> resendVerificationEmail() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-        setState(() {
-          isEmailSent = true;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending email verification: $e')),
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    // Supabase يرسل رابط التحقق تلقائيًا عند التسجيل
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Verification email sent (check your inbox).')),
+    );
   }
 
   Future<void> checkVerificationStatus() async {
-    final user = FirebaseAuth.instance.currentUser;
-    await user?.reload();
-    if (user != null && user.emailVerified) {
+    final user = Supabase.instance.client.auth.currentUser;
+    await Supabase.instance.client.auth.refreshSession();
+    if (user != null && user.emailConfirmedAt != null) {
       context.go('/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -49,9 +32,17 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     }
   }
 
+  String _maskEmail(String email) {
+    final parts = email.split('@');
+    if (parts.length != 2) return email;
+    final name = parts[0];
+    if (name.length <= 2) return email;
+    return name.substring(0, 2) + '***@' + parts[1];
+  }
+
   @override
   Widget build(BuildContext context) {
-    final userEmail = FirebaseAuth.instance.currentUser?.email ?? 'your email';
+    final userEmail = Supabase.instance.client.auth.currentUser?.email ?? 'your email';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -132,14 +123,5 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         ),
       ),
     );
-  }
-
-  String _maskEmail(String email) {
-    var parts = email.split('@');
-    if (parts.length != 2) return email;
-    var name = parts[0];
-    if (name.length <= 3) return email;
-    var maskedName = '${name.substring(0, 3)}*****';
-    return '$maskedName@${parts[1]}';
   }
 }

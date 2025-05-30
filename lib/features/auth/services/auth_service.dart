@@ -1,20 +1,18 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../../core/firebase/auth_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/supabase/auth_service.dart';
 
 class AuthServiceProvider {
   final _authService = AuthService();
 
-  Future<UserCredential> registerWithEmailAndPassword(String email, String password) async {
+  Future<bool> registerWithEmailAndPassword(String email, String password, context) async {
     try {
-      final userCredential = await _authService.registerWithEmailAndPassword(email, password);
-      await _authService.sendEmailVerification();
-      return userCredential;
+      return await _authService.registerWithEmailAndPasswordWithUI(context, email, password);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
+  Future<AuthResponse> signInWithEmailAndPassword(String email, String password) async {
     try {
       return await _authService.signInWithEmailAndPassword(email, password);
     } catch (e) {
@@ -22,17 +20,9 @@ class AuthServiceProvider {
     }
   }
 
-  Future<UserCredential> signInWithGoogle() async {
+  Future<void> signInWithGoogle() async {
     try {
-      return await _authService.signInWithGoogle();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<UserCredential> signInWithFacebook() async {
-    try {
-      return await _authService.signInWithFacebook();
+      await _authService.signInWithGoogle();
     } catch (e) {
       rethrow;
     }
