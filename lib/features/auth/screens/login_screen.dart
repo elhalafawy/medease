@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'forgot_password_screen.dart';  
+import '../../../core/supabase/auth_service.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,52 +13,46 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false;
-    final bool _isForgotPasswordFlow = false; 
+  final bool _isForgotPasswordFlow = false;
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final AuthService _authService = AuthService();
 
-  
   void _showForgotPasswordFlow() {
     showDialog(
       context: context,
-      builder: (context) => const ForgotPasswordScreen(), 
+      builder: (context) => ForgotPasswordScreen(),
     );
   }
 
- 
   Future<void> signInWithGoogle(BuildContext context) async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      Navigator.of(context).pushReplacementNamed('/home');
+      await _authService.signInWithGoogle();
+      // Supabase handles navigation after OAuth, you may need to listen to onAuthStateChange elsewhere
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign in failed: $e')));
     }
   }
 
-
-  Future<void> signInWithFacebook(BuildContext context) async {
+  Future<void> signInWithEmailPassword(BuildContext context) async {
     try {
-      final LoginResult result = await FacebookAuth.instance.login();
-
-      if (result.status == LoginStatus.success) {
-        final OAuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.token);
-        await FirebaseAuth.instance.signInWithCredential(credential);
-
-        Navigator.of(context).pushReplacementNamed('/home');
+      final role = await _authService.loginAndGetRole(
+        _email.text.trim(),
+        _password.text.trim(),
+      );
+      if (role == 'doctor') {
+        context.go('/doctor-dashboard');
+      } else if (role == 'patient') {
+        context.go('/home');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Facebook sign in failed')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed: User not found or role undefined.')),
+        );
       }
+    } on AuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Facebook sign in error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login error: $e')));
     }
   }
 
@@ -137,18 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () async {
-                        final email = _email.text.toLowerCase();
-                        if (email.contains('ahmed')) {
-                          context.go('/home');
-                        } else if (email.contains('doctor')) {
-                          context.go('/doctor-dashboard');
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Invalid email format'),
-                            ),
-                          );
-                        }
+                        await signInWithEmailPassword(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -201,24 +183,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       InkWell(
-                        onTap: () => signInWithFacebook(context),
-                        borderRadius: BorderRadius.circular(50),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Theme.of(context).dividerColor),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: Image.asset('assets/icons/facebook_icon.png'),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      InkWell(
                         onTap: () => signInWithGoogle(context),
                         borderRadius: BorderRadius.circular(50),
                         child: Container(
@@ -242,8 +206,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-          
-          if (_isForgotPasswordFlow) const ForgotPasswordScreen(), 
         ],
       ),
     );

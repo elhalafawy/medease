@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/supabase/auth_service.dart';
 import '../widgets/otp_verification_widget.dart';
-import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,7 +14,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _authServiceProvider = AuthServiceProvider();
+  final AuthService _authService = AuthService();
   bool _agreeToTerms = false;
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -44,53 +43,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       return;
     }
-
     setState(() => _isLoading = true);
     try {
-      await _authServiceProvider.registerWithEmailAndPassword(
+      final res = await _authService.registerPatientWithEmailAndPassword(
+        context,
         _email.text.trim(),
         _password.text.trim(),
+        _username.text.trim(),
+        _birthdate.text.trim(),
+        _selectedGender,
+        _phone.text.trim(),
       );
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Registration successful! Please verify your email.")),
-      );
-
-      // Show OTP Verification widget after registration
-      showDialog(
-        context: context,
-        builder: (_) => OtpVerificationWidget(email: _email.text.trim()),
-      );
-
-    } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'weak-password':
-          message = 'The password provided is too weak.';
-          break;
-        case 'email-already-in-use':
-          message = 'An account already exists for that email.';
-          break;
-        case 'invalid-email':
-          message = 'The email address is not valid.';
-          break;
-        default:
-          message = 'An error occurred. Please try again.';
+      if (res) {
+        if (!mounted) return;
+        
+        // إرسال رمز OTP بعد نجاح التسجيل
+        final otpSent = await _authService.sendOtpViaEmail(context, _email.text.trim());
+        setState(() => _isLoading = false);
+        
+        if (otpSent) {
+          // عرض نافذة التحقق من OTP
+          if (!mounted) return;
+          final result = await showDialog<bool>(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => OtpVerificationWidget(email: _email.text.trim()),
+          );
+          
+          // إذا تم التحقق بنجاح، انتقل للصفحة الرئيسية
+          if (result == true) {
+            if (!mounted) return;
+            context.go('/home');
+          }
+        } else {
+          // في حالة فشل إرسال OTP، ننتقل مباشرة للصفحة الرئيسية
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Registration successful! Please verify your email later.")),
+          );
+          context.go('/home');
+        }
       }
+    } on AuthException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      setState(() => _isLoading = false);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration error: $e')));
+      setState(() => _isLoading = false);
     }
   }
 
@@ -100,46 +100,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) return;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      // await FirebaseAuth.instance.signInWithCredential(credential);
+      // Supabase does not support Google Auth out of the box, 
+      // you would need to implement a custom auth flow
       if (!mounted) return;
       context.go('/main');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Google sign in failed: $e')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> signInWithFacebook() async {
-    setState(() => _isLoading = true);
-    try {
-      final LoginResult result = await FacebookAuth.instance.login();
-      if (result.status != LoginStatus.success) {
-        throw Exception('Facebook login failed');
-      }
-
-      final OAuthCredential credential = FacebookAuthProvider.credential(
-        result.accessToken!.token,
-      );
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      
-      if (!mounted) return;
-      context.go('/main');
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Facebook sign in failed: $e')),
       );
     } finally {
       if (mounted) {
@@ -409,24 +378,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        InkWell(
-                          onTap: _isLoading ? null : signInWithFacebook,
-                          borderRadius: BorderRadius.circular(50),
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Image.asset('assets/icons/facebook_icon.png'),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 24),
                         InkWell(
                           onTap: _isLoading ? null : signInWithGoogle,
                           borderRadius: BorderRadius.circular(50),
