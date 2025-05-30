@@ -247,7 +247,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                               margin: const EdgeInsets.only(right: 12),
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: isSelected ? Color(0xFF7DDCFF) : Colors.white,
+                                color: isSelected ? const Color(0xFF7DDCFF) : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15)),
                               ),
