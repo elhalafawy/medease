@@ -48,7 +48,7 @@ void main() {
     });
 
     test('Dark Theme Colors', () {
-      final theme = AppTheme.darkTheme;
+      final theme = AppTheme.nightTheme;
       
       // Test dark theme colors
       expect(theme.scaffoldBackgroundColor, equals(const Color(0xFF121212)));

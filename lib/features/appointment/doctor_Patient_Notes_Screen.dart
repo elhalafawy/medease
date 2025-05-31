@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PatientNotesScreen extends StatefulWidget {
   final String date;
   final String time;
   final String imageUrl;
-  final VoidCallback onNoteAdded; // Updated: no longer passes count
+  final void Function(String) onNoteAdded;
 
   const PatientNotesScreen({
     super.key,
@@ -19,9 +20,51 @@ class PatientNotesScreen extends StatefulWidget {
 }
 
 class _PatientNotesScreenState extends State<PatientNotesScreen> {
+  final TextEditingController _noteController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitNote() async {
+    final noteText = _noteController.text.trim();
+    if (noteText.isEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final supabase = Supabase.instance.client;
+
+      await supabase.from('notes').insert({
+        'note': noteText,
+        'date': widget.date,
+        'time': widget.time,
+        'doctor_name': 'Dr. Ahmed',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+
+      widget.onNoteAdded(noteText);
+      Navigator.pop(context);
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save note: $error')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -29,7 +72,10 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
         elevation: 0,
         title: Text(
           'Appointment Details',
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         centerTitle: false,
         leading: IconButton(
@@ -91,6 +137,7 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
             Text("Message", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
             const SizedBox(height: 12),
             TextField(
+              controller: _noteController,
               decoration: InputDecoration(
                 hintText: "Write a message for the doctor",
                 hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.5)),
@@ -108,10 +155,7 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  widget.onNoteAdded();
-                  Navigator.pop(context);
-                },
+                onPressed: _isLoading ? null : _submitNote,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -119,7 +163,9 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: Text("Done", style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary)),
+                child: _isLoading
+                    ? CircularProgressIndicator(color: theme.colorScheme.onPrimary)
+                    : Text("Done", style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onPrimary)),
               ),
             ),
           ],

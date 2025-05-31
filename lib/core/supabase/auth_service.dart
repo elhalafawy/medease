@@ -79,12 +79,13 @@ class AuthService {
       });
       // Add patient to 'patients' table
       final patientInsert = await _supabase.from('patients').insert({
-        'user_id': user.id,
-        'full_name': fullName,
-        'date_of_birth': dateOfBirth,
-        'gender': gender,
-        'contact_info': phone,
-      });
+  'id': user.id,  // Use 'id' if that is the PK used in patients
+  'full_name': fullName,
+  'date_of_birth': dateOfBirth,
+  'gender': gender,
+  'contact_info': phone,
+});
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Registration successful! Please verify your email.")),
       );
