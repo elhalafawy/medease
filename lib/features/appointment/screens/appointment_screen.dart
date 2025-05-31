@@ -104,7 +104,7 @@ final newAppointment = {
   'notes': userNote,
 };
 
-await supabase.from('appointments').insert(newAppointment);
+// await supabase.from('appointments').insert(newAppointment);
 
   // 📥 Step 3: Insert into the database
   final response = await supabase.from('appointments').insert(newAppointment);
