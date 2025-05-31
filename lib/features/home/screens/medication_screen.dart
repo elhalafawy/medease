@@ -195,54 +195,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
         centerTitle: true,
         title: Text('Prescriptions', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
         actions: [
-          // Debug button
-          IconButton(
-            icon: Icon(Icons.bug_report, color: theme.colorScheme.primary),
-            onPressed: () async {
-              try {
-                final user = Supabase.instance.client.auth.currentUser;
-                if (user == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User not authenticated')),
-                  );
-                  return;
-                }
-                
-                final patient = await Supabase.instance.client
-                    .from('patients')
-                    .select('patient_id')
-                    .eq('user_id', user.id)
-                    .maybeSingle();
-
-                if (patient == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Patient not found')),
-                  );
-                  return;
-                }
-
-                await _medicationService.addMedication(
-                  patientId: patient['patient_id'],
-                  name: 'Test Medication',
-                  dosage: '500mg',
-                  startDate: DateTime.now(),
-                  endDate: DateTime.now().add(const Duration(days: 30)),
-                  frequency: 'Once daily',
-                  reminderTimes: [TimeOfDay.now()],
-                  notes: 'Test medication for debugging',
-                );
-
-                await _loadMedications();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Test medication added')),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
-              }
-            },
-          ),
+          // Debug button removed for production
         ],
       ),
       body: _isLoading
