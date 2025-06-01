@@ -169,6 +169,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
     });
   }
 
+  //  TODO: Fetch time slots from the database
   Future<void> fetchTimeSlot({
     required String doctorId,
     required DateTime availableDate,

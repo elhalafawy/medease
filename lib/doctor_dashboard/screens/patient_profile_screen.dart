@@ -1,35 +1,75 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import 'patient_medical_record_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class PatientProfileScreen extends StatelessWidget {
+class PatientProfileScreen extends StatefulWidget {
   const PatientProfileScreen({super.key});
+
+  @override
+  State<PatientProfileScreen> createState() => _PatientProfileScreenState();
+}
+
+class _PatientProfileScreenState extends State<PatientProfileScreen> {
+  final supabase = Supabase.instance.client;
+
+  Map<String, dynamic>? userData;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPatientData();
+  }
+
+  Future<void> fetchPatientData() async {
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      // Not logged in
+      return;
+    }
+
+    final response = await supabase
+        .from('users')
+        .select()
+        .eq('id', user.id)
+        .single();
+
+    setState(() {
+      userData = response;
+    });
+  }
 
   String calculateAge(DateTime birthDate) {
     DateTime currentDate = DateTime.now();
     int age = currentDate.year - birthDate.year;
-    int month1 = currentDate.month;
-    int month2 = birthDate.month;
-    if (month2 > month1) {
+    if (currentDate.month < birthDate.month ||
+        (currentDate.month == birthDate.month &&
+            currentDate.day < birthDate.day)) {
       age--;
-    } else if (month1 == month2) {
-      int day1 = currentDate.day;
-      int day2 = birthDate.day;
-      if (day2 > day1) {
-        age--;
-      }
     }
     return '$age years';
   }
 
   @override
   Widget build(BuildContext context) {
-    final DateTime birthDate = DateTime(2002, 1, 1);
+    if (userData == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final fullName = userData!['full_name'] ?? 'Unknown';
+    final email = userData!['email'] ?? 'Unknown';
+    final phone = userData!['phone'] ?? 'Unknown';
+    final gender = userData!['gender'] ?? 'N/A';
+    final bloodType = userData!['blood_type'] ?? 'N/A';
+    final birthDateStr = userData!['birth_date'] ?? '2000-01-01';
+    final DateTime birthDate = DateTime.tryParse(birthDateStr) ?? DateTime(2000);
     final String age = calculateAge(birthDate);
-    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -47,16 +87,15 @@ class PatientProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Patient Profile Card
             GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => PatientMedicalRecordScreen(
-                      patientName: 'Ahmed Elhalafawy',
+                      patientName: fullName,
                       patientAge: age,
-                      patientId: '#12345',
+                      patientId: userData!['id'],
                     ),
                   ),
                 );
@@ -89,7 +128,7 @@ class PatientProfileScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Ahmed Elhalafawy',
+                                fullName,
                                 style: AppTheme.titleLarge.copyWith(
                                   color: AppTheme.primaryColor,
                                   fontWeight: FontWeight.bold,
@@ -97,7 +136,7 @@ class PatientProfileScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Patient ID: #12345',
+                                'Patient ID: ${userData!['id']}',
                                 style: AppTheme.bodyMedium.copyWith(
                                   color: AppTheme.greyColor,
                                 ),
@@ -112,15 +151,15 @@ class PatientProfileScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     _buildInfoRow('Age', age),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Gender', 'Male'),
+                    _buildInfoRow('Gender', gender),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Blood Type', 'O+'),
+                    _buildInfoRow('Blood Type', bloodType),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Phone', '01150504999'),
+                    _buildInfoRow('Phone', phone),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Email', 'ahmed.elhlafawy@gmail.com'),
+                    _buildInfoRow('Email', email),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Date of Birth', '2002-01-01'),
+                    _buildInfoRow('Date of Birth', birthDateStr),
                     const SizedBox(height: 20),
                     Center(
                       child: Text(
@@ -162,4 +201,4 @@ class PatientProfileScreen extends StatelessWidget {
       ],
     );
   }
-} 
+}
