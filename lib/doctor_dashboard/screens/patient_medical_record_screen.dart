@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_theme.dart';
 import 'doctor_UploadScreen.dart';
+import 'package:intl/intl.dart'; // Import the intl package
 
 class PatientMedicalRecordScreen extends StatefulWidget {
   final String patientName;
@@ -23,7 +24,9 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   int selectedTab = 0; // 0: Medical Record, 1: Lab & Radiology, 2: Medications
   final SupabaseClient _supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _medicalRecords = [];
+  List<Map<String, dynamic>> _labReports = []; // Add list for lab reports
   bool _isLoadingRecords = true;
+  bool _isLoadingLabReports = true; // Add loading state for lab reports
 
   // Controllers for manual medical record entry
   late final TextEditingController _conditionController;
@@ -93,6 +96,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   void initState() {
     super.initState();
     _loadMedicalRecords();
+    _loadLabReports(); // Load lab reports on init
     // Initialize controllers
     _conditionController = TextEditingController();
     _symptomsController = TextEditingController();
@@ -134,6 +138,37 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         );
         setState(() {
           _isLoadingRecords = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadLabReports() async {
+    try {
+      setState(() {
+        _isLoadingLabReports = true;
+      });
+      print('Attempting to load lab reports for patient ID: ${widget.patientId}'); // Log start
+      final response = await _supabase
+          .from('lab_reports')
+          .select('report_id, patient_id, doctor_id, status, created_at, Title, doctors!lab_reports_doctor_id_fkey(name)') // Select columns and join for doctor name
+          .eq('patient_id', widget.patientId)
+          .order('created_at', ascending: false);
+
+      print('Supabase lab reports response: ${response.length} records found.'); // Log success
+
+      setState(() {
+        _labReports = List<Map<String, dynamic>>.from(response);
+        _isLoadingLabReports = false;
+      });
+    } catch (e) {
+      print('Error in _loadLabReports: ${e.toString()}'); // Log error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading lab reports: ${e.toString()}')),
+        );
+        setState(() {
+          _isLoadingLabReports = false;
         });
       }
     }
@@ -187,7 +222,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
       if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Medical record added successfully!')),
+           const SnackBar(content: Text('Medical record added successfully!'))
          );
       }
       _loadMedicalRecords(); // Refresh the list after adding
@@ -195,6 +230,59 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to add medical record: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+   // Function to update a medical record in Supabase
+  Future<void> _updateMedicalRecord(
+    String recordId,
+    String medicalCondition,
+    String symptoms,
+    String notes,
+    String medications,
+    String tests,
+  ) async {
+    try {
+      // Add logging to check the data being sent
+      print('Attempting to update record with ID: $recordId');
+      print('Data: {medical_condition: $medicalCondition, symptoms: $symptoms, notes: $notes, medications: $medications, tests: $tests}');
+
+      final response = await _supabase
+          .from('medical_records')
+          .update({
+            'medical_condition': medicalCondition,
+            'symptoms': symptoms,
+            'notes': notes,
+            'medications': medications,
+            'tests': tests,
+          })
+          .eq('record_id', recordId) // Assuming 'record_id' is the primary key
+          .select(); // Select the updated row to check the response
+
+      // Add logging for the Supabase response
+      print('Supabase update response: ${response}');
+
+      if (response.isEmpty) {
+         if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('Failed to update medical record: Record not found or no changes made.')),
+           );
+         }
+         return; // Exit if no record was updated
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Medical record updated successfully!'))
+        );
+      }
+      _loadMedicalRecords(); // Refresh the list after updating
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update medical record: ${e.toString()}')),
         );
       }
     }
@@ -209,7 +297,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Medical record deleted successfully!')),
+          const SnackBar(content: Text('Medical record deleted successfully!'))
         );
       }
       _loadMedicalRecords(); // Refresh the list after deleting
@@ -246,7 +334,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => _showAddRecordChoiceDialog(context),
+                  onPressed: () => _showNewMedicalRecordDialog(context),
                   icon: const Icon(Icons.add),
                   label: const Text('Create New Record'),
                   style: ElevatedButton.styleFrom(
@@ -262,11 +350,14 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               ),
             ),
           Expanded(
-            child: selectedTab == 0
-                ? _buildMedicalRecord()
-                : selectedTab == 1
-                    ? _buildLabAndRadiology()
-                    : _buildMedications(),
+            child: KeyedSubtree(
+              key: ValueKey(selectedTab),
+              child: selectedTab == 0
+                  ? _buildMedicalRecord()
+                  : selectedTab == 1
+                      ? _buildLabAndRadiology()
+                      : _buildMedications(),
+            ),
           ),
         ],
       ),
@@ -325,7 +416,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         : ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: _medicalRecords.length,
-            itemBuilder: (context, index) => _buildMedicalRecordCard(_medicalRecords[index], index),
+            itemBuilder: (context, index) => _buildMedicalRecordCard(_medicalRecords[index]),
           );
   }
 
@@ -346,7 +437,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => _showAddRecordChoiceDialog(context),
+            onPressed: () => _showNewMedicalRecordDialog(context),
             icon: const Icon(Icons.add),
             label: const Text('Create New Record'),
             style: ElevatedButton.styleFrom(
@@ -363,7 +454,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
     );
   }
 
-  Widget _buildMedicalRecordCard(Map<String, dynamic> record, int index) {
+  Widget _buildMedicalRecordCard(Map<String, dynamic> record) {
      // Safely access data from columns
     final String date = record['created_at'] != null 
       ? DateTime.parse(record['created_at']).toLocal().toString().split(' ')[0] // Format date
@@ -403,11 +494,11 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               const SizedBox(width: 8),
               Text(
                 'Dr. $doctorName', // Display doctor name
-                style: AppTheme.bodyMedium.copyWith(
-                  color: AppTheme.primaryColor,
-                  fontWeight: FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -481,24 +572,100 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
     );
   }
 
+  // --- Lab & Radiology Tab ---
   Widget _buildLabAndRadiology() {
-    // Implementation for Lab & Radiology tab
-    return labReports.isEmpty && radiologyReports.isEmpty
-        ? Center(
-            child: Text('No lab or radiology reports found', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
-          )
-        : ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              ...labReports.map((report) => _buildReportCard('Lab Report', report)).toList(),
-              ...radiologyReports.map((report) => _buildReportCard('Radiology Report', report)).toList(),
-            ],
-          );
+    final theme = Theme.of(context);
+
+    // Temporarily always show the empty state for debugging
+    return _buildEmptyLabAndRadiology();
+
+    // Original logic (commented out)
+    // if (_isLoadingLabReports) {
+    //   return const Center(child: CircularProgressIndicator());
+    // }
+    //
+    // if (_labReports.isEmpty) {
+    //   return _buildEmptyLabAndRadiology();
+    // }
+    //
+    // return ListView.builder(
+    //   padding: const EdgeInsets.all(16),
+    //   itemCount: _labReports.length,
+    //   itemBuilder: (context, index) {
+    //     final report = _labReports[index];
+    //     // Map database columns to _buildReportCard expected format
+    //     final String title = report['Title'] ?? 'N/A';
+    //     final String date = report['created_at'] != null
+    //         ? DateFormat('dd MMM, yyyy').format(DateTime.parse(report['created_at']).toLocal())
+    //         : 'N/A';
+    //     final String status = report['status'] ?? 'N/A';
+    //
+    //     // Determine status color based on status string
+    //     Color statusColor = AppTheme.greyColor; // Default color
+    //     if (status == 'Normal Results') {
+    //       statusColor = Colors.green;
+    //     } else if (status == 'Requires Attention') {
+    //       statusColor = Colors.orange;
+    //     } else if (status == 'Urgent') {
+    //       statusColor = Colors.red;
+    //     }
+    //
+    //     // Get doctor name from the joined table
+    //     final String doctorName = report['doctors']?['name'] ?? 'N/A';
+    //
+    //     return _buildReportCard(
+    //       'Lab Report',
+    //       {
+    //         'title': title,
+    //         'date': date,
+    //         'status': status,
+    //         'statusColor': statusColor,
+    //         'result': status, // Using status for result as per existing structure
+    //         'desc': 'Report added by Dr. $doctorName', // Include doctor who added the report
+    //       },
+    //     );
+    //   },
+    // );
   }
 
+  Widget _buildEmptyLabAndRadiology() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.receipt_long_outlined, size: 60, color: theme.colorScheme.onSurface.withOpacity(0.5)),
+          const SizedBox(height: 18),
+          Text('No lab or radiology reports found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
+          const SizedBox(height: 8),
+          Text(
+            'Create a new lab or radiology record for ${widget.patientName}',
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => _showAddLabRadiologyRecordDialog(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Create New Record'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- Medications Tab ---
   Widget _buildMedications() {
     // Implementation for Medications tab
-     return medications.isEmpty
+    return medications.isEmpty
         ? Center(
             child: Text('No medications found', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
           )
@@ -509,7 +676,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
           );
   }
 
-   Widget _buildReportCard(String type, Map<String, dynamic> report) {
+  Widget _buildReportCard(String type, Map<String, dynamic> report) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -531,10 +698,10 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               Text(report['status'], style: AppTheme.bodyMedium.copyWith(color: report['statusColor'], fontWeight: FontWeight.bold)),
             ],
           ),
-           if (report['desc']!.isNotEmpty) ...[
+          if (report['desc'] != null && report['desc']!.isNotEmpty) ...[ // Added null check here
             const SizedBox(height: 8),
-             Text('Details: ${report['desc']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
-           ],
+            Text('Details: ${report['desc']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+          ],
         ],
       ),
     );
@@ -542,7 +709,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
   Widget _buildMedicationCard(Map<String, dynamic> medication) {
     return Container(
-       margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -552,15 +719,15 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           Text(medication['name'], style: AppTheme.titleMedium.copyWith(color: AppTheme.primaryColor)),
-           const SizedBox(height: 8),
-           Text('Dosage: ${medication['dosage']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
-           const SizedBox(height: 8),
-           Text('Frequency: ${medication['frequency']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
-           const SizedBox(height: 8),
-           Text('Duration: ${medication['duration']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
-           const SizedBox(height: 8),
-           Row(
+          Text(medication['name'], style: AppTheme.titleMedium.copyWith(color: AppTheme.primaryColor)),
+          const SizedBox(height: 8),
+          Text('Dosage: ${medication['dosage']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+          const SizedBox(height: 8),
+          Text('Frequency: ${medication['frequency']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+          const SizedBox(height: 8),
+          Text('Duration: ${medication['duration']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+          const SizedBox(height: 8),
+          Row(
             children: [
               Text('Status: ', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
               Text(medication['status'], style: AppTheme.bodyMedium.copyWith(color: medication['statusColor'], fontWeight: FontWeight.bold)),
@@ -604,6 +771,196 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         ],
       ),
     );
+  }
+
+  // --- Lab & Radiology Dialog ---
+  void _showAddLabRadiologyRecordDialog(BuildContext context) {
+    final TextEditingController titleController = TextEditingController();
+    DateTime? selectedDate;
+    String? selectedStatus;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'New Lab / Radiology Record',
+                  style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+                ),
+                const SizedBox(height: 16),
+                // Patient Name and Age
+                Text(
+                  'Patient: ${widget.patientName}',
+                  style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  'Age: ${widget.patientAge}',
+                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                ),
+                const SizedBox(height: 20),
+                // Title Field
+                TextField(
+                  controller: titleController,
+                  decoration: themedInputDecoration(label: 'Report Title', icon: Icons.description_outlined),
+                  style: AppTheme.bodyLarge,
+                ),
+                const SizedBox(height: 16),
+                // Date Picker Input
+                TextFormField(
+                  readOnly: true, // Prevent keyboard from appearing
+                  controller: TextEditingController( // Use a temporary controller for display
+                      text: selectedDate == null
+                          ? '' // Empty string when no date is selected
+                          : DateFormat('yyyy-MM-dd').format(selectedDate!)),
+                  decoration: themedInputDecoration(label: 'Date', icon: Icons.calendar_today_outlined),
+                  style: AppTheme.bodyLarge,
+                  onTap: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null && picked != selectedDate) {
+                      setState(() {
+                        selectedDate = picked;
+                        print('Selected date: $selectedDate'); // Keep for debugging
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                // Status Dropdown
+                DropdownButtonFormField<String>(
+                  decoration: themedInputDecoration(label: 'Status', icon: Icons.info_outline),
+                  value: selectedStatus,
+                  hint: Text('Select Status', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedStatus = newValue;
+                    });
+                  },
+                  items: <Map<String, dynamic>>[
+                    {'value': 'Normal Results', 'color': Colors.green},
+                    {'value': 'Requires Attention', 'color': Colors.orange},
+                    {'value': 'Urgent', 'color': Colors.red},
+                  ].map<DropdownMenuItem<String>>((Map<String, dynamic> status) {
+                    return DropdownMenuItem<String>(
+                      value: status['value'],
+                      child: Text(
+                        status['value'],
+                        style: AppTheme.bodyLarge.copyWith(color: status['color']),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+                // Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final String title = titleController.text.trim();
+                          final DateTime? date = selectedDate;
+                          final String? status = selectedStatus;
+
+                          if (title.isNotEmpty && date != null && status != null) {
+                            Navigator.of(context).pop(); // Close the dialog
+                            _addLabRadiologyRecord(title, date, status); // Call the save function
+                          } else {
+                            // Show validation error
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please fill all fields')),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          textStyle: AppTheme.bodyLarge,
+                        ),
+                        child: const Text('Save Record'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Implement the actual database saving function for Lab/Radiology records
+  Future<void> _addLabRadiologyRecord(String title, DateTime date, String status) async {
+    try {
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null) {
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('User not authenticated')),
+           );
+        }
+        return;
+      }
+
+      // Fetch the doctor's ID from the doctors table using the user's ID
+      final doctorResponse = await _supabase
+          .from('doctors')
+          .select('doctor_id') // Assuming doctor_id is the primary key
+          .eq('user_id', currentUser.id) // Assuming user_id links to auth.users
+          .maybeSingle();
+
+      if (doctorResponse == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Doctor profile not found. Cannot add lab report.')),
+          );
+        }
+        return;
+      }
+
+      final doctorId = doctorResponse['doctor_id'];
+
+      await _supabase.from('lab_reports').insert({
+        'patient_id': widget.patientId,
+        'doctor_id': doctorId,
+        'Title': title,
+        'status': status,
+        'created_at': date.toIso8601String(), // Save date as ISO 8601 string
+      });
+
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text('Lab report added successfully!'))
+         );
+      }
+      _loadLabReports(); // Refresh the list after adding
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add lab report: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   void _showNewMedicalRecordDialog(BuildContext context) {
@@ -662,8 +1019,8 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 decoration: themedInputDecoration(label: 'Medications', icon: Icons.medical_services),
                 style: AppTheme.bodyLarge,
               ),
-               const SizedBox(height: 16),
-               TextField(
+              const SizedBox(height: 16),
+              TextField(
                 controller: _testsController,
                 decoration: themedInputDecoration(label: 'Tests', icon: Icons.science),
                 style: AppTheme.bodyLarge,
@@ -675,7 +1032,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                   TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Cancel'),
-                  ),
+                    ),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
@@ -781,8 +1138,8 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 decoration: themedInputDecoration(label: 'Medications', icon: Icons.medical_services),
                 style: AppTheme.bodyLarge,
               ),
-               const SizedBox(height: 16),
-               TextField(
+              const SizedBox(height: 16),
+              TextField(
                 controller: _testsController,
                 decoration: themedInputDecoration(label: 'Tests', icon: Icons.science),
                 style: AppTheme.bodyLarge,
@@ -792,8 +1149,8 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
                   ),
                   Expanded(
                     child: ElevatedButton(
@@ -807,12 +1164,12 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
                         // Update the record in the database
                         await _updateMedicalRecord(
-                           record['record_id'], // Assuming 'record_id' is the primary key
-                           updatedCondition,
-                           updatedSymptoms,
-                           updatedNotes,
-                           updatedMedications,
-                           updatedTests,
+                          record['record_id'], // Assuming 'record_id' is the primary key
+                          updatedCondition,
+                          updatedSymptoms,
+                          updatedNotes,
+                          updatedMedications,
+                          updatedTests,
                         );
 
                         // Clear controllers after saving
@@ -842,59 +1199,6 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         ),
       ),
     );
-  }
-
-  // Function to update a medical record in Supabase
-  Future<void> _updateMedicalRecord(
-    String recordId,
-    String medicalCondition,
-    String symptoms,
-    String notes,
-    String medications,
-    String tests,
-  ) async {
-    try {
-      // Add logging to check the data being sent
-      print('Attempting to update record with ID: $recordId');
-      print('Data: {medical_condition: $medicalCondition, symptoms: $symptoms, notes: $notes, medications: $medications, tests: $tests}');
-
-      final response = await _supabase
-          .from('medical_records')
-          .update({
-            'medical_condition': medicalCondition,
-            'symptoms': symptoms,
-            'notes': notes,
-            'medications': medications,
-            'tests': tests,
-          })
-          .eq('record_id', recordId) // Assuming 'record_id' is the primary key
-          .select(); // Select the updated row to check the response
-
-      // Add logging for the Supabase response
-      print('Supabase update response: ${response}');
-
-      if (response.isEmpty) {
-         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(
-             const SnackBar(content: Text('Failed to update medical record: Record not found or no changes made.')),
-           );
-         }
-         return; // Exit if no record was updated
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Medical record updated successfully!')),
-        );
-      }
-      _loadMedicalRecords(); // Refresh the list after updating
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update medical record: ${e.toString()}')),
-        );
-      }
-    }
   }
 
   // Add a themed input decoration helper if it doesn't exist
