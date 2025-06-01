@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_theme.dart';
 import 'doctor_UploadScreen.dart';
 
@@ -20,16 +21,16 @@ class PatientMedicalRecordScreen extends StatefulWidget {
 
 class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen> {
   int selectedTab = 0; // 0: Medical Record, 1: Lab & Radiology, 2: Medications
+  final SupabaseClient _supabase = Supabase.instance.client;
+  List<Map<String, dynamic>> _medicalRecords = [];
+  bool _isLoadingRecords = true;
 
-  final List<Map<String, dynamic>> medicalRecords = [
-    // {
-    //   'date': '15 Mar, 2024',
-    //   'condition': 'Upper Respiratory Infection',
-    //   'symptoms': 'Fever, Cough, Sore Throat',
-    //   'notes': 'Patient presented with symptoms of common cold. Prescribed antibiotics and rest.',
-    //   'doctor': 'Dr. Ahmed',
-    // },
-  ];
+  // Controllers for manual medical record entry
+  late final TextEditingController _conditionController;
+  late final TextEditingController _symptomsController;
+  late final TextEditingController _notesController;
+  late final TextEditingController _medicationsController;
+  late final TextEditingController _testsController;
 
   final List<Map<String, dynamic>> labReports = [
     {
@@ -89,6 +90,115 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadMedicalRecords();
+    // Initialize controllers
+    _conditionController = TextEditingController();
+    _symptomsController = TextEditingController();
+    _notesController = TextEditingController();
+    _medicationsController = TextEditingController();
+    _testsController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers
+    _conditionController.dispose();
+    _symptomsController.dispose();
+    _notesController.dispose();
+    _medicationsController.dispose();
+    _testsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadMedicalRecords() async {
+    try {
+      setState(() {
+        _isLoadingRecords = true;
+      });
+      final response = await _supabase
+          .from('medical_records')
+          .select()
+          .eq('patient_id', widget.patientId)
+          .order('created_at', ascending: false);
+
+      setState(() {
+        _medicalRecords = List<Map<String, dynamic>>.from(response);
+        _isLoadingRecords = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading medical records: ${e.toString()}')),
+        );
+        setState(() {
+          _isLoadingRecords = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _addManualMedicalRecord({
+    required String diagnoses,
+    required String prescription,
+    required String tests,
+    required String medications,
+  }) async {
+    try {
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null) {
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('User not authenticated')),
+           );
+        }
+        return;
+      }
+
+      // Fetch the doctor's ID from the doctors table using the user's ID
+      final doctorResponse = await _supabase
+          .from('doctors')
+          .select('doctor_id')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+      if (doctorResponse == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Doctor profile not found. Cannot add medical record.')),
+          );
+        }
+        return;
+      }
+
+      final doctorId = doctorResponse['doctor_id'];
+
+      await _supabase.from('medical_records').insert({
+        'patient_id': widget.patientId,
+        'doctor_id': doctorId,
+        'diagnosis': diagnoses,
+        'prescription': prescription,
+        'tests': tests,
+        'medications': medications,
+      });
+
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text('Medical record added successfully!')),
+         );
+      }
+      _loadMedicalRecords(); // Refresh the list after adding
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add medical record: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
@@ -128,10 +238,10 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               ),
             ),
           Expanded(
-            child: selectedTab == 0 
-                ? _buildMedicalRecord() 
-                : selectedTab == 1 
-                    ? _buildLabAndRadiology() 
+            child: selectedTab == 0
+                ? _buildMedicalRecord()
+                : selectedTab == 1
+                    ? _buildLabAndRadiology()
                     : _buildMedications(),
           ),
         ],
@@ -183,27 +293,31 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   Widget _buildMedicalRecord() {
-    return medicalRecords.isEmpty
+    if (_isLoadingRecords) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return _medicalRecords.isEmpty
         ? _buildEmptyMedicalRecord()
         : ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: medicalRecords.length,
-            itemBuilder: (context, index) => _buildMedicalRecordCard(medicalRecords[index], index),
+            itemCount: _medicalRecords.length,
+            itemBuilder: (context, index) => _buildMedicalRecordCard(_medicalRecords[index], index),
           );
   }
 
   Widget _buildEmptyMedicalRecord() {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.medical_services_outlined, size: 60, color: AppTheme.greyColor),
+          Icon(Icons.medical_services_outlined, size: 60, color: theme.colorScheme.onSurface.withOpacity(0.5)),
           const SizedBox(height: 18),
-          Text('No medical records found', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
+          Text('No medical records found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
           const SizedBox(height: 8),
           Text(
             'Create a new medical record for ${widget.patientName}',
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
@@ -226,6 +340,15 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   Widget _buildMedicalRecordCard(Map<String, dynamic> record, int index) {
+     // Safely access data, providing default values or handling nulls
+    final String date = record['created_at'] != null 
+      ? DateTime.parse(record['created_at']).toLocal().toString().split(' ')[0] // Format date
+      : 'N/A';
+    final String diagnosis = record['diagnosis'] ?? 'N/A';
+    final String prescription = record['prescription'] ?? 'N/A';
+    final String tests = record['tests'] ?? 'N/A';
+    final String medications = record['medications'] ?? 'N/A';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -242,205 +365,134 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
             children: [
               Expanded(
                 child: Text(
-                  record['date'],
+                  date,
                   style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  record['doctor'],
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.end,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              // Option to add more actions like Edit/Delete here
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            'Condition: ${record['condition']}',
-            style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600),
-          ),
+          const Divider(height: 20, thickness: 1),
+          _buildRecordDetailRow('Diagnosis:', diagnosis),
           const SizedBox(height: 8),
-          Text(
-            'Symptoms: ${record['symptoms']}',
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
-          ),
+          _buildRecordDetailRow('Prescription/Notes:', prescription),
           const SizedBox(height: 8),
-          Text(
-            'Notes: ${record['notes']}',
-            style: AppTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    _showEditMedicalRecordDialog(context, record, index);
-                  },
-                  icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
-                  label: Text('Edit', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  label: Text('Delete', style: AppTheme.bodyLarge.copyWith(color: Colors.red)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildRecordDetailRow('Tests:', tests),
+          const SizedBox(height: 8),
+          _buildRecordDetailRow('Medications:', medications),
         ],
       ),
     );
   }
 
-  void _showEditMedicalRecordDialog(BuildContext context, Map<String, dynamic> record, int index) {
-    final TextEditingController conditionController = TextEditingController(text: record['condition'] ?? '');
-    final TextEditingController symptomsController = TextEditingController(text: record['symptoms'] ?? '');
-    final TextEditingController notesController = TextEditingController(text: record['notes'] ?? '');
-    final TextEditingController medicationsController = TextEditingController(text: record['medications'] ?? '');
-    final TextEditingController testsController = TextEditingController(text: record['tests'] ?? '');
-    InputDecoration themedInputDecoration({required String label, IconData? icon}) {
-      return InputDecoration(
-        labelText: label,
-        labelStyle: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
-        prefixIcon: icon != null ? Icon(icon, color: AppTheme.primaryColor) : null,
-        filled: true,
-        fillColor: Colors.white,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      );
-    }
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Edit Medical Record',
-                style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Patient: ${widget.patientName}',
-                style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
-              ),
-              Text(
-                'Age: ${widget.patientAge}',
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: conditionController,
-                decoration: themedInputDecoration(label: 'Medical Condition', icon: Icons.sick),
-                style: AppTheme.bodyLarge,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: symptomsController,
-                decoration: themedInputDecoration(label: 'Symptoms', icon: Icons.healing),
-                style: AppTheme.bodyLarge,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: notesController,
-                maxLines: 3,
-                decoration: themedInputDecoration(label: 'Notes', icon: Icons.note_alt),
-                style: AppTheme.bodyLarge,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: medicationsController,
-                decoration: themedInputDecoration(label: 'Required Medications', icon: Icons.medication),
-                style: AppTheme.bodyLarge,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: testsController,
-                decoration: themedInputDecoration(label: 'Required Tests', icon: Icons.science),
-                style: AppTheme.bodyLarge,
-              ),
-              const SizedBox(height: 28),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        textStyle: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
-                      ),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          medicalRecords[index] = {
-                            'date': record['date'],
-                            'condition': conditionController.text,
-                            'symptoms': symptomsController.text,
-                            'notes': notesController.text,
-                            'doctor': record['doctor'],
-                            'medications': medicationsController.text,
-                            'tests': testsController.text,
-                          };
-                        });
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        textStyle: AppTheme.bodyLarge,
-                      ),
-                      child: const Text('Update'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+  Widget _buildRecordDetailRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTheme.bodyMedium.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
           ),
         ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabAndRadiology() {
+    // Implementation for Lab & Radiology tab
+    return labReports.isEmpty && radiologyReports.isEmpty
+        ? Center(
+            child: Text('No lab or radiology reports found', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
+          )
+        : ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              ...labReports.map((report) => _buildReportCard('Lab Report', report)).toList(),
+              ...radiologyReports.map((report) => _buildReportCard('Radiology Report', report)).toList(),
+            ],
+          );
+  }
+
+  Widget _buildMedications() {
+    // Implementation for Medications tab
+     return medications.isEmpty
+        ? Center(
+            child: Text('No medications found', style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
+          )
+        : ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: medications.length,
+            itemBuilder: (context, index) => _buildMedicationCard(medications[index]),
+          );
+  }
+
+   Widget _buildReportCard(String type, Map<String, dynamic> report) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(report['title'], style: AppTheme.titleMedium.copyWith(color: AppTheme.primaryColor)),
+          const SizedBox(height: 8),
+          Text('Date: ${report['date']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text('Status: ', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+              Text(report['status'], style: AppTheme.bodyMedium.copyWith(color: report['statusColor'], fontWeight: FontWeight.bold)),
+            ],
+          ),
+           if (report['desc']!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+             Text('Details: ${report['desc']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedicationCard(Map<String, dynamic> medication) {
+    return Container(
+       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+           Text(medication['name'], style: AppTheme.titleMedium.copyWith(color: AppTheme.primaryColor)),
+           const SizedBox(height: 8),
+           Text('Dosage: ${medication['dosage']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+           const SizedBox(height: 8),
+           Text('Frequency: ${medication['frequency']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+           const SizedBox(height: 8),
+           Text('Duration: ${medication['duration']}', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+           const SizedBox(height: 8),
+           Row(
+            children: [
+              Text('Status: ', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+              Text(medication['status'], style: AppTheme.bodyMedium.copyWith(color: medication['statusColor'], fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -481,31 +533,6 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   void _showNewMedicalRecordDialog(BuildContext context) {
-    final TextEditingController conditionController = TextEditingController();
-    final TextEditingController symptomsController = TextEditingController();
-    final TextEditingController notesController = TextEditingController();
-    final TextEditingController medicationsController = TextEditingController();
-    final TextEditingController testsController = TextEditingController();
-
-    InputDecoration themedInputDecoration({required String label, IconData? icon}) {
-      return InputDecoration(
-        labelText: label,
-        labelStyle: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
-        prefixIcon: icon != null ? Icon(icon, color: AppTheme.primaryColor) : null,
-        filled: true,
-        fillColor: Colors.white,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      );
-    }
-
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -531,66 +558,68 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: conditionController,
+                controller: _conditionController,
                 decoration: themedInputDecoration(label: 'Medical Condition', icon: Icons.sick),
                 style: AppTheme.bodyLarge,
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: symptomsController,
+                controller: _symptomsController,
                 decoration: themedInputDecoration(label: 'Symptoms', icon: Icons.healing),
                 style: AppTheme.bodyLarge,
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: notesController,
+                controller: _notesController,
                 maxLines: 3,
                 decoration: themedInputDecoration(label: 'Notes', icon: Icons.note_alt),
                 style: AppTheme.bodyLarge,
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: medicationsController,
-                decoration: themedInputDecoration(label: 'Required Medications', icon: Icons.medication),
+                controller: _medicationsController,
+                decoration: themedInputDecoration(label: 'Medications', icon: Icons.medical_services),
                 style: AppTheme.bodyLarge,
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: testsController,
-                decoration: themedInputDecoration(label: 'Required Tests', icon: Icons.science),
+               const SizedBox(height: 16),
+               TextField(
+                controller: _testsController,
+                decoration: themedInputDecoration(label: 'Tests', icon: Icons.science),
                 style: AppTheme.bodyLarge,
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        textStyle: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
-                      ),
-                      child: const Text('Cancel'),
-                    ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
                   ),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          medicalRecords.add({
-                            'date': DateTime.now().toString().substring(0, 10),
-                            'condition': conditionController.text,
-                            'symptoms': symptomsController.text,
-                            'notes': notesController.text,
-                            'doctor': 'Dr. Ahmed',
-                            'medications': medicationsController.text,
-                            'tests': testsController.text,
-                          });
-                        });
+                      onPressed: () async {
+                        // Collect data from controllers
+                        final String diagnoses = _conditionController.text.trim();
+                        final String symptoms = _symptomsController.text.trim();
+                        final String notes = _notesController.text.trim();
+                        final String medications = _medicationsController.text.trim();
+                        final String tests = _testsController.text.trim();
+
+                        // Add the record to the database
+                        await _addManualMedicalRecord(
+                          diagnoses: '$diagnoses\nSymptoms: $symptoms', // Combine diagnosis and symptoms
+                          prescription: notes, // Map notes to prescription
+                          tests: tests,
+                          medications: medications,
+                        );
+
+                        // Clear controllers and close dialog
+                        // No need to dispose controllers here, they are disposed in the State's dispose method.
+                        // conditionController.dispose();
+                        // symptomsController.dispose();
+                        // notesController.dispose();
+                        // medicationsController.dispose();
+                        // testsController.dispose();
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -614,216 +643,20 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
     );
   }
 
-  Widget _buildLabAndRadiology() {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          Container(
-            color: Colors.white,
-            child: const TabBar(
-              labelColor: AppTheme.primaryColor,
-              unselectedLabelColor: AppTheme.greyColor,
-              indicatorColor: AppTheme.primaryColor,
-              tabs: [
-                Tab(text: 'Lab Tests'),
-                Tab(text: 'Radiology'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildReportsList(labReports),
-                _buildReportsList(radiologyReports),
-              ],
-            ),
-          ),
-        ],
+  // Add a themed input decoration helper if it doesn't exist
+  InputDecoration themedInputDecoration({required String label, IconData? icon}) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: icon != null ? Icon(icon, color: AppTheme.primaryColor) : null,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppTheme.greyColor),
       ),
-    );
-  }
-
-  Widget _buildReportsList(List<Map<String, dynamic>> reports) {
-    return reports.isEmpty
-        ? _buildEmptyState('No reports found')
-        : ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: reports.length,
-            itemBuilder: (context, index) => _buildReportCard(reports[index]),
-          );
-  }
-
-  Widget _buildMedications() {
-    return medications.isEmpty
-        ? _buildEmptyState('No medications found')
-        : ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: medications.length,
-            itemBuilder: (context, index) => _buildMedicationCard(medications[index]),
-          );
-  }
-
-  Widget _buildReportCard(Map<String, dynamic> report) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(report['title'], style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              const Icon(Icons.more_vert, color: AppTheme.greyColor),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(report['date'], style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
-              if (report['result'] != null && report['result'].toString().isNotEmpty) ...[
-                const Text(' . '),
-                Text(
-                  report['result'],
-                  style: AppTheme.bodyMedium.copyWith(color: report['statusColor'], fontWeight: FontWeight.w500),
-                ),
-              ],
-            ],
-          ),
-          if (report['desc'] != null && report['desc'].toString().isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(report['desc'], style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
-          ],
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.remove_red_eye, color: AppTheme.primaryColor),
-                  label: Text('View Report', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.download, color: AppTheme.primaryColor),
-                  label: Text('Download', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMedicationCard(Map<String, dynamic> medication) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(medication['name'], style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600)),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: medication['statusColor'].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  medication['status'],
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: medication['statusColor'],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _buildMedicationInfo('Dosage', medication['dosage']),
-          _buildMedicationInfo('Frequency', medication['frequency']),
-          _buildMedicationInfo('Duration', medication['duration']),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMedicationInfo(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.greyColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Text(
-            value,
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.primaryColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            selectedTab == 0 ? Icons.science : selectedTab == 1 ? Icons.science : Icons.medication,
-            size: 60,
-            color: AppTheme.greyColor,
-          ),
-          const SizedBox(height: 18),
-          Text(message, style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
-          const SizedBox(height: 8),
-          Text(
-            'No records available at the moment.',
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+      labelStyle: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
     );
   }
 } 

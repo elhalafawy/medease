@@ -1,32 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/theme/app_theme.dart';
 import 'patient_medical_record_screen.dart';
 
-class PatientProfileScreen extends StatelessWidget {
+class PatientProfileScreen extends StatefulWidget {
   const PatientProfileScreen({super.key});
 
-  String calculateAge(DateTime birthDate) {
-    DateTime currentDate = DateTime.now();
-    int age = currentDate.year - birthDate.year;
-    int month1 = currentDate.month;
-    int month2 = birthDate.month;
-    if (month2 > month1) {
-      age--;
-    } else if (month1 == month2) {
-      int day1 = currentDate.day;
-      int day2 = birthDate.day;
-      if (day2 > day1) {
-        age--;
+  @override
+  State<PatientProfileScreen> createState() => _PatientProfileScreenState();
+}
+
+class _PatientProfileScreenState extends State<PatientProfileScreen> {
+  final _supabase = Supabase.instance.client;
+  List<Map<String, dynamic>> _patients = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPatients();
+  }
+
+  Future<void> _loadPatients() async {
+    try {
+      final response = await _supabase
+          .from('patients')
+          .select('*, users!patients_user_id_fkey(email)')
+          .order('full_name');
+      
+      setState(() {
+        _patients = List<Map<String, dynamic>>.from(response);
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading patients: ${e.toString()}')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
-    return '$age years';
   }
 
   @override
   Widget build(BuildContext context) {
-    final DateTime birthDate = DateTime(2002, 1, 1);
-    final String age = calculateAge(birthDate);
     final theme = Theme.of(context);
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_patients.isEmpty) {
+       return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'Patients',
+            style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+          ),
+        ),
+        body: const Center(
+          child: Text('No patients found'),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -38,25 +88,27 @@ class PatientProfileScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Patient Profile',
+          'Patients',
           style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
         ),
       ),
-      body: SingleChildScrollView(
+      body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Patient Profile Card
-            GestureDetector(
+        itemCount: _patients.length,
+        itemBuilder: (context, index) {
+          final patient = _patients[index];
+          final patientEmail = patient['users']?['email'] ?? 'N/A';
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => PatientMedicalRecordScreen(
-                      patientName: 'Ahmed Elhalafawy',
-                      patientAge: age,
-                      patientId: '#12345',
+                      patientName: patient['full_name'],
+                      patientAge: '${patient['age']} years',
+                      patientId: patient['id'],
                     ),
                   ),
                 );
@@ -79,9 +131,11 @@ class PatientProfileScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 40,
-                          backgroundImage: AssetImage('assets/images/profile_picture.png'),
+                          backgroundImage: patient['profile_image'] != null
+                              ? NetworkImage(patient['profile_image'])
+                              : const AssetImage('assets/images/profile_picture.png') as ImageProvider,
                         ),
                         const SizedBox(width: 20),
                         Expanded(
@@ -89,7 +143,7 @@ class PatientProfileScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Ahmed Elhalafawy',
+                                patient['full_name'],
                                 style: AppTheme.titleLarge.copyWith(
                                   color: AppTheme.primaryColor,
                                   fontWeight: FontWeight.bold,
@@ -97,7 +151,7 @@ class PatientProfileScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Patient ID: #12345',
+                                'Patient ID: ${patient['user_id'].substring(0, 4)}',
                                 style: AppTheme.bodyMedium.copyWith(
                                   color: AppTheme.greyColor,
                                 ),
@@ -110,17 +164,15 @@ class PatientProfileScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     const Divider(),
                     const SizedBox(height: 20),
-                    _buildInfoRow('Age', age),
+                    _buildInfoRow('Age', '${patient['age']} years'),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Gender', 'Male'),
+                    _buildInfoRow('Gender', patient['gender']),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Blood Type', 'O+'),
+                    _buildInfoRow('Phone', patient['contact_info']),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Phone', '01150504999'),
+                    _buildInfoRow('Email', patientEmail),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Email', 'ahmed.elhlafawy@gmail.com'),
-                    const SizedBox(height: 15),
-                    _buildInfoRow('Date of Birth', '2002-01-01'),
+                    _buildInfoRow('Date of Birth', patient['date_of_birth']),
                     const SizedBox(height: 20),
                     Center(
                       child: Text(
@@ -135,8 +187,8 @@ class PatientProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -144,6 +196,7 @@ class PatientProfileScreen extends StatelessWidget {
   Widget _buildInfoRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
@@ -152,12 +205,28 @@ class PatientProfileScreen extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        Text(
-          value,
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.primaryColor,
-            fontWeight: FontWeight.w600,
-          ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: label == 'Email' && value.contains('@')
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: value.split('@').map((part) => Text(
+                    part + (value.split('@').last != part ? '@' : ''),
+                    textAlign: TextAlign.right,
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )).toList(),
+                )
+              : Text(
+                  value,
+                  textAlign: TextAlign.right,
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
       ],
     );
