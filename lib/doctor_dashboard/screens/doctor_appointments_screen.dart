@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DoctorAppointmentsScreen extends StatefulWidget {
   final List<Map<String, dynamic>> appointments;
@@ -19,10 +20,55 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   int selectedDayIndex = 0;
   final List<String> daysShort = const ['All', 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   final List<String> daysFull = const ['All', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  List<Map<String, dynamic>> _appointments = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAppointments();
+  }
+
+  Future<void> fetchAppointments() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final response = await Supabase.instance.client
+          .from('appointments')
+          .select('*, patients:patient_id(full_name)');
+          // print(response);
+      setState(() {
+        _appointments = List<Map<String, dynamic>>.from(response);
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load appointments';
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> confirmAppointment(String appointmentId) async {
+    try {
+      await Supabase.instance.client
+          .from('appointments')
+          .update({'status': 'confirmed'})
+          .eq('appointment_id', appointmentId);
+      // Optionally refresh appointments
+      await fetchAppointments();
+    } catch (e) {
+      // Handle error (show a snackbar, etc.)
+      print('Failed to confirm appointment: $e');
+    }
+  }
 
   // Example data with status and message
   List<Map<String, dynamic>> get displayAppointments {
-    final allAppointments = widget.appointments.isEmpty ? [
+    final allAppointments = _appointments.isEmpty ? [
     {
       'patient': 'Menna Ahmed',
         'date': '2023-04-22',
@@ -47,7 +93,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
         'status': 'cancelled',
         'message': 'Please confirm if you are available.',
       },
-    ] : widget.appointments;
+    ] : _appointments;
     if (selectedDayIndex == 0) {
       return allAppointments;
     } else {
@@ -76,6 +122,8 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
         return 'Pending';
       case 'cancelled':
         return 'Cancelled';
+      case 'completed':
+        return "Completed";
       default:
         return 'Unknown';
     }
@@ -101,7 +149,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  appt['patient'] ?? '',
+                  appt['patients']?['full_name'] ?? 'Unknown',
                   style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
                 ),
                 Container(
@@ -150,10 +198,8 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                   child: SizedBox(
                     height: 38,
                     child: ElevatedButton.icon(
-                      onPressed: appt['status'] == 'confirmed' ? null : () {
-                        setState(() {
-                          appt['status'] = 'confirmed';
-                        });
+                      onPressed: appt['status'] == 'confirmed' ? null : () async {
+                        await confirmAppointment(appt['appointment_id']);
                         Navigator.pop(context);
                       },
                       icon: const Icon(Icons.check, size: 18),
@@ -220,7 +266,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         );
                         if (confirmed == true) {
                           setState(() {
-                            appt['status'] = 'cancelled';
+                            appt['status'] = 'confirmed';
                           });
                           Navigator.pop(context);
                         }
@@ -274,7 +320,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            appt['patient'] ?? '',
+                            appt['patients']?['full_name'] ?? 'Unknown',
                             style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 18),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -403,6 +449,12 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_error != null) {
+      return Center(child: Text(_error!));
+    }
     return SafeArea(
       child: Container(
         color: theme.scaffoldBackgroundColor,
@@ -490,7 +542,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                   children: [
                                             Flexible(
                                               child: Text(
-                                      appt['patient'] ?? '',
+                                      appt['patients']?['full_name'] ?? 'Unknown',
                                       style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 18),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
