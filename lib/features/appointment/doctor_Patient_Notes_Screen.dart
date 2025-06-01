@@ -155,7 +155,10 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : _submitNote,
+                onPressed: () {
+                  widget.onNoteAdded(_noteController.text);
+                  Navigator.pop(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   padding: const EdgeInsets.symmetric(vertical: 16),

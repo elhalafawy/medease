@@ -112,7 +112,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       children: [
                         CircleAvatar(
                           radius: 30,
-                          backgroundImage: AssetImage(widget.appointment['imageUrl'] ?? widget.appointment['image']),
+                          backgroundImage: AssetImage(
+                            (widget.appointment['imageUrl'] is String && widget.appointment['imageUrl'] != null && widget.appointment['imageUrl']!.isNotEmpty)
+                                ? widget.appointment['imageUrl']
+                                : (widget.appointment['image'] is String && widget.appointment['image'] != null && widget.appointment['image']!.isNotEmpty)
+                                    ? widget.appointment['image']
+                                    : 'assets/images/doctor_photo.png',
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -120,7 +126,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.appointment['doctorName'] ?? 'Dr. Ahmed',
+                                widget.appointment['doctorName']?.toString() ?? 'Dr. Ahmed',
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -404,7 +410,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundImage: AssetImage(widget.appointment['imageUrl'] ?? widget.appointment['image']),
+                        backgroundImage: AssetImage(
+                          (widget.appointment['imageUrl'] is String && widget.appointment['imageUrl'] != null && widget.appointment['imageUrl']!.isNotEmpty)
+                              ? widget.appointment['imageUrl']
+                              : (widget.appointment['image'] is String && widget.appointment['image'] != null && widget.appointment['image']!.isNotEmpty)
+                                  ? widget.appointment['image']
+                                  : 'assets/images/doctor_photo.png',
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -412,7 +424,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.appointment['doctorName'] ?? 'Dr. Ahmed',
+                              widget.appointment['doctorName']?.toString() ?? 'Dr. Ahmed',
                               style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                             ),
                             Text(
@@ -444,7 +456,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         _buildInfoColumn(
                           Icons.calendar_today,
                           'Date',
-                          widget.appointment['date'] ?? 'Mon 4',
+                          widget.appointment['date']?.toString() ?? 'Mon 4',
                         ),
                         _buildInfoColumn(
                           Icons.access_time,

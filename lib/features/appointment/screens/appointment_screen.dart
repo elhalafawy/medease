@@ -88,9 +88,9 @@ final patientId = patient['patient_id'];
 final doctorID = patient['doctor_id'];
 
 final newAppointment = {
-  // 'appointment_id': const Uuid().v4(),
+  'appointment_id': const Uuid().v4(),
   // 'doctor_id': widget.doctor?['id'],
-  'doctor_id': doctorID,
+  'doctor_id': "8542e414-78e2-40c7-9b9c-36748ac82c99",
   'patient_id': patientId, // ✅ must match auth.uid()
   'date': DateTime(
       DateTime.now().year,
@@ -110,6 +110,7 @@ final newAppointment = {
   final response = await supabase.from('appointments').insert(newAppointment);
 
   setState(() => isBooking = false);
+  Navigator.pop(context);
 
 // if (response == null) {
 //   CustomSnackBar.show(context: context, message: 'Insert failed, no response.');

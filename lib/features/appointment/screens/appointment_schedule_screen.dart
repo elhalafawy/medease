@@ -113,6 +113,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+
       appBar: AppBar(
         elevation: 0,
         backgroundColor: theme.colorScheme.surface,
@@ -162,6 +163,8 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
           const SizedBox(width: 8),
         ],
       ),
+
+      
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
