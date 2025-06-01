@@ -66,6 +66,20 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
     }
   }
 
+  Future<void> cancelAppointment(String appointmentId) async {
+    try {
+      await Supabase.instance.client
+          .from('appointments')
+          .update({'status': 'cancelled'})
+          .eq('appointment_id', appointmentId);
+      // Optionally refresh appointments
+      await fetchAppointments();
+    } catch (e) {
+      // Handle error (show a snackbar, etc.)
+      print('Failed to cancel appointment: $e');
+    }
+  }
+
   // Example data with status and message
   List<Map<String, dynamic>> get displayAppointments {
     final allAppointments = _appointments.isEmpty ? [
@@ -100,7 +114,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
       return allAppointments.where((appt) => appt['day'] == daysFull[selectedDayIndex]).toList();
     }
   }
-
+  
   Color statusColor(String status) {
     switch (status) {
       case 'confirmed':
@@ -265,9 +279,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                           ),
                         );
                         if (confirmed == true) {
-                          setState(() {
-                            appt['status'] = 'confirmed';
-                          });
+                          await cancelAppointment(appt['appointment_id']);
                           Navigator.pop(context);
                         }
                       },
