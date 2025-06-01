@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DoctorBookAppointmentScreen extends StatefulWidget {
   const DoctorBookAppointmentScreen({super.key});
@@ -144,6 +145,44 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
         ),
       ),
     );
+  }
+
+  Future<void> addTimeSlot({
+    required String doctorId,
+    required DateTime availableDate,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    String status = 'available',
+    String? recurringRule,
+  }) async {
+    final supabase = Supabase.instance.client;
+    final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
+    final end = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
+
+    await supabase.from('time_slots').insert({
+      'doctor_id': doctorId,
+      'available_date': availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
+      'start_time': start,
+      'end_time': end,
+      'status': status,
+      'recurring_rule': recurringRule,
+    });
+  }
+
+  Future<void> fetchTimeSlot({
+    required String doctorId,
+    required DateTime availableDate,
+    required TimeOfDay startTime,
+    required TimeOfDay endTime,
+    String status = 'available',
+    String? recurringRule,
+  }) async {
+    final supabase = Supabase.instance.client;
+    final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
+    final end = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
+
+    await supabase.from('time_slots').select("*");
+    print(supabase.from('time_slots').select("*"));
   }
 
   @override
@@ -399,7 +438,18 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            String doctorId = '8542e414-78e2-40c7-9b9c-36748ac82c99'; // Replace with actual doctor id from auth/session
+
+                            for (var idx in selectedDayIndices) {
+                              await addTimeSlot(
+                                doctorId: doctorId,
+                                availableDate: next7Days[idx],
+                                startTime: fromTime!,
+                                endTime: toTime!,
+                              );
+                            }
+                            // Optionally, fetch and display updated slots here
                             _showSuccessDialog();
                           },
                           style: ElevatedButton.styleFrom(
@@ -428,6 +478,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                           final day = appt['day'] as DateTime;
                           final from = appt['from'] as TimeOfDay?;
                           final to = appt['to'] as TimeOfDay?;
+                          fetchTimeSlot(doctorId: "'8542e414-78e2-40c7-9b9c-36748ac82c99'", availableDate: day, startTime: from!, endTime: to!);
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 4),
                             child: ListTile(
