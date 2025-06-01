@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/theme/app_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppointmentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
@@ -17,7 +18,8 @@ class AppointmentDetailsScreen extends StatefulWidget {
   });
 
   @override
-  State<AppointmentDetailsScreen> createState() => _AppointmentDetailsScreenState();
+  State<AppointmentDetailsScreen> createState() =>
+      _AppointmentDetailsScreenState();
 }
 
 class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
@@ -26,6 +28,25 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   List<Map<String, dynamic>> _searchResults = [];
   bool isUpdating = false;
   bool isCanceling = false;
+  Map<String, dynamic>? appointmentData;
+  bool isLoading = false;
+  late BuildContext _scaffoldContext;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scaffoldContext = context;
+  }
+
+  Future<void> getPatientData() async {
+    final patientId = widget.appointment['patient_id'];
+    final patientData = await Supabase.instance.client
+        .from('patients')
+        .select('*')
+        .eq('id', patientId)
+        .single();
+    print('Patient data: $patientData');
+  }
 
   void _handleSearch(String query) {
     if (query.isEmpty) {
@@ -45,15 +66,54 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           'specialty': 'Senior Neurologist and Surgeon',
           'date': 'Mon 4',
           'time': '9:00 AM',
-          'status': 'Pending',
+          'status': 'ending',
           'imageUrl': 'assets/images/doctor_photo.png',
         },
-
       ].where((appointment) {
-        return appointment['doctorName'].toString().toLowerCase().contains(query.toLowerCase()) ||
-               appointment['specialty'].toString().toLowerCase().contains(query.toLowerCase());
+        return appointment['doctorName']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()) ||
+            appointment['specialty']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase());
       }).toList();
     });
+  }
+
+  Future<void> updateAppointment(String appointmentId, String newDate, String newTime) async {
+    if (appointmentId.isEmpty) {
+      throw Exception('Invalid appointment ID');
+    }
+    
+    try {
+      // Parse the date string (e.g., "Tue 5" -> "2024-03-05")
+      final now = DateTime.now();
+      final dateParts = newDate.split(' ');
+      final day = int.parse(dateParts[1]);
+      final month = now.month;
+      final year = now.year;
+      final formattedDate = DateTime(year, month, day).toIso8601String().split('T')[0];
+
+      await Supabase.instance.client
+          .from('appointments')
+          .update({
+            'date': formattedDate,
+            'time': newTime,
+          })
+          .eq('appointment_id', appointmentId);
+      
+      if (widget.onUpdate != null) {
+        final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
+        updatedAppointment['date'] = newDate; // Keep the display format for UI
+        updatedAppointment['time'] = newTime;
+        widget.onUpdate!(updatedAppointment);
+      }
+    } catch (e) {
+      print('Failed to update appointment: $e');
+      throw e; // Re-throw to handle in the UI
+    }
   }
 
   void _showUpdateDialog() {
@@ -63,7 +123,15 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     List<String> dates = ['3', '4', '5', '6', '7'];
     List<String> times = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM'];
 
-    final theme = Theme.of(context);
+    final appointmentId = widget.appointment['appointment_id']?.toString();
+    if (appointmentId == null || appointmentId.isEmpty) {
+      CustomSnackBar.show(
+        context: _scaffoldContext,
+        message: 'Invalid appointment ID',
+        isError: true,
+      );
+      return;
+    }
 
     showDialog(
       context: context,
@@ -107,15 +175,20 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 30,
                           backgroundImage: AssetImage(
-                            (widget.appointment['imageUrl'] is String && widget.appointment['imageUrl'] != null && widget.appointment['imageUrl']!.isNotEmpty)
+                            (widget.appointment['imageUrl'] is String &&
+                                    widget.appointment['imageUrl'] != null &&
+                                    widget.appointment['imageUrl']!.isNotEmpty)
                                 ? widget.appointment['imageUrl']
-                                : (widget.appointment['image'] is String && widget.appointment['image'] != null && widget.appointment['image']!.isNotEmpty)
+                                : (widget.appointment['image'] is String &&
+                                        widget.appointment['image'] != null &&
+                                        widget.appointment['image']!.isNotEmpty)
                                     ? widget.appointment['image']
                                     : 'assets/images/doctor_photo.png',
                           ),
@@ -126,7 +199,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.appointment['doctorName']?.toString() ?? 'Dr. Ahmed',
+                                widget.appointment['doctorName']?.toString() ??
+                                    'Dr. Ahmed',
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -134,7 +208,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                 ),
                               ),
                               Text(
-                                widget.appointment['specialty'] ?? 'Neurologist',
+                                widget.appointment['specialty'] ??
+                                    'Neurologist',
                                 style: const TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey,
@@ -151,13 +226,17 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     alignment: Alignment.centerLeft,
                     child: const Text(
                       "Appointment",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Color(0xFF232B3E)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Color(0xFF232B3E)),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -174,13 +253,21 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         final isSelected = index == selectedDayIndex;
                         return Expanded(
                           child: GestureDetector(
-                            onTap: () => setState(() => selectedDayIndex = index),
+                            onTap: () =>
+                                setState(() => selectedDayIndex = index),
                             child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 4, vertical: 2),
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF7DDCFF) : Colors.white,
+                                color: isSelected
+                                    ? const Color(0xFF7DDCFF)
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: isSelected ? const Color(0xFF7DDCFF) : Colors.grey.shade300, width: 2),
+                                border: Border.all(
+                                    color: isSelected
+                                        ? const Color(0xFF7DDCFF)
+                                        : Colors.grey.shade300,
+                                    width: 2),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Column(
@@ -188,7 +275,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                   Text(
                                     days[index],
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : const Color(0xFF232B3E),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF232B3E),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
                                     ),
@@ -197,7 +286,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                   Text(
                                     dates[index],
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : const Color(0xFF232B3E),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF232B3E),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
                                     ),
@@ -216,7 +307,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     alignment: Alignment.centerLeft,
                     child: const Text(
                       "Available Time",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Color(0xFF232B3E)),
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Color(0xFF232B3E)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -228,13 +322,20 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       children: List.generate(times.length, (index) {
                         final isSelected = index == selectedTimeIndex;
                         return GestureDetector(
-                          onTap: () => setState(() => selectedTimeIndex = index),
+                          onTap: () =>
+                              setState(() => selectedTimeIndex = index),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFFF5B183) : const Color(0xFFF3F3F3),
+                              color: isSelected
+                                  ? const Color(0xFFF5B183)
+                                  : const Color(0xFFF3F3F3),
                               borderRadius: BorderRadius.circular(30),
-                              border: Border.all(color: isSelected ? const Color(0xFFF5B183) : Colors.grey.shade300),
+                              border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFFF5B183)
+                                      : Colors.grey.shade300),
                               boxShadow: isSelected
                                   ? [
                                       const BoxShadow(
@@ -248,8 +349,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             child: Text(
                               times[index],
                               style: TextStyle(
-                                color: isSelected ? Colors.white : const Color(0xFF9C9C9C),
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                color: isSelected
+                                    ? Colors.white
+                                    : const Color(0xFF9C9C9C),
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
                               ),
                             ),
                           ),
@@ -259,7 +364,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   ),
                   const SizedBox(height: 24),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -269,19 +375,29 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
-                          onPressed: () {
-                            final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
-                            updatedAppointment['date'] = '${days[selectedDayIndex]} ${dates[selectedDayIndex]}';
-                            updatedAppointment['time'] = times[selectedTimeIndex];
-                            if (widget.onUpdate != null) {
-                              widget.onUpdate!(updatedAppointment);
+                          onPressed: () async {
+                            final newDate = '${days[selectedDayIndex]} ${dates[selectedDayIndex]}';
+                            final newTime = times[selectedTimeIndex];
+                            
+                            try {
+                              await updateAppointment(appointmentId, newDate, newTime);
+                              if (mounted) {
+                                CustomSnackBar.show(
+                                  context: _scaffoldContext,
+                                  message: 'Appointment updated successfully',
+                                );
+                                Navigator.pop(context); // Close the update dialog
+                                Navigator.pop(context); // Return to schedule screen
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                CustomSnackBar.show(
+                                  context: _scaffoldContext,
+                                  message: 'Failed to update appointment',
+                                  isError: true,
+                                );
+                              }
                             }
-                            CustomSnackBar.show(
-                              context: context,
-                              message: 'Appointment updated successfully',
-                            );
-                            Navigator.pop(context); // Close the update dialog
-                            Navigator.pop(context); // Return to schedule screen
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF14375A),
@@ -303,11 +419,42 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     );
   }
 
+  Future<void> cancelAppointment(String appointmentId) async {
+    if (appointmentId.isEmpty) {
+      throw Exception('Invalid appointment ID');
+    }
+    
+    try {
+      await Supabase.instance.client
+          .from('appointments')
+          .update({'status': 'cancelled'})
+          .eq('appointment_id', appointmentId);
+          
+      
+      if (widget.onUpdate != null) {
+        final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
+        updatedAppointment['status'] = 'cancelled';
+        widget.onUpdate!(updatedAppointment);
+      }
+    } catch (e) {
+      print('Failed to cancel appointment: $e');
+      throw e; // Re-throw to handle in the UI
+    }
+  }
+
   void _showCancelDialog() {
-    final theme = Theme.of(context);
+    final appointmentId = widget.appointment['appointment_id']?.toString();
+    if (appointmentId == null || appointmentId.isEmpty) {
+      CustomSnackBar.show(
+        context: _scaffoldContext,
+        message: 'Invalid appointment ID',
+        isError: true,
+      );
+      return;
+    }
 
     showDialog(
-      context: context,
+      context: _scaffoldContext,
       builder: (context) => AlertDialog(
         title: const Text('Cancel Appointment'),
         content: const Text('Are you sure you want to cancel this appointment?'),
@@ -317,24 +464,26 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             child: const Text('No'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context); // Close dialog
-              // Update appointment status to Canceled
-              final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
-              updatedAppointment['status'] = 'Canceled';
-
-              if (widget.onCancel != null) {
-                widget.onCancel!(widget.appointment['id']?.toString() ?? '');
+              try {
+                await cancelAppointment(appointmentId);
+                if (mounted) {
+                  CustomSnackBar.show(
+                    context: _scaffoldContext,
+                    message: 'Appointment cancelled successfully',
+                  );
+                  Navigator.pop(_scaffoldContext); // Return to schedule screen
+                }
+              } catch (e) {
+                if (mounted) {
+                  CustomSnackBar.show(
+                    context: _scaffoldContext,
+                    message: 'Failed to cancel appointment',
+                    isError: true,
+                  );
+                }
               }
-              if (widget.onUpdate != null) {
-                widget.onUpdate!(updatedAppointment);
-              }
-
-              CustomSnackBar.show(
-                context: context,
-                message: 'Appointment cancelled successfully',
-              );
-              Navigator.pop(context); // Return to schedule screen
             },
             child: const Text('Yes'),
           ),
@@ -375,12 +524,14 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           ),
         ),
         actions: [
-          if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+          if (widget.appointment['status'] == 'pending' ||
+              widget.appointment['status'] == 'confirmed')
             IconButton(
               icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
               onPressed: _showUpdateDialog,
             ),
-          if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+          if (widget.appointment['status'] == 'pending' ||
+              widget.appointment['status'] == 'confirmed')
             IconButton(
               icon: const Icon(Icons.cancel, color: Colors.red),
               onPressed: _showCancelDialog,
@@ -411,9 +562,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       CircleAvatar(
                         radius: 30,
                         backgroundImage: AssetImage(
-                          (widget.appointment['imageUrl'] is String && widget.appointment['imageUrl'] != null && widget.appointment['imageUrl']!.isNotEmpty)
+                          (widget.appointment['imageUrl'] is String &&
+                                  widget.appointment['imageUrl'] != null &&
+                                  widget.appointment['imageUrl']!.isNotEmpty)
                               ? widget.appointment['imageUrl']
-                              : (widget.appointment['image'] is String && widget.appointment['image'] != null && widget.appointment['image']!.isNotEmpty)
+                              : (widget.appointment['image'] is String &&
+                                      widget.appointment['image'] != null &&
+                                      widget.appointment['image']!.isNotEmpty)
                                   ? widget.appointment['image']
                                   : 'assets/images/doctor_photo.png',
                         ),
@@ -424,12 +579,18 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.appointment['doctorName']?.toString() ?? 'Dr. Ahmed',
-                              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+                              widget.appointment['doctorName']?.toString() ??
+                                  'Dr. Ahmed',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface),
                             ),
                             Text(
-                              widget.appointment['specialty'] ?? 'Senior Neurologist and Surgeon',
-                              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                              widget.appointment['specialty'] ??
+                                  'Senior Neurologist and Surgeon',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.7)),
                             ),
                           ],
                         ),
@@ -482,7 +643,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                 children: [
                   Text(
                     'Appointment Status',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 10),
                   Container(
@@ -501,21 +664,26 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 6),
                           decoration: BoxDecoration(
-                            color: _getStatusColor(widget.appointment['status'] ?? 'Pending').withOpacity(0.1),
+                            color: _getStatusColor(
+                                    widget.appointment['status'] ?? 'pending')
+                                .withOpacity(0.1),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            widget.appointment['status'] ?? 'Pending',
+                            widget.appointment['status'] ?? 'pending',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: _getStatusColor(widget.appointment['status'] ?? 'Pending'),
+                              color: _getStatusColor(
+                                  widget.appointment['status'] ?? 'pending'),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         const Spacer(),
-                        if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+                        if (widget.appointment['status'] == 'pending' ||
+                            widget.appointment['status'] == 'confirmed')
                           ElevatedButton(
                             onPressed: _showUpdateDialog,
                             style: ElevatedButton.styleFrom(
@@ -526,9 +694,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                             ),
                             child: const Text('Update'),
                           ),
-                        if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+                        if (widget.appointment['status'] == 'pending' ||
+                            widget.appointment['status'] == 'confirmed')
                           const SizedBox(width: 6),
-                        if (widget.appointment['status'] == 'Pending' || widget.appointment['status'] == 'Confirmed')
+                        if (widget.appointment['status'] == 'pending' ||
+                            widget.appointment['status'] == 'confirmed')
                           ElevatedButton(
                             onPressed: _showCancelDialog,
                             style: ElevatedButton.styleFrom(
@@ -545,7 +715,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   const SizedBox(height: 20),
                   Text(
                     'Additional Information',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 10),
                   Container(
@@ -564,13 +736,22 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow('Patient Name', widget.appointment['patientName'] ?? 'Ahmed Elhaafawy'),
+                        _buildInfoRow(
+                            'Patient Name',
+                            widget.appointment['full_name'] ??
+                                'N/A'),
                         const Divider(),
-                        _buildInfoRow('Phone Number', widget.appointment['phone'] ?? '01150504999'),
+                        _buildInfoRow('Phone Number',
+                            widget.appointment['contact_info'] ?? 'N/A'),
                         const Divider(),
-                        _buildInfoRow('Email', widget.appointment['email'] ?? 'Ahmed.elhalafawy@gmail.com'),
+                        _buildInfoRow(
+                            'Email',
+                            widget.appointment['email'] ?? 'N/A'),
                         const Divider(),
-                        _buildInfoRow('Notes', widget.appointment['notes'] ?? 'No additional notes'),
+                        _buildInfoRow(
+                            'Notes',
+                            widget.appointment['notes'] ??
+                                'No additional notes'),
                       ],
                     ),
                   ),
