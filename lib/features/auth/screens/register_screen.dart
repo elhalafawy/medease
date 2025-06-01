@@ -3,7 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/supabase/auth_service.dart';
-import '../widgets/otp_verification_widget.dart';
+import '../widgets/verification_success_dialog.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -56,30 +56,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       if (res) {
         if (!mounted) return;
-        
-        // إرسال رمز OTP بعد نجاح التسجيل
-        final otpSent = await _authService.sendOtpViaEmail(context, _email.text.trim());
         setState(() => _isLoading = false);
         
-        if (otpSent) {
-          // عرض نافذة التحقق من OTP
+        // Show verification success popup
+        if (!mounted) return;
+        final result = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => VerificationSuccessDialog(email: _email.text.trim()),
+        );
+        
+        // Navigate to home page when popup is dismissed
+        if (result == true) {
           if (!mounted) return;
-          final result = await showDialog<bool>(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => OtpVerificationWidget(email: _email.text.trim()),
-          );
-          
-          // إذا تم التحقق بنجاح، انتقل للصفحة الرئيسية
-          if (result == true) {
-            if (!mounted) return;
-            context.go('/home');
-          }
-        } else {
-          // في حالة فشل إرسال OTP، ننتقل مباشرة للصفحة الرئيسية
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Registration successful! Please verify your email later.")),
-          );
           context.go('/home');
         }
       }

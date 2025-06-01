@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 
 class AuthService {
@@ -59,14 +59,21 @@ class AuthService {
     String phone,
   ) async {
     try {
-      final response = await _supabase.auth.signUp(email: email, password: password);
+      // Sign up the user with Supabase auth
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+        emailRedirectTo: null, // Supabase will send a verification email automatically
+      );
+
       final user = response.user;
       if (user == null) {
         await showErrorDialog(context, "Registration failed. No user returned.");
         return false;
       }
+
       // Add user to 'users' table
-      final userInsert = await _supabase.from('users').insert({
+      await _supabase.from('users').insert({
         'id': user.id,
         'email': email,
         'role': 'patient',
@@ -77,17 +84,27 @@ class AuthService {
         'created_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       });
-      // Add patient to 'patients' table
-      final patientInsert = await _supabase.from('patients').insert({
-  'id': user.id,  // Use 'id' if that is the PK used in patients
-  'full_name': fullName,
-  'date_of_birth': dateOfBirth,
-  'gender': gender,
-  'contact_info': phone,
-});
+
+      try {
+        // Add patient to 'patients' table - using user_id consistently
+        await _supabase.from('patients').insert({
+          'user_id': user.id,  // Changed from 'id' to 'user_id' to be consistent
+          'full_name': fullName,
+          'date_of_birth': dateOfBirth,
+          'gender': gender,
+          'contact_info': phone,
+        });
+        print("Patient data added successfully to patients table");
+      } catch (e) {
+        // Log detailed error information for debugging
+        print("PostgreSQL error adding patient data: $e");
+        // Don't show error dialog as it might prevent the verification dialog
+        // Just print to console for debugging
+        return true; // Still return true since user was created
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Registration successful! Please verify your email.")),
+        const SnackBar(content: Text("Registration successful! Please check your email.")),
       );
       return true;
     } on AuthException catch (e) {
@@ -139,7 +156,7 @@ class AuthService {
   // Google sign in for patients
   Future<bool> signInWithGoogleForPatient(BuildContext context) async {
     try {
-      final res = await _supabase.auth.signInWithOAuth(OAuthProvider.google);
+      final res= await _supabase.auth.signInWithOAuth(OAuthProvider.google);
       // After successful Google sign-in, add user data to tables if new
       final user = _supabase.auth.currentUser;
       if (user == null) return false;
@@ -156,7 +173,7 @@ class AuthService {
             'gender': user.userMetadata?['gender'] ?? '',
             'contact_info': '',
           });
-          
+
           print('User successfully added to patients table');
         } catch (error) {
           print('Error adding user to patients: $error');
@@ -184,76 +201,21 @@ class AuthService {
     await _supabase.auth.resetPasswordForEmail(email);
   }
 
-  // Send OTP via email
-  Future<bool> sendOtpViaEmail(BuildContext context, String email) async {
+  // Check if user's email is verified with force refresh
+  Future<bool> isEmailVerified() async {
     try {
-      // Use Supabase to send email with OTP code
-      final response = await _supabase.auth.signInWithOtp(
-        email: email,
-        emailRedirectTo: null, // Can specify redirect path if using browser
-      );
-      
-      // OTP code sent successfully
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("A verification code has been sent to your email")),
-      );
-      return true;
-    } catch (e) {
-      print('Error sending OTP: $e');
-      await showErrorDialog(context, 'Failed to send verification code: ${e.toString()}');
-      return false;
-    }
-  }
+      // Force refresh session to get the most up-to-date status
+      await _supabase.auth.refreshSession();
 
-  // Verify OTP code
-  Future<bool> verifyOtpCode(BuildContext context, String email, String otpCode) async {
-    try {
-      print('Verifying OTP: $otpCode for email: $email');
-      
-      final response = await _supabase.auth.verifyOTP(
-        email: email,
-        token: otpCode,
-        type: OtpType.email,
-      );
-      
-      final session = response.session;
-      final user = response.user;
-      
-      if (session != null && user != null) {
-        print('OTP verification successful for user: ${user.id}');
-        
-        // Automatically confirm email after OTP verification
-        try {
-          // Check if user exists in users table
-          final userData = await _supabase.from('users').select('id, email_confirmed_at')
-              .eq('id', user.id).maybeSingle();
-          
-          if (userData != null && userData['email_confirmed_at'] == null) {
-            // Update email confirmation status
-            await _supabase.from('users').update({
-              'email_confirmed_at': DateTime.now().toIso8601String(),
-            }).eq('id', user.id);
-            
-            print('User email automatically confirmed after OTP verification');
-          }
-        } catch (confirmError) {
-          print('Error confirming email automatically: $confirmError');
-          // Continue even if email confirmation fails, as user successfully verified
-        }
-        
-        return true;
-      } else {
-        print('OTP verification failed: No session or user returned');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Invalid verification code. Please try again.")),
-        );
-        return false;
-      }
+      final user = _supabase.auth.currentUser;
+      if (user == null) return false;
+
+      print("Email verification status: ${user.emailConfirmedAt}");
+
+      // Check if email is confirmed
+      return user.emailConfirmedAt != null;
     } catch (e) {
-      print('OTP verification error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Verification failed: ${e.toString()}")),
-      );
+      print('Error checking email verification: $e');
       return false;
     }
   }
@@ -265,4 +227,6 @@ class AuthService {
     // Supabase doesn't support changing password with old password, only updating current user's password
     await _supabase.auth.updateUser(UserAttributes(password: newPassword));
   }
-} 
+
+
+}

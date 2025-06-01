@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/supabase/auth_service.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
 import 'about_app_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/supabase/auth_service.dart';
 import '../../../core/theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
