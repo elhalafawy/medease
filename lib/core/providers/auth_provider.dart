@@ -65,4 +65,9 @@ class AuthProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  // دالة عامة لتحديث بيانات المستخدم يمكن استدعاؤها من أي مكان
+  Future<void> refreshUserData() async {
+    await _loadUserName();
+  }
 } 

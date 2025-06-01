@@ -4,6 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/supabase/auth_service.dart';
 import '../widgets/verification_success_dialog.dart';
+import 'package:provider/provider.dart';
+import '../../../core/providers/auth_provider.dart';
+import '../widgets/email_confirm_check_dialog.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -58,19 +61,96 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (!mounted) return;
         setState(() => _isLoading = false);
         
-        // Show verification success popup
+        // إظهار رسالة نجاح ثم التوجيه إلى شاشة تسجيل الدخول
         if (!mounted) return;
-        final result = await showDialog<bool>(
+        
+        // عرض مربع حوار بنجاح التسجيل والتوجيه لتسجيل الدخول
+        showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => VerificationSuccessDialog(email: _email.text.trim()),
+          builder: (context) => Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 70,
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Registration Successful!',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF00264D),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Please check your email and click the verification link. You must verify your email before logging in.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            try {
+                              await _authService.resendVerificationEmail(_email.text.trim());
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Verification email resent. Please check your inbox.')),
+                              );
+                            } catch (e) {
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error resending email: $e')),
+                              );
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF00264D)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            minimumSize: const Size(0, 50),
+                          ),
+                          child: const Text(
+                            'Resend Email',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF00264D)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            context.go('/login');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00264D),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            minimumSize: const Size(0, 50),
+                          ),
+                          child: const Text(
+                            'Go to Login',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
-        
-        // Navigate to home page when popup is dismissed
-        if (result == true) {
-          if (!mounted) return;
-          context.go('/home');
-        }
       }
     } on AuthException catch (e) {
       if (!mounted) return;

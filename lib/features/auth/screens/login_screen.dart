@@ -50,7 +50,32 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } on AuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      // عرض رسالة خاصة في حالة عدم تأكيد البريد الإلكتروني
+      if (e.message.contains('Email not verified')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please verify your email before logging in. Check your inbox for confirmation link.'),
+            action: SnackBarAction(
+              label: 'Resend',
+              onPressed: () async {
+                try {
+                  await _authService.resendVerificationEmail(_email.text.trim());
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Verification email sent again. Please check your inbox.')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error sending verification email: $e')),
+                  );
+                }
+              },
+            ),
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login error: $e')));
     }

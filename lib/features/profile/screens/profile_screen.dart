@@ -25,44 +25,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadPatientProfile();
   }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload when returning to this screen
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      _loadPatientProfile();
+    }
+  }
 
   Future<void> _loadPatientProfile() async {
+    if (!mounted) return;
+    
+    setState(() => _isLoading = true);
+    
     try {
       final user = _supabase.auth.currentUser;
-      if (user != null) {
-        final response = await _supabase
-            .from('patients')
-            .select()
-            .eq('user_id', user.id)
-            .single();
-        
+      if (user == null) {
+        if (mounted) context.go('/login');
+        return;
+      }
+      
+      // Get patient data
+      final response = await _supabase
+          .from('patients')
+          .select()
+          .eq('user_id', user.id)
+          .single();
+          
+      if (mounted) {
         setState(() {
           _patientProfile = response;
           _isLoading = false;
         });
-      } else {
+      }
+    } catch (e) {
+      final user = _supabase.auth.currentUser;
+      if (e is PostgrestException && e.message.contains('No rows found') && user != null) {
+        await _createPatientProfile(user.id);
+      } else if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  // Create patient profile if it doesn't exist
+  Future<void> _createPatientProfile(String userId) async {
+    try {
+      // Get user data
+      final userData = await _supabase
+          .from('users')
+          .select('full_name, email, phone, gender, date_of_birth')
+          .eq('id', userId)
+          .single();
+      
+      // Create patient
+      final response = await _supabase
+          .from('patients')
+          .insert({
+            'user_id': userId,
+            'full_name': userData['full_name'] ?? 'Patient',
+            'email': userData['email'],
+            'contact_info': userData['phone'] ?? '',
+            'gender': userData['gender'] ?? 'other',
+            'date_of_birth': userData['date_of_birth'] ?? '2000-01-01',
+          })
+          .select()
+          .single();
+      
+      if (mounted) {
         setState(() {
+          _patientProfile = response;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        if (e is PostgrestException && e.message.contains('0 rows returned')) {
-             setState(() {
-               _patientProfile = null;
-               _isLoading = false;
-             });
-             ScaffoldMessenger.of(context).showSnackBar(
-               const SnackBar(content: Text('Patient profile not found.')),
-             );
-        } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error loading profile: ${e.toString()}')),
-            );
-             setState(() {
-              _isLoading = false;
-            });
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating profile: ${e.toString()}')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
