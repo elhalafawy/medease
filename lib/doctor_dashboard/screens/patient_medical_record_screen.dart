@@ -119,7 +119,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
       });
       final response = await _supabase
           .from('medical_records')
-          .select()
+          .select('*, doctors!medical_records_doctor_id_fkey(name)')
           .eq('patient_id', widget.patientId)
           .order('created_at', ascending: false);
 
@@ -140,8 +140,9 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   Future<void> _addManualMedicalRecord({
-    required String diagnoses,
-    required String prescription,
+    required String medicalCondition,
+    required String symptoms,
+    required String notes,
     required String tests,
     required String medications,
   }) async {
@@ -177,8 +178,9 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
       await _supabase.from('medical_records').insert({
         'patient_id': widget.patientId,
         'doctor_id': doctorId,
-        'diagnosis': diagnoses,
-        'prescription': prescription,
+        'medical_condition': medicalCondition,
+        'symptoms': symptoms,
+        'notes': notes,
         'tests': tests,
         'medications': medications,
       });
@@ -193,6 +195,28 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to add medical record: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteMedicalRecord(String recordId) async {
+    try {
+      await _supabase
+          .from('medical_records')
+          .delete()
+          .eq('record_id', recordId); // Assuming 'record_id' is the primary key
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Medical record deleted successfully!')),
+        );
+      }
+      _loadMedicalRecords(); // Refresh the list after deleting
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete medical record: ${e.toString()}')),
         );
       }
     }
@@ -340,14 +364,20 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   Widget _buildMedicalRecordCard(Map<String, dynamic> record, int index) {
-     // Safely access data, providing default values or handling nulls
+     // Safely access data from columns
     final String date = record['created_at'] != null 
       ? DateTime.parse(record['created_at']).toLocal().toString().split(' ')[0] // Format date
       : 'N/A';
-    final String diagnosis = record['diagnosis'] ?? 'N/A';
-    final String prescription = record['prescription'] ?? 'N/A';
+    final String medicalCondition = record['medical_condition'] ?? 'N/A';
+    final String symptoms = record['symptoms'] ?? 'N/A';
+    final String notes = record['notes'] ?? 'N/A';
     final String tests = record['tests'] ?? 'N/A';
     final String medications = record['medications'] ?? 'N/A';
+    // Access doctor name from the nested object, providing default
+    final String doctorName = record['doctors']?['name'] ?? 'N/A';
+
+    // Assuming 'record_id' is the primary key of the medical_records table
+    final String recordId = record['record_id'] ?? ''; // Handle potential null by providing empty string
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -371,17 +401,61 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 ),
               ),
               const SizedBox(width: 8),
-              // Option to add more actions like Edit/Delete here
+              Text(
+                'Dr. $doctorName', // Display doctor name
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
           const Divider(height: 20, thickness: 1),
-          _buildRecordDetailRow('Diagnosis:', diagnosis),
+          _buildRecordDetailRow('Medical Condition:', medicalCondition),
           const SizedBox(height: 8),
-          _buildRecordDetailRow('Prescription/Notes:', prescription),
+          _buildRecordDetailRow('Symptoms:', symptoms),
+          const SizedBox(height: 8),
+          _buildRecordDetailRow('Notes:', notes),
           const SizedBox(height: 8),
           _buildRecordDetailRow('Tests:', tests),
           const SizedBox(height: 8),
           _buildRecordDetailRow('Medications:', medications),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                     _showEditMedicalRecordDialog(context, record); // Call edit dialog function
+                  },
+                  icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
+                  label: Text('Edit', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppTheme.primaryColor),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                     _deleteMedicalRecord(recordId); // Call delete function
+                  },
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  label: Text('Delete', style: AppTheme.bodyLarge.copyWith(color: Colors.red)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -533,6 +607,13 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   void _showNewMedicalRecordDialog(BuildContext context) {
+    // Use state-managed controllers
+    _conditionController.clear(); // Clear previous text
+    _symptomsController.clear();
+    _notesController.clear();
+    _medicationsController.clear();
+    _testsController.clear();
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -592,34 +673,34 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
                   ),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
                         // Collect data from controllers
-                        final String diagnoses = _conditionController.text.trim();
+                        final String medicalCondition = _conditionController.text.trim();
                         final String symptoms = _symptomsController.text.trim();
                         final String notes = _notesController.text.trim();
                         final String medications = _medicationsController.text.trim();
                         final String tests = _testsController.text.trim();
 
-                        // Add the record to the database
+                        // Add the record to the database using new columns
                         await _addManualMedicalRecord(
-                          diagnoses: '$diagnoses\nSymptoms: $symptoms', // Combine diagnosis and symptoms
-                          prescription: notes, // Map notes to prescription
+                          medicalCondition: medicalCondition,
+                          symptoms: symptoms,
+                          notes: notes,
                           tests: tests,
                           medications: medications,
                         );
 
-                        // Clear controllers and close dialog
-                        // No need to dispose controllers here, they are disposed in the State's dispose method.
-                        // conditionController.dispose();
-                        // symptomsController.dispose();
-                        // notesController.dispose();
-                        // medicationsController.dispose();
-                        // testsController.dispose();
+                        // Clear controllers after saving
+                        _conditionController.clear();
+                        _symptomsController.clear();
+                        _notesController.clear();
+                        _medicationsController.clear();
+                        _testsController.clear();
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -641,6 +722,179 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         ),
       ),
     );
+  }
+
+  // Function to show the edit medical record dialog
+  void _showEditMedicalRecordDialog(BuildContext context, Map<String, dynamic> record) {
+    // Populate controllers with existing record data
+    _conditionController.text = record['medical_condition'] ?? '';
+    _symptomsController.text = record['symptoms'] ?? '';
+    _notesController.text = record['notes'] ?? '';
+    _medicationsController.text = record['medications'] ?? '';
+    _testsController.text = record['tests'] ?? '';
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Edit Medical Record',
+                style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Patient: ${widget.patientName}',
+                style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+              ),
+              Text(
+                'Age: ${widget.patientAge}',
+                style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _conditionController,
+                decoration: themedInputDecoration(label: 'Medical Condition', icon: Icons.sick),
+                style: AppTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _symptomsController,
+                decoration: themedInputDecoration(label: 'Symptoms', icon: Icons.healing),
+                style: AppTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _notesController,
+                maxLines: 3,
+                decoration: themedInputDecoration(label: 'Notes', icon: Icons.note_alt),
+                style: AppTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _medicationsController,
+                decoration: themedInputDecoration(label: 'Medications', icon: Icons.medical_services),
+                style: AppTheme.bodyLarge,
+              ),
+               const SizedBox(height: 16),
+               TextField(
+                controller: _testsController,
+                decoration: themedInputDecoration(label: 'Tests', icon: Icons.science),
+                style: AppTheme.bodyLarge,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        // Collect updated data from controllers
+                        final String updatedCondition = _conditionController.text.trim();
+                        final String updatedSymptoms = _symptomsController.text.trim();
+                        final String updatedNotes = _notesController.text.trim();
+                        final String updatedMedications = _medicationsController.text.trim();
+                        final String updatedTests = _testsController.text.trim();
+
+                        // Update the record in the database
+                        await _updateMedicalRecord(
+                           record['record_id'], // Assuming 'record_id' is the primary key
+                           updatedCondition,
+                           updatedSymptoms,
+                           updatedNotes,
+                           updatedMedications,
+                           updatedTests,
+                        );
+
+                        // Clear controllers after saving
+                        _conditionController.clear();
+                        _symptomsController.clear();
+                        _notesController.clear();
+                        _medicationsController.clear();
+                        _testsController.clear();
+                        Navigator.pop(context); // Close the dialog
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        textStyle: AppTheme.bodyLarge,
+                      ),
+                      child: const Text('Save Changes'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Function to update a medical record in Supabase
+  Future<void> _updateMedicalRecord(
+    String recordId,
+    String medicalCondition,
+    String symptoms,
+    String notes,
+    String medications,
+    String tests,
+  ) async {
+    try {
+      // Add logging to check the data being sent
+      print('Attempting to update record with ID: $recordId');
+      print('Data: {medical_condition: $medicalCondition, symptoms: $symptoms, notes: $notes, medications: $medications, tests: $tests}');
+
+      final response = await _supabase
+          .from('medical_records')
+          .update({
+            'medical_condition': medicalCondition,
+            'symptoms': symptoms,
+            'notes': notes,
+            'medications': medications,
+            'tests': tests,
+          })
+          .eq('record_id', recordId) // Assuming 'record_id' is the primary key
+          .select(); // Select the updated row to check the response
+
+      // Add logging for the Supabase response
+      print('Supabase update response: ${response}');
+
+      if (response.isEmpty) {
+         if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('Failed to update medical record: Record not found or no changes made.')),
+           );
+         }
+         return; // Exit if no record was updated
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Medical record updated successfully!')),
+        );
+      }
+      _loadMedicalRecords(); // Refresh the list after updating
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update medical record: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   // Add a themed input decoration helper if it doesn't exist

@@ -23,9 +23,12 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
 
   Future<void> _loadPatients() async {
     try {
+      setState(() {
+        _isLoading = true;
+      });
       final response = await _supabase
           .from('patients')
-          .select('*, users!patients_user_id_fkey(email)')
+          .select('patient_id, full_name, age, gender, contact_info, profile_image, date_of_birth, users!patients_user_id_fkey(email)')
           .order('full_name');
       
       setState(() {
@@ -98,20 +101,28 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
         itemBuilder: (context, index) {
           final patient = _patients[index];
           final patientEmail = patient['users']?['email'] ?? 'N/A';
+          final patientId = patient['patient_id'];
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PatientMedicalRecordScreen(
-                      patientName: patient['full_name'],
-                      patientAge: '${patient['age']} years',
-                      patientId: patient['id'],
+                if (patientId != null && patientId.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PatientMedicalRecordScreen(
+                        patientName: patient['full_name'] ?? '',
+                        patientAge: '${patient['age'] ?? 'N/A'} years',
+                        patientId: patientId,
+                      ),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                   ScaffoldMessenger.of(context).showSnackBar(
+                     const SnackBar(content: Text('Patient record has no valid ID.')),
+                   );
+                }
               },
               child: Container(
                 padding: const EdgeInsets.all(20),
@@ -143,7 +154,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                patient['full_name'],
+                                patient['full_name'] ?? 'N/A',
                                 style: AppTheme.titleLarge.copyWith(
                                   color: AppTheme.primaryColor,
                                   fontWeight: FontWeight.bold,
@@ -151,7 +162,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Patient ID: ${patient['user_id'].substring(0, 4)}',
+                                'Patient ID: ${patientId != null && patientId.isNotEmpty ? patientId.substring(0, 4) : 'N/A'}',
                                 style: AppTheme.bodyMedium.copyWith(
                                   color: AppTheme.greyColor,
                                 ),
@@ -164,15 +175,15 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                     const SizedBox(height: 20),
                     const Divider(),
                     const SizedBox(height: 20),
-                    _buildInfoRow('Age', '${patient['age']} years'),
+                    _buildInfoRow('Age', '${patient['age'] ?? 'N/A'} years'),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Gender', patient['gender']),
+                    _buildInfoRow('Gender', patient['gender'] ?? 'N/A'),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Phone', patient['contact_info']),
+                    _buildInfoRow('Phone', patient['contact_info'] ?? 'N/A'),
                     const SizedBox(height: 15),
                     _buildInfoRow('Email', patientEmail),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Date of Birth', patient['date_of_birth']),
+                    _buildInfoRow('Date of Birth', patient['date_of_birth'] ?? 'N/A'),
                     const SizedBox(height: 20),
                     Center(
                       child: Text(
