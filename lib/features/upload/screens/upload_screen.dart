@@ -7,6 +7,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart'; // Import provider
+import 'ocr_result.dart'; // Import the OCR result screen
+import '../models/analysis_result.dart'; // Import the analysis result model
+import 'analysis_result_screen.dart'; // Import the analysis result screen
+import '../../../core/providers/analysis_result_provider.dart'; // Import the analysis result provider
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
@@ -53,19 +58,113 @@ class _UploadScreenState extends State<UploadScreen> {
       final rec = TextRecognizer();
       final res = await rec.processImage(input);
       await rec.close();
+
+      // Update state with image and text, then navigate to the result page
       setState(() {
         _imageFile = img;
         _ocrText = res.text;
         _busy = false;
       });
       _pageController.animateToPage(
-        4,
+        4, // Index of the OCR result page
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+
     } catch (e, st) {
       print('OCR failed: $e\n$st');
-      setState(() => _busy = false);
+      // Show error message if OCR fails
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('OCR failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+       setState(() => _busy = false); // Ensure busy is false
+    }
+  }
+
+  Future<void> _analyzeText(BuildContext context) async {
+    if (_ocrText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No text to analyze'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      print('Starting text analysis...');
+      
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Analyzing text...',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      print('Text to analyze: $_ocrText');
+      
+      // Perform analysis
+      final result = await AnalysisResult.fromText(_ocrText);
+      print('Analysis completed: ${result.diagnosis}');
+
+      // Set the result in the provider
+      Provider.of<AnalysisResultProvider>(context, listen: false).setAnalysisResult(result);
+
+      // Hide loading indicator
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      // Show results
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AnalysisResultScreen(result: result),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      print('Error during analysis: $e');
+      print('Stack trace: $stackTrace');
+      
+      // Hide loading indicator
+      if (context.mounted) {
+        Navigator.pop(context);
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error analyzing text: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -229,15 +328,34 @@ class _UploadScreenState extends State<UploadScreen> {
                 Center(child: Opacity(opacity: .4, child: _frameOverlay())),
               ],
             ),
-            // Page 4: OCR result
+            // Page 4: OCR result and Analysis Button
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text('Result OCR', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
                   const SizedBox(height: 16),
-                  Expanded(child: SingleChildScrollView(child: Text(_ocrText, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface)))),
-                  Row(
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        _ocrText,
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Analyze Text Button
+                  ElevatedButton.icon(
+                    onPressed: () => _analyzeText(context),
+                    icon: const Icon(Icons.analytics),
+                    label: const Text('Analyze Text'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 16), // Add some spacing
+                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
@@ -245,7 +363,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: _ocrText));
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Copied', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary)), backgroundColor: theme.colorScheme.primary),
+                            SnackBar(content: Text('Copied', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onPrimary)), backgroundColor: theme.colorScheme.primary), // Corrected snackbar
                           );
                         },
                       ),
