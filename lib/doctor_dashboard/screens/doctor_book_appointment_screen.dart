@@ -23,6 +23,37 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
     super.initState();
     final now = DateTime.now();
     next7Days = List.generate(7, (i) => now.add(Duration(days: i)));
+    loadAppointments(); // Load appointments when screen initializes
+  }
+
+  Future<void> loadAppointments() async {
+    final supabase = Supabase.instance.client;
+    try {
+      final response = await supabase
+          .from('time_slots')
+          .select()
+          .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
+          .order('available_date');
+      
+      if (response != null) {
+        setState(() {
+          confirmedAppointments = (response as List).map((slot) {
+            // Convert the database format to the format expected by the UI
+            final date = DateTime.parse(slot['available_date']);
+            final startParts = (slot['start_time'] as String).split(':');
+            final endParts = (slot['end_time'] as String).split(':');
+            
+            return {
+              'day': date,
+              'from': TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1])),
+              'to': TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1])),
+            };
+          }).toList();
+        });
+      }
+    } catch (e) {
+      print('Error loading appointments: $e');
+    }
   }
 
   List<String> get availableTimes {
@@ -169,21 +200,54 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
     });
   }
 
-  //  TODO: Fetch time slots from the database
-  Future<void> fetchTimeSlot({
-    required String doctorId,
-    required DateTime availableDate,
-    required TimeOfDay startTime,
-    required TimeOfDay endTime,
-    String status = 'available',
-    String? recurringRule,
+  Future<void> deleteAppointment(DateTime date, TimeOfDay startTime) async {
+    final supabase = Supabase.instance.client;
+    try {
+      final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
+      
+      await supabase
+          .from('time_slots')
+          .delete()
+          .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
+          .eq('available_date', date.toIso8601String().split('T')[0])
+          .eq('start_time', start);
+      
+      // Refresh the appointments list after deletion
+      await loadAppointments();
+    } catch (e) {
+      print('Error deleting appointment: $e');
+    }
+  }
+
+  Future<void> updateAppointment({
+    required DateTime oldDate,
+    required TimeOfDay oldStartTime,
+    required DateTime newDate,
+    required TimeOfDay newStartTime,
+    required TimeOfDay newEndTime,
   }) async {
     final supabase = Supabase.instance.client;
-    final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
-    final end = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
-
-    await supabase.from('time_slots').select("*");
-    print(supabase.from('time_slots').select("*"));
+    try {
+      final oldStart = '${oldStartTime.hour.toString().padLeft(2, '0')}:${oldStartTime.minute.toString().padLeft(2, '0')}:00';
+      final newStart = '${newStartTime.hour.toString().padLeft(2, '0')}:${newStartTime.minute.toString().padLeft(2, '0')}:00';
+      final newEnd = '${newEndTime.hour.toString().padLeft(2, '0')}:${newEndTime.minute.toString().padLeft(2, '0')}:00';
+      
+      await supabase
+          .from('time_slots')
+          .update({
+            'available_date': newDate.toIso8601String().split('T')[0],
+            'start_time': newStart,
+            'end_time': newEnd,
+          })
+          .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
+          .eq('available_date', oldDate.toIso8601String().split('T')[0])
+          .eq('start_time', oldStart);
+      
+      // Refresh the appointments list after update
+      await loadAppointments();
+    } catch (e) {
+      print('Error updating appointment: $e');
+    }
   }
 
   @override
@@ -440,18 +504,23 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-                            String doctorId = '8542e414-78e2-40c7-9b9c-36748ac82c99'; // Replace with actual doctor id from auth/session
+                            String doctorId = 'b55f005f-3185-4fa3-9098-2179e0751621';
 
-                            for (var idx in selectedDayIndices) {
-                              await addTimeSlot(
-                                doctorId: doctorId,
-                                availableDate: next7Days[idx],
-                                startTime: fromTime!,
-                                endTime: toTime!,
-                              );
+                            if (selectedDayIndices.isNotEmpty && fromTime != null && toTime != null) {
+                              for (var idx in selectedDayIndices) {
+                                await addTimeSlot(
+                                  doctorId: doctorId,
+                                  availableDate: next7Days[idx],
+                                  startTime: fromTime!,
+                                  endTime: toTime!,
+                                );
+                                print("idx" + idx.toString());
+                              }
+                              // Refresh appointments after adding new ones
+                                print("idx" + selectedDayIndices.toString());
+                              await loadAppointments();
+                              _showSuccessDialog();
                             }
-                            // Optionally, fetch and display updated slots here
-                            _showSuccessDialog();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: theme.colorScheme.primary,
@@ -475,11 +544,13 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: confirmedAppointments.length,
                         itemBuilder: (context, idx) {
+                          if (idx >= confirmedAppointments.length) return const SizedBox.shrink();
+                          
                           final appt = confirmedAppointments[idx];
                           final day = appt['day'] as DateTime;
                           final from = appt['from'] as TimeOfDay?;
                           final to = appt['to'] as TimeOfDay?;
-                          fetchTimeSlot(doctorId: "'8542e414-78e2-40c7-9b9c-36748ac82c99'", availableDate: day, startTime: from!, endTime: to!);
+                          
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 4),
                             child: ListTile(
@@ -496,21 +567,50 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.edit, color: Colors.blue),
-                                    onPressed: () {
-                                      setState(() {
-                                        selectedDayIndices = [next7Days.indexWhere((d) => d == appt['day'])];
-                                        fromTime = appt['from'];
-                                        toTime = appt['to'];
-                                        confirmedAppointments.removeAt(idx);
-                                      });
+                                    onPressed: () async {
+                                      if (idx < confirmedAppointments.length) {
+                                        final oldDate = day;
+                                        final oldStartTime = from!;
+                                        
+                                        // Find the closest day in next7Days
+                                        final dayIndex = next7Days.indexWhere((d) => 
+                                          d.year == day.year && 
+                                          d.month == day.month && 
+                                          d.day == day.day
+                                        );
+                                        
+                                        if (dayIndex != -1) {
+                                          setState(() {
+                                            selectedDayIndices = [dayIndex];
+                                            fromTime = appt['from'];
+                                            toTime = appt['to'];
+                                            if (idx < confirmedAppointments.length) {
+                                              confirmedAppointments.removeAt(idx);
+                                            }
+                                          });
+                                          
+                                          await updateAppointment(
+                                            oldDate: oldDate,
+                                            oldStartTime: oldStartTime,
+                                            newDate: next7Days[dayIndex],
+                                            newStartTime: from!,
+                                            newEndTime: to!
+                                          );
+                                        }
+                                      }
                                     },
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      setState(() {
-                                        confirmedAppointments.removeAt(idx);
-                                      });
+                                    onPressed: () async {
+                                      if (idx < confirmedAppointments.length) {
+                                        await deleteAppointment(day, from!);
+                                        setState(() {
+                                          if (idx < confirmedAppointments.length) {
+                                            confirmedAppointments.removeAt(idx);
+                                          }
+                                        });
+                                      }
                                     },
                                   ),
                                 ],

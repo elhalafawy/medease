@@ -83,22 +83,22 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   // Example data with status and message
   List<Map<String, dynamic>> get displayAppointments {
     final allAppointments = _appointments.isEmpty ? [
-    {
-      'patient': 'Menna Ahmed',
-        'date': '2023-04-22',
-        'day': 'Saturday',
-      'time': '16:30 - 18:30',
-        'status': 'pending',
-        'message': 'I have a fever and headache.',
-    },
-    {
-      'patient': 'Rana Mohamed',
-        'date': '2023-04-24',
-        'day': 'Monday',
-      'time': '11:00-16:00',
-        'status': 'confirmed',
-        'message': '',
-      },
+    // {
+    //   'patient': 'Menna Ahmed',
+    //     'date': '2023-04-22',
+    //     'day': 'Saturday',
+    //   'time': '16:30 - 18:30',
+    //     'status': 'pending',
+    //     'message': 'I have a fever and headache.',
+    // },
+    // {
+    //   'patient': 'Rana Mohamed',
+    //     'date': '2023-04-24',
+    //     'day': 'Monday',
+    //   'time': '11:00-16:00',
+    //     'status': 'confirmed',
+    //     'message': '',
+    //   },
       {
         'patient': 'Ali Hassan',
         'date': '2023-04-25',

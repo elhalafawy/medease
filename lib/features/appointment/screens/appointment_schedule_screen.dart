@@ -64,6 +64,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
     });
   }
 
+
   Future<void> _cancelAppointment(String appointmentId) async {
     await Supabase.instance.client
         .from('appointments')

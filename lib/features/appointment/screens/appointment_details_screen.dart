@@ -3,6 +3,8 @@ import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+//TODO: Add patient data to the appointment details screen
+
 class AppointmentDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> appointment;
   final VoidCallback? onBack;
@@ -29,6 +31,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   bool isUpdating = false;
   bool isCanceling = false;
   Map<String, dynamic>? appointmentData;
+  Map<String, dynamic>? patientData;
   bool isLoading = false;
   late BuildContext _scaffoldContext;
 
@@ -38,14 +41,30 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     _scaffoldContext = context;
   }
 
-  Future<void> getPatientData() async {
+  @override
+  void initState() {
+    super.initState();
+    fetchPatientData();
+  }
+
+  Future<void> fetchPatientData() async {
     final patientId = widget.appointment['patient_id'];
-    final patientData = await Supabase.instance.client
-        .from('patients')
-        .select('*')
-        .eq('id', patientId)
-        .single();
-    print('Patient data: $patientData');
+    if (patientId == null) return;
+    setState(() => isLoading = true);
+    try {
+      final data = await Supabase.instance.client
+          .from('patients')
+          .select('*')
+          .eq('patient_id', patientId)
+          .single();
+      setState(() {
+        patientData = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      print('Failed to fetch patient data: $e');
+    }
   }
 
   void _handleSearch(String query) {
@@ -738,15 +757,14 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       children: [
                         _buildInfoRow(
                             'Patient Name',
-                            widget.appointment['full_name'] ??
-                                'N/A'),
+                            patientData?['full_name'] ?? 'N/A'),
                         const Divider(),
                         _buildInfoRow('Phone Number',
-                            widget.appointment['contact_info'] ?? 'N/A'),
+                            patientData?['contact_info'] ?? 'N/A'),
                         const Divider(),
                         _buildInfoRow(
                             'Email',
-                            widget.appointment['email'] ?? 'N/A'),
+                            patientData?['email'] ?? 'N/A'),
                         const Divider(),
                         _buildInfoRow(
                             'Notes',
