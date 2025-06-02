@@ -5,6 +5,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
   final String diagnosis;
   final String tests;
   final String medications;
+  final DateTime date;
 
   const MedicalRecordDetailsScreen({
     super.key,
@@ -12,6 +13,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
     required this.diagnosis,
     required this.tests,
     required this.medications,
+    required this.date,
   });
 
   @override
@@ -28,118 +30,47 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: theme.colorScheme.primary, width: 2),
-                ),
-                child: CircleAvatar(
-                  radius: 48,
-                  backgroundColor: theme.colorScheme.surface,
-                  backgroundImage: const AssetImage('assets/images/profile_picture.png'),
-                ),
-              ),
-            ),
-            _buildRecordDetailItem(
-              label: 'Patient Name:',
+            _buildInfoCard(
+              title: 'Patient Name',
               value: patientName,
+              icon: Icons.person,
               theme: theme,
             ),
             const SizedBox(height: 16),
-            _buildRecordDetailItem(
-              label: 'Diagnosis:',
+            _buildInfoCard(
+              title: 'Diagnosis',
               value: diagnosis,
+              icon: Icons.medical_services,
               theme: theme,
             ),
             const SizedBox(height: 16),
-            _buildRecordDetailItem(
-              label: 'Tests/Exams:',
+            _buildInfoCard(
+              title: 'Tests',
               value: tests,
+              icon: Icons.science,
               theme: theme,
             ),
             const SizedBox(height: 16),
-            _buildRecordDetailItem(
-              label: 'Medications:',
+            _buildInfoCard(
+              title: 'Medications',
               value: medications,
+              icon: Icons.medication,
               theme: theme,
             ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      // Navigate to Lab Results
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.shadowColor.withAlpha(20),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                        border: Border.all(color: theme.colorScheme.primary, width: 1),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.science, color: theme.colorScheme.primary, size: 32),
-                          const SizedBox(height: 8),
-                          Text('Lab Results', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      // Navigate to X-Ray
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.shadowColor.withAlpha(20),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                        border: Border.all(color: theme.colorScheme.primary, width: 1),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.medical_information, color: theme.colorScheme.primary, size: 32),
-                          const SizedBox(height: 8),
-                          Text('X-Ray', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 16),
+            _buildInfoCard(
+              title: 'Date',
+              value: '${date.day}/${date.month}/${date.year}',
+              icon: Icons.calendar_today,
+              theme: theme,
             ),
           ],
         ),
@@ -147,30 +78,39 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecordDetailItem({required String label, required String value, required ThemeData theme}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
-              textAlign: TextAlign.left,
+  Widget _buildInfoCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required ThemeData theme,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: theme.textTheme.bodyLarge,
+            ),
+          ],
+        ),
       ),
     );
   }

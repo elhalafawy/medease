@@ -93,6 +93,7 @@ class AuthService {
           'date_of_birth': dateOfBirth,
           'gender': gender,
           'contact_info': phone,
+          'email': email, // Add email to patients table
         });
         print("Patient data added successfully to patients table");
       } catch (e) {

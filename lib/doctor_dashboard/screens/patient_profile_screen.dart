@@ -28,7 +28,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
       });
       final response = await _supabase
           .from('patients')
-          .select('patient_id, full_name, age, gender, contact_info, profile_image, date_of_birth, users!patients_user_id_fkey(email)')
+          .select('patient_id, full_name, age, gender, contact_info, profile_image, date_of_birth, email')
           .order('full_name');
       
       setState(() {
@@ -100,7 +100,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
         itemCount: _patients.length,
         itemBuilder: (context, index) {
           final patient = _patients[index];
-          final patientEmail = patient['users']?['email'] ?? 'N/A';
+          final patientEmail = patient['email'] ?? 'N/A';
           final patientId = patient['patient_id'];
 
           return Padding(

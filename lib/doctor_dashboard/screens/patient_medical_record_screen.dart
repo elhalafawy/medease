@@ -37,62 +37,9 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   late final TextEditingController _medicationsController;
   late final TextEditingController _testsController;
 
-  final List<Map<String, dynamic>> labReports = [
-    {
-      'title': 'Complete Blood Count (CBC)',
-      'date': '02 Jan, 2024',
-      'status': 'Normal Results',
-      'result': 'Normal Results',
-      'desc': '',
-      'statusColor': const Color(0xFF1A7C3E),
-    },
-    {
-      'title': 'Lipid Panel',
-      'date': '02 Jan, 2024',
-      'status': 'Requires Attention',
-      'result': 'Requires Attention',
-      'desc': '',
-      'statusColor': const Color(0xFFFFA800),
-    },
-  ];
-
-  final List<Map<String, dynamic>> radiologyReports = [
-    {
-      'title': 'Chest X-Ray',
-      'date': '10 Feb, 2024',
-      'status': 'Normal',
-      'result': 'Normal',
-      'desc': '',
-      'statusColor': const Color(0xFF1A7C3E),
-    },
-    {
-      'title': 'Abdominal Ultrasound',
-      'date': '15 Feb, 2024',
-      'status': 'Requires Attention',
-      'result': 'Requires Attention',
-      'desc': '',
-      'statusColor': const Color(0xFFFFA800),
-    },
-  ];
-
-  final List<Map<String, dynamic>> medications = [
-    {
-      'name': 'Amoxicillin',
-      'dosage': '500mg',
-      'frequency': '3 times daily',
-      'duration': '7 days',
-      'status': 'Active',
-      'statusColor': const Color(0xFF1A7C3E),
-    },
-    {
-      'name': 'Ibuprofen',
-      'dosage': '400mg',
-      'frequency': 'As needed',
-      'duration': '5 days',
-      'status': 'Active',
-      'statusColor': const Color(0xFF1A7C3E),
-    },
-  ];
+  final List<Map<String, dynamic>> labReports = []; // Remove dummy data
+  final List<Map<String, dynamic>> radiologyReports = []; // Remove dummy data
+  final List<Map<String, dynamic>> medications = []; // Remove dummy data
 
   @override
   void initState() {
