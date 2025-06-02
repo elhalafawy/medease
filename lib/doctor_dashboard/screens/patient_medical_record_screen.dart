@@ -29,6 +29,10 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   bool _isLoadingRecords = true;
   bool _isLoadingLabReports = true; // Add loading state for lab reports
   bool _isLoadingMedications = true; // Add loading state for medications
+  List<Map<String, dynamic>> _radiologyReports = []; // Add list for radiology reports
+  bool _isLoadingRadiology = true; // Add loading state for radiology reports
+
+  int selectedLabRadiologyTab = 0; // 0: Lab Tests, 1: Radiology
 
   // Controllers for manual medical record entry
   late final TextEditingController _conditionController;
@@ -47,6 +51,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
     _loadMedicalRecords();
     _loadLabReports(); // Load lab reports on init
     _loadMedications(); // Load medications on init
+    _loadRadiologyReports(); // Load radiology reports on init
     // Initialize controllers
     _conditionController = TextEditingController();
     _symptomsController = TextEditingController();
@@ -157,6 +162,40 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         );
         setState(() {
           _isLoadingMedications = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadRadiologyReports() async {
+    try {
+      setState(() {
+        _isLoadingRadiology = true;
+      });
+      print('Attempting to load radiology reports for patient ID: ${widget.patientId}'); // Log start
+      final response = await _supabase
+          .from('Radiology')
+          .select('Radiology_id, patient_id, doctor_id, status, created_at, Title, doctors(name)')
+          .eq('patient_id', widget.patientId)
+          .order('created_at', ascending: false);
+
+      print('Supabase radiology reports response: ${response.length} records found.'); // Log success
+      print('Supabase radiology reports fetched data: ${response}'); // Log fetched data
+
+      setState(() {
+        _radiologyReports = List<Map<String, dynamic>>.from(response);
+        _isLoadingRadiology = false;
+      });
+      print('setState called after loading radiology reports. isLoadingRadiology: $_isLoadingRadiology'); // Log setState call
+
+    } catch (e) {
+      print('Error in _loadRadiologyReports: ${e.toString()}'); // Log error
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading radiology reports: ${e.toString()}')),
+        );
+        setState(() {
+          _isLoadingRadiology = false;
         });
       }
     }
@@ -618,25 +657,27 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   Widget _buildLabAndRadiology() {
     final theme = Theme.of(context);
 
-    // Temporarily always show the empty state for debugging
-    // return _buildEmptyLabAndRadiology();
-
-    // Original logic (commented out)
-    if (_isLoadingLabReports) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Keep the empty state widget, but remove the button from it
-    final emptyState = _buildEmptyLabAndRadiology();
-
     return Column(
       children: [
          Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                   Expanded(child: _labRadiologySubTabButton('Lab Tests', 0)),
+                   const SizedBox(width: 8),
+                   Expanded(child: _labRadiologySubTabButton('Radiology', 1)),
+                ],
+              )
+            ),
+         // Show Create New Record button based on selected sub-tab
+         if (selectedLabRadiologyTab == 0) // Lab Tests
+           Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => _showAddLabRadiologyRecordDialog(context),
+                  onPressed: () => _showAddLabRadiologyRecordDialog(context, isRadiology: false), // Pass type
                   icon: const Icon(Icons.add),
                   label: const Text('Create New Record'),
                   style: ElevatedButton.styleFrom(
@@ -651,55 +692,134 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 ),
               ),
             ),
-        Expanded(
-          child: _labReports.isEmpty
-              ? emptyState
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _labReports.length,
-                  itemBuilder: (context, index) {
-                    final report = _labReports[index];
-                    // Map database columns to _buildReportCard expected format
-                    final String title = report['Title'] ?? 'N/A';
-                    final String date = report['created_at'] != null
-                        ? DateFormat('dd MMM, yyyy').format(DateTime.parse(report['created_at']).toLocal())
-                        : 'N/A';
-                    final String status = report['status'] ?? 'N/A';
-
-                    // Determine status color based on status string
-                    Color statusColor = AppTheme.greyColor; // Default color
-                    if (status == 'Normal Results') {
-                      statusColor = Colors.green;
-                    } else if (status == 'Requires Attention') {
-                      statusColor = Colors.orange;
-                    } else if (status == 'Urgent') {
-                      statusColor = Colors.red;
-                    }
-
-                    // Get doctor name from the joined table
-                    final String doctorName = report['doctors']?['name'] ?? 'N/A';
-
-                    // Assuming 'report_id' is the primary key for lab_reports
-                    final String reportId = report['report_id'] ?? ''; // Handle potential null by providing empty string
-                    print('[LabReportCard] Report ID: $reportId'); // Added logging
-
-                    // Add logging to show the full report data before building the card
-                    print('[buildLabAndRadiology] Building Report Card for: $report');
-
-                    return _buildReportCard(
-                      'Lab Report', // Assuming all are lab reports for now, might need adjustment for radiology
-                      {
-                        'title': title,
-                        'date': date,
-                        'status': status,
-                        'statusColor': statusColor,
-                        'result': status, // Using status for result as per existing structure
-                        'desc': 'Report added by Dr. $doctorName',
-                        'report_id': reportId, // Ensure report_id is passed to _buildReportCard
-                      },
-                    );
-                  },
+          if (selectedLabRadiologyTab == 1) // Radiology
+           Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showAddLabRadiologyRecordDialog(context, isRadiology: true), // Pass type
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create New Record'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary, // Use primary color for radiology button
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    textStyle: theme.textTheme.bodyLarge,
+                  ),
                 ),
+              ),
+            ),
+        Expanded(
+          child: selectedLabRadiologyTab == 0 // Lab Tests Tab
+              ? (_isLoadingLabReports
+                  ? const Center(child: CircularProgressIndicator())
+                  : _labReports.isEmpty
+                      ? _buildEmptyLabAndRadiology() // Use existing empty state for Lab
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _labReports.length,
+                          itemBuilder: (context, index) {
+                            final report = _labReports[index];
+                            // Log the report data for Lab reports before building the card
+                            print('[buildLabAndRadiology - Lab] Data before building card: ${report}');
+                            // Map database columns to _buildReportCard expected format
+                            final String title = report['Title'] ?? 'N/A';
+                            final String date = report['created_at'] != null
+                                ? DateFormat('dd MMM, yyyy').format(DateTime.parse(report['created_at']).toLocal())
+                                : 'N/A';
+                            final String status = report['status'] ?? 'N/A';
+
+                            // Determine status color based on status string
+                            Color statusColor = AppTheme.greyColor; // Default color
+                            if (status == 'Normal Results') {
+                              statusColor = Colors.green;
+                            } else if (status == 'Requires Attention') {
+                              statusColor = Colors.orange;
+                            } else if (status == 'Urgent') {
+                              statusColor = Colors.red;
+                            }
+
+                            // Get doctor name from the joined table
+                            final String doctorName = report['doctors']?['name'] ?? 'N/A';
+
+                            // Assuming 'report_id' is the primary key for lab_reports
+                            final String reportId = report['report_id'] ?? ''; // Handle potential null by providing empty string
+                            print('[LabReportCard] Report ID: $reportId'); // Added logging
+
+                            // Add logging to show the full report data before building the card
+                            print('[buildLabAndRadiology] Building Report Card for: $report');
+
+                            return _buildReportCard(
+                              'Lab Report', // Assuming all are lab reports for now, might need adjustment for radiology
+                              {
+                                'title': title,
+                                'date': date,
+                                'status': status,
+                                'statusColor': statusColor,
+                                'result': status, // Using status for result as per existing structure
+                                'desc': 'Report added by Dr. $doctorName',
+                                'report_id': reportId, // Ensure report_id is passed to _buildReportCard
+                              },
+                            );
+                          },
+                        ))
+              : (_isLoadingRadiology // Radiology Tab
+                  ? const Center(child: CircularProgressIndicator())
+                  : _radiologyReports.isEmpty
+                      ? _buildEmptyRadiology() // Use the new empty state for Radiology
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _radiologyReports.length,
+                          itemBuilder: (context, index) {
+                            final report = _radiologyReports[index];
+                            // Log the report data for Radiology reports before building the card
+                            print('[buildLabAndRadiology - Radiology] Data before building card: ${report}'); // **Added logging**
+                            print('[buildLabAndRadiology] Processing Radiology Report index $index: $report'); // **Added logging**
+                            // Map database columns to _buildReportCard expected format for Radiology
+                            final String title = report['Title'] ?? 'N/A';
+                            final String date = report['created_at'] != null
+                                ? DateFormat('dd MMM, yyyy').format(DateTime.parse(report['created_at']).toLocal())
+                                : 'N/A';
+                            final String status = report['status'] ?? 'N/A';
+
+                            // Determine status color based on status string
+                            Color statusColor = AppTheme.greyColor; // Default color
+                            if (status == 'Normal Results') {
+                              statusColor = Colors.green;
+                            } else if (status == 'Requires Attention') {
+                              statusColor = Colors.orange;
+                            } else if (status == 'Urgent') {
+                              statusColor = Colors.red;
+                            }
+
+                            // Get doctor name from the joined table
+                            final String doctorName = report['doctors']?['name'] ?? 'N/A';
+
+                            // Get the Radiology_id and log it
+                            final String reportId = report['Radiology_id']?.toString() ?? '';
+                            print('[RadiologyReportCard] Report ID: $reportId'); // Added logging
+
+                             // Add logging to show the full report data before building the card
+                            print('[buildLabAndRadiology] Building Radiology Report Card for: $report');
+
+                            return _buildReportCard(
+                              'Radiology Report', // Explicitly label as Radiology Report
+                              {
+                                'title': title,
+                                'date': date,
+                                'status': status,
+                                'statusColor': statusColor,
+                                'result': status, // Using status for result as per existing structure
+                                'desc': 'Report added by Dr. $doctorName', // Assuming similar description structure
+                                'report_id': reportId, // Pass the Radiology_id as report_id
+                              },
+                            );
+                          },
+                        ))
         ),
       ],
     );
@@ -739,6 +859,28 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
     );
   }
 
+  // Add a new empty state widget specifically for Radiology
+  Widget _buildEmptyRadiology() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.receipt_long_outlined, size: 60, color: theme.colorScheme.onSurface.withOpacity(0.5)),
+          const SizedBox(height: 18),
+          Text('No radiology reports found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
+          const SizedBox(height: 8),
+          Text(
+            'Create a new radiology record for ${widget.patientName}',
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+            textAlign: TextAlign.center,
+          ),
+          // Removed the Create New Record button from the empty state
+        ],
+      ),
+    );
+  }
+
   // --- Medications Tab ---
   Widget _buildMedications() {
     // Implementation for Medications tab
@@ -757,6 +899,15 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   Widget _buildReportCard(String type, Map<String, dynamic> report) {
+    print('[buildReportCard] Building card for type: $type, data: $report'); // **Added logging**
+    
+    // Determine the correct ID based on the report type
+    final String recordId = type == 'Radiology Report' 
+        ? report['report_id']?.toString() ?? '' 
+        : report['report_id']?.toString() ?? '';
+    
+    print('[buildReportCard] Determined recordId: $recordId'); // Added logging
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -790,7 +941,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 child: OutlinedButton.icon(
                   onPressed: () {
                      // TODO: Implement edit functionality for Lab/Radiology records
-                     _showEditLabRadiologyRecordDialog(context, report); // Call edit dialog function
+                     _showEditLabRadiologyRecordDialog(context, report, isRadiology: type == 'Radiology Report', recordId: recordId); // Pass record, isRadiology flag, and recordId
                   },
                   icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
                   label: Text('Edit', style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
@@ -806,10 +957,13 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 child: OutlinedButton.icon(
                   onPressed: () {
                      // TODO: Implement delete functionality for Lab/Radiology records
-                     // Assuming 'report_id' is the primary key for lab_reports
-                     final String reportId = report['report_id'] ?? '';
-                     if (reportId.isNotEmpty) {
-                        _deleteLabRadiologyRecord(reportId);
+                     if (recordId.isNotEmpty) {
+                        _deleteLabRadiologyRecord(recordId, isRadiology: type == 'Radiology Report'); // Pass recordId and isRadiology flag
+                     } else {
+                        print('[buildReportCard] Cannot delete: recordId is empty.'); // Added logging
+                         ScaffoldMessenger.of(context).showSnackBar(
+                           const SnackBar(content: Text('Cannot delete record: Invalid record ID.')),
+                         );
                      }
                   },
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -1060,7 +1214,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   // --- Lab & Radiology Dialog ---
-  void _showAddLabRadiologyRecordDialog(BuildContext context) {
+  void _showAddLabRadiologyRecordDialog(BuildContext context, {bool isRadiology = false}) {
     final TextEditingController titleController = TextEditingController();
     DateTime? selectedDate;
     String? selectedStatus;
@@ -1077,7 +1231,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'New Lab / Radiology Record',
+                  isRadiology ? 'New Radiology Record' : 'New Lab Record', // Change dialog title
                   style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
                 ),
                 const SizedBox(height: 16),
@@ -1094,7 +1248,10 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                 // Title Field
                 TextField(
                   controller: titleController,
-                  decoration: themedInputDecoration(label: 'Report Title', icon: Icons.description_outlined),
+                  decoration: themedInputDecoration(
+                    label: isRadiology ? 'Radiology Title' : 'Report Title', // Change hint text
+                    icon: isRadiology ? Icons.receipt_long_outlined : Icons.description_outlined, // Change icon
+                  ),
                   style: AppTheme.bodyLarge,
                 ),
                 const SizedBox(height: 16),
@@ -1165,7 +1322,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
                           if (title.isNotEmpty && date != null && status != null) {
                             Navigator.of(context).pop(); // Close the dialog
-                            _addLabRadiologyRecord(title, date, status); // Call the save function
+                            _addLabRadiologyRecord(title, date, status, isRadiology); // Call the save function
                           } else {
                             // Show validation error
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -1196,8 +1353,59 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   // Implement the actual database saving function for Lab/Radiology records
-  Future<void> _addLabRadiologyRecord(String title, DateTime date, String status) async {
+  Future<void> _addLabRadiologyRecord(String title, DateTime date, String status, bool isRadiology) async {
     try {
+      if (isRadiology) {
+        // For now, just show a success message and do not insert into the database
+        // If isRadiology is true, insert into the 'Radiology' table
+        final currentUser = _supabase.auth.currentUser;
+        if (currentUser == null) {
+          if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(
+               const SnackBar(content: Text('User not authenticated')),
+             );
+          }
+          return;
+        }
+
+        // Fetch the doctor's ID
+        final doctorResponse = await _supabase
+            .from('doctors')
+            .select('doctor_id')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+
+        if (doctorResponse == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Doctor profile not found. Cannot add radiology report.')),
+            );
+          }
+          return;
+        }
+
+        final doctorId = doctorResponse['doctor_id'];
+
+        await _supabase.from('Radiology').insert({ // Insert into 'Radiology' table
+          'patient_id': widget.patientId,
+          'doctor_id': doctorId,
+          'Title': title, // Use 'Title' as per database schema
+          'status': status,
+          'created_at': date.toIso8601String(), // Save date as ISO 8601 string
+          // 'is_radiology': true, // No need for this column in Radiology table
+        });
+
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('Radiology report added successfully!'))
+           );
+        }
+        _loadRadiologyReports(); // Refresh the radiology list after adding
+        print('[_addLabRadiologyRecord] Radiology record saved to DB: Title: $title, Date: $date, Status: $status');
+        return;
+      }
+
+      // Existing logic for Lab Reports
       final currentUser = _supabase.auth.currentUser;
       if (currentUser == null) {
         if (mounted) {
@@ -1232,6 +1440,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         'Title': title, // Use 'Title' as per _loadLabReports
         'status': status,
         'created_at': date.toIso8601String(), // Save date as ISO 8601 string
+        // 'is_radiology': isRadiology, // Add this new column
       });
 
       if (mounted) {
@@ -1250,19 +1459,26 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   // Function to delete a Lab/Radiology record from Supabase
-  Future<void> _deleteLabRadiologyRecord(String reportId) async {
+  Future<void> _deleteLabRadiologyRecord(String reportId, {bool isRadiology = false}) async {
     try {
+       // Determine if it's a radiology record before attempting to delete
+       final bool isRadiologyRecord = _radiologyReports.any((r) => r['Radiology_id']?.toString() == reportId); // **Corrected to use Radiology_id**
+        print('[_deleteLabRadiologyRecord] Attempting to delete record with ID: $reportId'); // Added logging
+        print('[_deleteLabRadiologyRecord] isRadiologyRecord: $isRadiologyRecord'); // Added logging
+
       await _supabase
-          .from('lab_reports')
+           .from(isRadiologyRecord ? 'Radiology' : 'lab_reports') // Select table based on flag
           .delete()
-          .eq('report_id', reportId); // Assuming 'report_id' is the primary key
+          .eq(isRadiologyRecord ? 'Radiology_id' : 'report_id', reportId); // **Corrected to use Radiology_id for Radiology table**
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Lab/Radiology record deleted successfully!'))
         );
       }
-      _loadLabReports(); // Refresh the list after deleting
+       // Refresh both lists after deleting, as we don't know which one it was
+      _loadLabReports();
+      _loadRadiologyReports();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1273,7 +1489,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
   }
 
   // Function to show the edit Lab/Radiology record dialog
-  void _showEditLabRadiologyRecordDialog(BuildContext context, Map<String, dynamic> record) {
+  void _showEditLabRadiologyRecordDialog(BuildContext context, Map<String, dynamic> record, {bool isRadiology = false, String? recordId}) {
     final TextEditingController titleController = TextEditingController(text: record['Title'] ?? '');
     DateTime? selectedDate = record['created_at'] != null ? DateTime.tryParse(record['created_at']) : null;
     String? selectedStatus = record['status'] ?? null;
@@ -1284,9 +1500,13 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
     print('[EditLabRadiologyDialog] Initial date: $selectedDate');
     print('[EditLabRadiologyDialog] Initial status: $selectedStatus');
 
-    // Correctly get the report_id from the record map
-    final String reportId = record['report_id']?.toString() ?? '';
-    print('[EditLabRadiologyDialog] Record ID from record: $reportId'); // Added logging
+    // Correctly get the record ID from the passed argument, defaulting to the value from the record map if not passed
+    final String currentRecordId = recordId ?? record['Radiology_id']?.toString() ?? record['report_id']?.toString() ?? ''; // Use passed recordId, fallback to map
+    print('[EditLabRadiologyDialog] Using record ID: $currentRecordId'); // Added logging
+
+     // Determine if the record is a radiology report based on the passed flag or by checking the record structure
+    final bool isRadiologyRecord = isRadiology || record.containsKey('Radiology_id');
+     print('[EditLabRadiologyDialog] isRadiologyRecord: $isRadiologyRecord'); // Added logging
 
     showDialog(
       context: context,
@@ -1300,7 +1520,7 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Edit Lab / Radiology Record',
+                  isRadiologyRecord ? 'Edit Radiology Record' : 'Edit Lab Record', // Dynamic title
                   style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
                 ),
                 const SizedBox(height: 16),
@@ -1386,25 +1606,25 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                           final String updatedTitle = titleController.text.trim();
                           final DateTime? updatedDate = selectedDate;
                           final String? updatedStatus = selectedStatus;
-                          // Use the reportId captured when the dialog was opened
 
                           // Add logging to show data before update call
                           print('[EditLabRadiologyDialog] Save button pressed.');
                           print('[EditLabRadiiologyDialog] updatedTitle: $updatedTitle');
                           print('[EditLabRadiologyDialog] updatedDate: $updatedDate');
                           print('[EditLabRadiologyDialog] updatedStatus: $updatedStatus');
-                          print('[EditLabRadiologyDialog] reportId: $reportId');
+                          print('[EditLabRadiologyDialog] recordId: $currentRecordId'); // Use the correctly determined ID
 
-                          if (reportId.isNotEmpty && updatedTitle.isNotEmpty && updatedDate != null && updatedStatus != null) {
+                          if (currentRecordId.isNotEmpty && updatedTitle.isNotEmpty && updatedDate != null && updatedStatus != null) {
                             await _updateLabRadiologyRecord(
-                              reportId,
+                              currentRecordId,
                               updatedTitle,
                               updatedDate,
                               updatedStatus,
+                              isRadiologyRecord,
                             );
                             Navigator.of(context).pop(); // Close the dialog
                           } else {
-                            // Show validation error or handle missing reportId
+                            // Show validation error
                             print('[EditLabRadiologyDialog] Validation failed.'); // Added logging
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Please fill all fields and ensure record has a valid ID')),
@@ -1435,24 +1655,33 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
 
   // Function to update a Lab/Radiology record in Supabase
   Future<void> _updateLabRadiologyRecord(
-    String reportId,
+    String recordId,
     String title,
     DateTime date,
     String status,
+     bool isRadiology, // Add isRadiology flag
   ) async {
     try {
       // Add logging to check the data being sent
-      print('[_updateLabRadiologyRecord] Attempting to update lab/radiology record with ID: $reportId');
+      print('[_updateLabRadiologyRecord] Attempting to update lab/radiology record with ID: $recordId');
+      print('[_updateLabRadiologyRecord] isRadiology: $isRadiology'); // Added logging
       print('[_updateLabRadiologyRecord] Data: {Title: $title, created_at: ${date.toIso8601String()}, status: $status}');
 
-      final response = await _supabase
-          .from('lab_reports')
+      // Add logging just before the Supabase update call
+      print('[_updateLabRadiologyRecord] Supabase update call parameters:');
+      print('  Table: ${isRadiology ? 'Radiology' : 'lab_reports'}');
+      print('  ID Column: ${isRadiology ? 'Radiology_id' : 'report_id'}');
+      print('  Record ID: $recordId');
+      print('  Update Data: {Title: $title, created_at: ${date.toIso8601String()}, status: $status}');
+
+       final response = await _supabase
+          .from(isRadiology ? 'Radiology' : 'lab_reports') // Select table based on flag
           .update({
             'Title': title,
             'created_at': date.toIso8601String(),
             'status': status,
           })
-          .eq('report_id', reportId) // Assuming 'report_id' is the primary key
+          .eq(isRadiology ? 'Radiology_id' : 'report_id', recordId) // **Corrected to use Radiology_id for Radiology table**
           .select(); // Select the updated row to check the response
 
       // Add logging for the Supabase response
@@ -1474,7 +1703,13 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         );
       }
       print('[_updateLabRadiologyRecord] Update successful. Loading reports...'); // Added logging
-      _loadLabReports(); // Refresh the list after updating
+      
+      // Refresh both lists after updating
+      if (isRadiology) {
+        _loadRadiologyReports();
+      } else {
+        _loadLabReports();
+      }
     } catch (e) {
       print('[_updateLabRadiologyRecord] Error: ${e.toString()}'); // Added logging
       if (mounted) {
@@ -2015,6 +2250,34 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
         );
       }
     }
+  }
+
+  // Add a new widget for the Lab/Radiology sub-tab buttons
+  Widget _labRadiologySubTabButton(String label, int index) {
+    final bool selected = selectedLabRadiologyTab == index;
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: () => setState(() => selectedLabRadiologyTab = index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.colorScheme.primary), // Add border for unselected state
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary, // Text color based on selection
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ),
+    );
   }
 }
 

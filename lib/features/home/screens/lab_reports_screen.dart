@@ -14,28 +14,39 @@ class LabReportsScreen extends StatefulWidget {
 
 class _LabReportsScreenState extends State<LabReportsScreen> {
   final SupabaseClient _supabase = Supabase.instance.client; // Supabase client instance
-  List<Map<String, dynamic>> _labRadiologyReports = []; // List to hold fetched reports
+  List<Map<String, dynamic>> _labReports = []; // List for lab reports
+  List<Map<String, dynamic>> _radiologyReports = []; // List for radiology reports
   bool _isLoading = true; // Loading state
+  int _selectedCategory = 0; // 0 for Lab Tests, 1 for Radiology
 
   @override
   void initState() {
     super.initState();
-    _loadLabRadiologyReports(); // Load data on init
+    _loadReports(); // Load data on init
   }
 
-  Future<void> _loadLabRadiologyReports() async {
+  Future<void> _loadReports() async {
     try {
       setState(() => _isLoading = true);
-      // Fetch data from the 'lab_reports' table
-      final response = await _supabase
+      
+      // Fetch Lab Reports
+      final labResponse = await _supabase
           .from('lab_reports')
-          .select('report_id, patient_id, doctor_id, status, created_at, Title, doctors!lab_reports_doctor_id_fkey(name)') // Select necessary columns and join with doctors table
+          .select('report_id, patient_id, doctor_id, status, created_at, Title, doctors!lab_reports_doctor_id_fkey(name)')
+          .order('created_at', ascending: false);
+
+      // Fetch Radiology Reports
+      final radiologyResponse = await _supabase
+          .from('Radiology') // Assuming your radiology table is named 'Radiology'
+          .select('Radiology_id, patient_id, doctor_id, status, created_at, Title, doctors!Radiology_doctor_id_fkey(name)') // Select necessary columns and join with doctors table
           .order('created_at', ascending: false);
 
       setState(() {
-        _labRadiologyReports = List<Map<String, dynamic>>.from(response);
+        _labReports = List<Map<String, dynamic>>.from(labResponse);
+        _radiologyReports = List<Map<String, dynamic>>.from(radiologyResponse);
         _isLoading = false;
       });
+
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,27 +78,100 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
         centerTitle: true,
         title: Text('Lab Reports & Radiology', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)), // Updated title
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator()) // Show loading indicator
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Column(
-                children: [
-                  // Removed tabs and sort/filter buttons
-                  Expanded(
-                    child: _labRadiologyReports.isEmpty
-                        ? _buildEmptyState(theme) // Show empty state if no reports
-                        : ListView.builder(
-                            itemCount: _labRadiologyReports.length,
-                            itemBuilder: (context, index) {
-                              final report = _labRadiologyReports[index];
-                              return _buildReportCard(report, theme);
-                            },
-                          ),
-                  ),
-                ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          children: [
+            _buildCategoryButtons(theme), // Add category buttons
+            Expanded(
+              child: Builder(
+                builder: (BuildContext context) {
+                  if (_isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (_selectedCategory == 0) {
+                    // Lab Reports
+                    if (_labReports.isEmpty) {
+                      return _buildEmptyState(theme);
+                    } else {
+                      return ListView.builder(
+                        itemCount: _labReports.length,
+                        itemBuilder: (context, index) {
+                          final report = _labReports[index];
+                          return _buildReportCard(report, theme);
+                        },
+                      );
+                    }
+                  } else {
+                    // Radiology Reports
+                    if (_radiologyReports.isEmpty) {
+                      return _buildEmptyState(theme);
+                    } else {
+                      return ListView.builder(
+                        itemCount: _radiologyReports.length,
+                        itemBuilder: (context, index) {
+                          final report = _radiologyReports[index];
+                          return _buildReportCard(report, theme);
+                        },
+                      );
+                    }
+                  }
+                },
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // New widget to build the category buttons
+  Widget _buildCategoryButtons(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _selectedCategory = 0; // Select Lab Tests
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedCategory == 0 ? theme.colorScheme.primary : theme.colorScheme.surface,
+                foregroundColor: _selectedCategory == 0 ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  side: BorderSide(color: theme.colorScheme.primary), // Add border
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('Lab Tests'),
+            ),
+          ),
+          const SizedBox(width: 16), // Add spacing between buttons
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _selectedCategory = 1; // Select Radiology
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedCategory == 1 ? theme.colorScheme.primary : theme.colorScheme.surface,
+                foregroundColor: _selectedCategory == 1 ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  side: BorderSide(color: theme.colorScheme.primary), // Add border
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('Radiology'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -138,10 +222,10 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
               Text(date, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
               // Removed result display as per assumption
               const Text(' . '), // Keep separator
-              Text(
+                Text(
                 status,
                 style: theme.textTheme.bodyMedium?.copyWith(color: statusColor, fontWeight: FontWeight.w500),
-              ),
+                ),
             ],
           ),
           // Removed description display as per assumption

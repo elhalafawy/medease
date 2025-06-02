@@ -7,6 +7,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
   final String medications;
   final String notes;
   final DateTime date;
+  final String? profileImageUrl;
 
   const MedicalRecordDetailsScreen({
     super.key,
@@ -16,6 +17,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
     required this.medications,
     required this.notes,
     required this.date,
+    this.profileImageUrl,
   });
 
   @override
@@ -40,6 +42,15 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: CircleAvatar(
+                radius: 40,
+                backgroundImage: (profileImageUrl != null && profileImageUrl!.isNotEmpty)
+                    ? NetworkImage(profileImageUrl!) as ImageProvider
+                    : const AssetImage('assets/images/profile_picture.png') as ImageProvider,
+              ),
+            ),
+            const SizedBox(height: 24),
             _buildInfoCard(
               title: 'Patient Name',
               value: patientName,
@@ -80,6 +91,58 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
               value: '${date.day}/${date.month}/${date.year}',
               icon: Icons.calendar_today,
               theme: theme,
+            ),
+            const SizedBox(height: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () { /* Do nothing for now */ },
+                      icon: const Icon(Icons.science),
+                      label: const Text('Lab Results'),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surface,
+                        foregroundColor: theme.colorScheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: BorderSide(color: theme.colorScheme.primary),
+                        ),
+                        textStyle: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () { /* Do nothing for now */ },
+                      icon: const Icon(Icons.medical_services),
+                      label: const Text('X-Ray'),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surface,
+                        foregroundColor: theme.colorScheme.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          side: BorderSide(color: theme.colorScheme.primary),
+                        ),
+                        textStyle: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
