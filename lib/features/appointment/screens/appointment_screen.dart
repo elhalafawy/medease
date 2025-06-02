@@ -8,7 +8,6 @@ import '../../../core/theme/app_theme.dart';
 
 class AppointmentScreen extends StatefulWidget {
   final Map<String, dynamic>? doctor;
-
   const AppointmentScreen({
     super.key,
     this.doctor,
@@ -19,17 +18,87 @@ class AppointmentScreen extends StatefulWidget {
 }
 
 class _AppointmentScreenState extends State<AppointmentScreen> {
-  int selectedDayIndex = 2;
+  int selectedDayIndex = 0;
   int selectedTimeIndex = 0;
   bool isBooking = false;
   int notesCount = 0;
   String userNote = "";
 
   final List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
-  final List<String> dates = ['3', '4', '5', '6', '7'];
-  final List<String> times = ['09:00:00', '09:30:00', '10:00:00', '10:30:00'];
+  final List<String> dates = [
+  "2025-06-02",
+  "2025-06-03",
+  "2025-06-04",
+  "2025-06-05",
+  "2025-06-06"
+];
+  final List<dynamic> times = ["9:30" , "10:30" , "11:30" , "12:30" , "13:30"];
 
   final supabase = Supabase.instance.client;
+
+  List<Map<String, dynamic>> 
+  availableTimeSlots = [];
+  bool loadingSlots = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAvailableTimeSlots();
+  }
+
+  // Helper to generate 30-minute slots between start and end time
+  List<String> generateTimeSlots(String startTime, String endTime) {
+    List<String> slots = [];
+    TimeOfDay start = TimeOfDay(
+      hour: int.parse(startTime.split(":")[0]),
+      minute: int.parse(startTime.split(":")[1]),
+    );
+    TimeOfDay end = TimeOfDay(
+      hour: int.parse(endTime.split(":")[0]),
+      minute: int.parse(endTime.split(":")[1]),
+    );
+    TimeOfDay current = start;
+    while (current.hour < end.hour || (current.hour == end.hour && current.minute < end.minute)) {
+      final hourStr = current.hour.toString().padLeft(2, '0');
+      final minStr = current.minute.toString().padLeft(2, '0');
+      slots.add("$hourStr:$minStr");
+      int newMinute = current.minute + 30;
+      int newHour = current.hour;
+      if (newMinute >= 60) {
+        newHour += 1;
+        newMinute -= 60;
+      }
+      current = TimeOfDay(hour: newHour, minute: newMinute);
+    }
+    return slots;
+  }
+
+  Future<void> fetchAvailableTimeSlots() async {
+    setState(() {
+      loadingSlots = true;
+      availableTimeSlots = [];
+    });
+
+    const doctorId = "b55f005f-3185-4fa3-9098-2179e0751621"; // or widget.doctor?['id']
+    final selectedDate = dates[selectedDayIndex];
+    // Fetch slots from Supabase
+    final slots = await supabase
+        .from('time_slots')
+        .select("doctor_id, available_date, start_time, end_time, status")
+        .eq('doctor_id', doctorId)
+        .eq('available_date', selectedDate)
+        .order('start_time', ascending: true);
+    setState(() {
+      loadingSlots = false;
+      availableTimeSlots = (slots as List?)?.cast<Map<String, dynamic>>() ?? [];
+      // selectedTimeIndex = 0;
+      dates.addAll(availableTimeSlots.map((slot) => slot['available_date'] as String));
+      times.clear();
+      for (final slot in availableTimeSlots) {
+        times.addAll(generateTimeSlots(slot['start_time'], slot['end_time']));
+      }
+    });
+  }
 
   Future<void> _showConfirmationDialog() async {
     return showDialog(
@@ -62,84 +131,122 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   }
 
   Future<void> _bookAppointment() async {
-  setState(() => isBooking = true);
+    setState(() => isBooking = true);
 
-  final user = supabase.auth.currentUser;
-  if (user == null) {
-    CustomSnackBar.show(context: context, message: 'User not logged in');
-    setState(() => isBooking = false);
-    return;
-  }
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      CustomSnackBar.show(context: context, message: 'User not logged in');
+      setState(() => isBooking = false);
+      return;
+    }
 
-  // 🔍 Step 1: Get the patient_id that corresponds to the logged-in user
-  final patient = await supabase
-    .from('patients')
-    .select('patient_id')
-    .eq('user_id', user.id)
-    .maybeSingle();
+    final doctorId = 'b55f005f-3185-4fa3-9098-2179e0751621';
+    // widget.doctor?['id'];
+    if (doctorId == null) {
+      CustomSnackBar.show(context: context, message: 'Doctor information not found');
+      setState(() => isBooking = false);
+      return;
+    }
 
-if (patient == null) {
-  CustomSnackBar.show(context: context, message: 'Patient profile not found');
-  setState(() => isBooking = false);
-  return;
-}
+    if (selectedDayIndex < 0 || selectedDayIndex >= dates.length ||
+        selectedTimeIndex < 0 || selectedTimeIndex >= times.length) {
+      CustomSnackBar.show(context: context, message: 'Invalid date or time selection');
+      setState(() => isBooking = false,);
+      return;
+    }
 
-final patientId = patient['patient_id'];
-final doctorID = patient['doctor_id'];
+    try {
+      // 🔍 Step 1: Get the patient_id that corresponds to the logged-in user
+      final patient = await supabase
+          .from('patients')
+          .select('patient_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
 
-final newAppointment = {
-  'appointment_id': const Uuid().v4(),
-  // 'doctor_id': widget.doctor?['id'],
-  'doctor_id': "8542e414-78e2-40c7-9b9c-36748ac82c99",
-  'patient_id': patientId, // ✅ must match auth.uid()
-  'date': DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      int.parse(dates[selectedDayIndex]),
-    ).toIso8601String(),
-  'time': times[selectedTimeIndex],
-  'status': 'pending',
-  'patient_confirmed': true,
-  'doctor_confirmed': false,
-  'notes': userNote,
-};
+      if (patient == null) {
+        CustomSnackBar.show(context: context, message: 'Patient profile not found');
+        setState(() => isBooking = false);
+        return;
+      }
 
-// await supabase.from('appointments').insert(newAppointment);
+      final patientId = patient['patient_id'];
+      final selectedDate = DateTime.parse(dates[selectedDayIndex]);
 
-  // 📥 Step 3: Insert into the database
-  final response = await supabase.from('appointments').insert(newAppointment);
+      // Check if the time slot is available
+      final timeSlot = await supabase
+          .from('time_slots')
+          .select()
+          .eq('doctor_id', doctorId)
+          .eq('available_date', selectedDate.toIso8601String().split('T')[0])
+          // .eq('start_time', times[selectedTimeIndex])
+          .eq('status', 'available')
+          .maybeSingle();
+          
+      if (timeSlot == null) {
+        CustomSnackBar.show(context: context, message: 'Selected time slot is not available');
+        setState(() => isBooking = false);
+        return;
+      }
 
-  setState(() => isBooking = false);
-  Navigator.pop(context);
+      CustomSnackBar.show(context: context, message: 'time_slots: $timeSlot');
+      
+      dates.add(selectedDate.toIso8601String().split('T')[0]);
+      times.addAll(generateTimeSlots(timeSlot['start_time'], timeSlot['end_time']));
 
-// if (response == null) {
-//   CustomSnackBar.show(context: context, message: 'Insert failed, no response.');
-//   setState(() => isBooking = false);
-//   return;
-// }
+      final newAppointment = {
+        'appointment_id': const Uuid().v4(),
+        'doctor_id': doctorId,
+        'patient_id': patientId,
+        'date': selectedDate.toIso8601String(),
+        'time': times[selectedTimeIndex],
+        'status': 'pending',
+        'patient_confirmed': true,
+        'doctor_confirmed': false,
+        'notes': userNote,
+      };
 
-  if (response.error == null && mounted) {
-    CustomSnackBar.show(
-      context: context,
-      message: 'Appointment booked successfully!',
-    );
+      // Start a transaction
+      final response = await supabase.from('appointments').insert(newAppointment);
+      if (!response.error) {
+        CustomSnackBar.show(context: context, message: 'Error: ${response.error?.message}');
+        print('Error: ${response.error?.message}');
+        setState(() => isBooking = false);
+        return;
+      }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MainNavigation(
-          goToAppointment: true,
-          initialAppointments: [newAppointment],
+      // Update the time slot status
+      await supabase
+          .from('time_slots')
+          .update({'status': 'booked'})
+          .eq('slot_id', timeSlot['slot_id']);
+
+      if (!mounted) return;
+      CustomSnackBar.show(
+        context: context,
+        message: 'Appointment booked successfully!',
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainNavigation(
+            goToAppointment: true,
+            initialAppointments: [newAppointment],
+          ),
         ),
-      ),
-    );
-  } else {
-    CustomSnackBar.show(
-      context: context,
-      message: 'Error: ${response.error?.message}',
-    );
+      );
+    } catch (e) {
+      if (!mounted) return;
+      CustomSnackBar.show(
+        context: context,
+        message: 'Error booking appointment: $e',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isBooking = false);
+      }
+    }
   }
-}
 
   void _incrementNoteCount(String note) {
     setState(() {
@@ -285,7 +392,13 @@ final newAppointment = {
               final isSelected = index == selectedDayIndex;
               return Expanded(
                 child: GestureDetector(
-                  onTap: () => setState(() => selectedDayIndex = index),
+                  onTap: () {
+                    setState(() {
+                      selectedDayIndex = index;
+                      selectedTimeIndex = 0;
+                    });
+                    fetchAvailableTimeSlots();
+                  },
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     decoration: BoxDecoration(
@@ -333,7 +446,12 @@ final newAppointment = {
           children: List.generate(times.length, (index) {
             final isSelected = index == selectedTimeIndex;
             return GestureDetector(
-              onTap: () => setState(() => selectedTimeIndex = index),
+              onTap: () {
+                    setState(() {
+                      selectedTimeIndex = index;
+                    });
+                    fetchAvailableTimeSlots();
+                  },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(

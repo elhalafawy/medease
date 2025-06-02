@@ -44,4 +44,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/doctor_photo.png
     - assets/icons/
+    - assets\icons\facebook_icon.png

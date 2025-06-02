@@ -288,7 +288,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[200],
                   backgroundImage: AssetImage(
-                    appointment['imageUrl'] ?? appointment['image'] ?? 'assets\images\doctor_photo.png',
+                    appointment['imageUrl'] ?? appointment['image'] ?? 'E:\Medease\Final\medease\assets\icons\facebook_icon.png',
                   ),
                   radius: 32,
                 ),

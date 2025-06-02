@@ -56,12 +56,13 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
     try {
       await Supabase.instance.client
           .from('appointments')
-          .update({'status': 'confirmed'})
+          .update({
+            'doctor_confirmed': true,
+            'status': 'confirmed'
+          })
           .eq('appointment_id', appointmentId);
-      // Optionally refresh appointments
       await fetchAppointments();
     } catch (e) {
-      // Handle error (show a snackbar, etc.)
       print('Failed to confirm appointment: $e');
     }
   }

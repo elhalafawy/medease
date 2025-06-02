@@ -35,24 +35,39 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
           .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
           .order('available_date');
       
-      if (response != null) {
+      if (response != null && response is List) {
         setState(() {
-          confirmedAppointments = (response as List).map((slot) {
-            // Convert the database format to the format expected by the UI
-            final date = DateTime.parse(slot['available_date']);
-            final startParts = (slot['start_time'] as String).split(':');
-            final endParts = (slot['end_time'] as String).split(':');
-            
-            return {
-              'day': date,
-              'from': TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1])),
-              'to': TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1])),
-            };
-          }).toList();
+          confirmedAppointments = response.map((slot) {
+            try {
+              // Convert the database format to the format expected by the UI
+              final date = DateTime.parse(slot['available_date'] as String);
+              final startParts = (slot['start_time'] as String).split(':');
+              final endParts = (slot['end_time'] as String).split(':');
+              
+              return {
+                'day': date,
+                'from': TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1])),
+                'to': TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1])),
+              };
+            } catch (e) {
+              print('Error parsing slot: $e');
+              return null;
+            }
+          })
+          .where((slot) => slot != null)
+          .cast<Map<String, dynamic>>()
+          .toList();
+        });
+      } else {
+        setState(() {
+          confirmedAppointments = [];
         });
       }
     } catch (e) {
       print('Error loading appointments: $e');
+      setState(() {
+        confirmedAppointments = [];
+      });
     }
   }
 
