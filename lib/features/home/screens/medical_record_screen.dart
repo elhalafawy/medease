@@ -91,8 +91,10 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     ..._records.map((record) => _buildRecordItem(
                       patientName: record['doctors']?['name'] ?? 'N/A',
                       diagnosis: record['medical_condition'] ?? 'N/A',
+                      symptoms: record['symptoms'] ?? 'N/A',
                       tests: record['tests'] ?? 'N/A',
                       medications: record['medications'] ?? 'N/A',
+                      notes: record['notes'] ?? 'N/A',
                       date: DateTime.parse(record['created_at']),
                       context: context,
                       theme: theme,
@@ -104,21 +106,24 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   }
 
   Widget _buildLabReportsButton(BuildContext context, ThemeData theme) {
-    return ElevatedButton.icon(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LabReportsScreen()),
-        );
-      },
-      icon: const Icon(Icons.science),
-      label: const Text('View Lab Reports'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LabReportsScreen()),
+          );
+        },
+        icon: const Icon(Icons.science),
+        label: const Text('View Lab Reports & Radiology'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
         ),
       ),
     );
@@ -127,71 +132,102 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   Widget _buildRecordItem({
     required String patientName,
     required String diagnosis,
+    required String symptoms,
     required String tests,
     required String medications,
+    required String notes,
     required DateTime date,
     required BuildContext context,
     required ThemeData theme,
   }) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MedicalRecordDetailsScreen(
-                patientName: patientName,
-                diagnosis: diagnosis,
-                tests: tests,
-                medications: medications,
-                date: date,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MedicalRecordDetailsScreen(
+              patientName: patientName,
+              symptoms: symptoms,
+              tests: tests,
+              medications: medications,
+              notes: notes,
+              date: date,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withAlpha(20),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: theme.colorScheme.primary, width: 2),
+              ),
+              child: CircleAvatar(
+                backgroundColor: theme.colorScheme.surface,
+                radius: 28,
+                child: Icon(Icons.medical_services, color: theme.colorScheme.primary, size: 32),
               ),
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     patientName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   ),
+                  const SizedBox(height: 6),
                   Text(
-                    '${date.day}/${date.month}/${date.year}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
-                    ),
+                    'Diagnosis: $diagnosis',
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Tests: $tests',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Medications: $medications',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Added on: ${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.arrow_forward, color: theme.colorScheme.primary, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Show more',
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Diagnosis: $diagnosis',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Tests: $tests',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Medications: $medications',
-                style: theme.textTheme.bodyMedium,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

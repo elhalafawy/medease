@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
+import 'package:intl/intl.dart'; // Import for date formatting
+import 'lab_radiology_report_details_screen.dart'; // Import the new details screen
 
 class LabReportsScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -10,66 +13,42 @@ class LabReportsScreen extends StatefulWidget {
 }
 
 class _LabReportsScreenState extends State<LabReportsScreen> {
-  int selectedTab = 0; // 0: Lab, 1: Radiology
+  final SupabaseClient _supabase = Supabase.instance.client; // Supabase client instance
+  List<Map<String, dynamic>> _labRadiologyReports = []; // List to hold fetched reports
+  bool _isLoading = true; // Loading state
 
-  final List<Map<String, dynamic>> labReports = [
-    {
-      'title': 'Complete Blood Count (CBC)',
-      'date': '02 Jan, 2024',
-      'status': 'Pending',
-      'result': '',
-      'desc': 'Results will be 03 Jan, 2024',
-      'statusColor': AppTheme.greyColor,
-    },
-    {
-      'title': 'Complete Blood Count (CBC)',
-      'date': '02 Jan, 2024',
-      'status': 'Normal Results',
-      'result': 'Normal Results',
-      'desc': '',
-      'statusColor': const Color(0xFF1A7C3E),
-    },
-    {
-      'title': 'Lipid Panel',
-      'date': '02 Jan, 2024',
-      'status': 'Requires Attention',
-      'result': 'Requires Attention',
-      'desc': '',
-      'statusColor': const Color(0xFFFFA800),
-    },
-    {
-      'title': 'Thyroid Function Test',
-      'date': '02 Jan, 2024',
-      'status': 'Follow-Up Needed',
-      'result': 'Follow-Up Needed',
-      'desc': '',
-      'statusColor': const Color(0xFFFF3B30),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadLabRadiologyReports(); // Load data on init
+  }
 
-  final List<Map<String, dynamic>> radiologyReports = [
-    {
-      'title': 'Chest X-Ray',
-      'date': '10 Feb, 2024',
-      'status': 'Normal',
-      'result': 'Normal',
-      'desc': '',
-      'statusColor': const Color(0xFF1A7C3E),
-    },
-    {
-      'title': 'Abdominal Ultrasound',
-      'date': '15 Feb, 2024',
-      'status': 'Requires Attention',
-      'result': 'Requires Attention',
-      'desc': '',
-      'statusColor': const Color(0xFFFFA800),
-    },
-  ];
+  Future<void> _loadLabRadiologyReports() async {
+    try {
+      setState(() => _isLoading = true);
+      // Fetch data from the 'lab_reports' table
+      final response = await _supabase
+          .from('lab_reports')
+          .select('report_id, patient_id, doctor_id, status, created_at, Title, doctors!lab_reports_doctor_id_fkey(name)') // Select necessary columns and join with doctors table
+          .order('created_at', ascending: false);
+
+      setState(() {
+        _labRadiologyReports = List<Map<String, dynamic>>.from(response);
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading reports: ${e.toString()}')),
+        );
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final reports = selectedTab == 0 ? labReports : radiologyReports;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -86,83 +65,53 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
           },
         ),
         centerTitle: true,
-        title: Text('lab reports', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
+        title: Text('Lab Reports & Radiology', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)), // Updated title
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          children: [
-            _buildTabs(theme),
-            const SizedBox(height: 8),
-            _buildSortAndFilter(theme),
-            const SizedBox(height: 12),
-            Expanded(
-              child: reports.isEmpty
-                  ? _buildEmptyState(theme)
-                  : ListView.builder(
-                      itemCount: reports.length,
-                      itemBuilder: (context, index) {
-                        final report = reports[index];
-                        return _buildReportCard(report, theme);
-                      },
-                    ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator()) // Show loading indicator
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                children: [
+                  // Removed tabs and sort/filter buttons
+                  Expanded(
+                    child: _labRadiologyReports.isEmpty
+                        ? _buildEmptyState(theme) // Show empty state if no reports
+                        : ListView.builder(
+                            itemCount: _labRadiologyReports.length,
+                            itemBuilder: (context, index) {
+                              final report = _labRadiologyReports[index];
+                              return _buildReportCard(report, theme);
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabs(ThemeData theme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _tabButton('Lab Tests', 0, theme),
-        const SizedBox(width: 12),
-        _tabButton('Radiology', 1, theme),
-      ],
-    );
-  }
-
-  Widget _tabButton(String label, int index, ThemeData theme) {
-    final bool selected = selectedTab == index;
-    return GestureDetector(
-      onTap: () => setState(() => selectedTab = index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? theme.colorScheme.primary : theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.colorScheme.primary),
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSortAndFilter(ThemeData theme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.sort, size: 20, color: theme.colorScheme.onSurface.withAlpha(153)),
-            const SizedBox(width: 4),
-            Text('By date', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
-          ],
-        ),
-        Icon(Icons.sync, size: 22, color: theme.colorScheme.onSurface.withAlpha(153)),
-      ],
     );
   }
 
   Widget _buildReportCard(Map<String, dynamic> report, ThemeData theme) {
+    // Safely access data using correct column names from database
+    final String title = report['Title'] ?? 'N/A';
+    final String date = report['created_at'] != null
+        ? DateFormat('dd MMM, yyyy').format(DateTime.parse(report['created_at']).toLocal())
+        : 'N/A';
+    final String status = report['status'] ?? 'N/A';
+    // final String result = report['result'] ?? ''; // Assuming no separate result field, using status
+    // Access doctor name from the nested object, providing default
+    final String doctorName = report['doctors']?['name'] ?? 'N/A';
+
+    // Determine status color based on status string
+    Color statusColor = AppTheme.greyColor; // Default color
+    if (status == 'Normal Results') {
+      statusColor = Colors.green;
+    } else if (status == 'Requires Attention') {
+      statusColor = Colors.orange;
+    } else if (status == 'Urgent') {
+      statusColor = Colors.red;
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -178,7 +127,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text(report['title'], style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
+                child: Text(title, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
               ),
               Icon(Icons.more_vert, color: theme.colorScheme.onSurface.withAlpha(153)),
             ],
@@ -186,26 +135,32 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
           const SizedBox(height: 4),
           Row(
             children: [
-              Text(report['date'], style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
-              if (report['result'] != null && report['result'].toString().isNotEmpty) ...[
-                const Text(' . '),
-                Text(
-                  report['result'],
-                  style: theme.textTheme.bodyMedium?.copyWith(color: report['statusColor'], fontWeight: FontWeight.w500),
-                ),
-              ],
+              Text(date, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
+              // Removed result display as per assumption
+              const Text(' . '), // Keep separator
+              Text(
+                status,
+                style: theme.textTheme.bodyMedium?.copyWith(color: statusColor, fontWeight: FontWeight.w500),
+              ),
             ],
           ),
-          if (report['desc'] != null && report['desc'].toString().isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(report['desc'], style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
-          ],
+          // Removed description display as per assumption
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Implement View Report functionality
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LabRadiologyReportDetailsScreen(
+                          reportData: report, // Pass the entire report map
+                        ),
+                      ),
+                    );
+                  },
                   icon: Icon(Icons.remove_red_eye, color: theme.colorScheme.primary),
                   label: Text('View Report', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                   style: OutlinedButton.styleFrom(
@@ -218,7 +173,9 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    // TODO: Implement Download functionality
+                  },
                   icon: Icon(Icons.download, color: theme.colorScheme.primary),
                   label: Text('Download', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                   style: OutlinedButton.styleFrom(
@@ -241,13 +198,13 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 60),
-          Icon(Icons.science, size: 60, color: theme.colorScheme.onSurface.withAlpha(153)),
+          Icon(Icons.receipt_long_outlined, size: 60, color: theme.colorScheme.onSurface.withOpacity(0.5)), // Changed icon
           const SizedBox(height: 18),
-          Text('No lab reports found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153))),
+          Text('No lab or radiology reports found', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))), // Updated text
           const SizedBox(height: 8),
           Text(
-            'Your test reports will appear here\nonce they are available.',
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(153)),
+            'Reports will appear here once they are available.', // Updated text
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6)), // Adjusted opacity
             textAlign: TextAlign.center,
           ),
         ],

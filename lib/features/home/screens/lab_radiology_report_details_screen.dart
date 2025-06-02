@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_theme.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
 
-class MedicalRecordDetailsScreen extends StatelessWidget {
-  final String patientName;
-  final String symptoms;
-  final String tests;
-  final String medications;
-  final String notes;
-  final DateTime date;
+class LabRadiologyReportDetailsScreen extends StatelessWidget {
+  final Map<String, dynamic> reportData;
 
-  const MedicalRecordDetailsScreen({
-    super.key,
-    required this.patientName,
-    required this.symptoms,
-    required this.tests,
-    required this.medications,
-    required this.notes,
-    required this.date,
-  });
+  const LabRadiologyReportDetailsScreen({super.key, required this.reportData});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // Safely access data from the reportData map
+    final String title = reportData['Title'] ?? 'N/A';
+    final String date = reportData['created_at'] != null
+        ? DateFormat('dd MMM, yyyy').format(DateTime.parse(reportData['created_at']).toLocal())
+        : 'N/A';
+    final String status = reportData['status'] ?? 'N/A';
+    final String doctorName = reportData['doctors']?['name'] ?? 'N/A';
+    // You can add more fields here if they exist in your fetched reportData, e.g., 'result', 'description'
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Medical Record Details',
+          'Report Details',
           style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface),
         ),
         backgroundColor: theme.colorScheme.surface,
@@ -41,50 +40,51 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoCard(
-              title: 'Patient Name',
-              value: patientName,
-              icon: Icons.person,
-              theme: theme,
-            ),
-            const SizedBox(height: 16),
-            _buildInfoCard(
-              title: 'Symptoms',
-              value: symptoms,
-              icon: Icons.healing,
-              theme: theme,
-            ),
-            const SizedBox(height: 16),
-            _buildInfoCard(
-              title: 'Notes',
-              value: notes,
-              icon: Icons.note_alt,
-              theme: theme,
-            ),
-            const SizedBox(height: 16),
-            _buildInfoCard(
-              title: 'Tests',
-              value: tests,
-              icon: Icons.science,
-              theme: theme,
-            ),
-            const SizedBox(height: 16),
-            _buildInfoCard(
-              title: 'Medications',
-              value: medications,
-              icon: Icons.medication,
+              title: 'Report Title',
+              value: title,
+              icon: Icons.description_outlined,
               theme: theme,
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
               title: 'Date',
-              value: '${date.day}/${date.month}/${date.year}',
-              icon: Icons.calendar_today,
+              value: date,
+              icon: Icons.calendar_today_outlined,
               theme: theme,
             ),
+            const SizedBox(height: 16),
+             _buildInfoCard(
+              title: 'Status',
+              value: status,
+              icon: Icons.info_outline,
+              theme: theme,
+               valueColor: _getStatusColor(status, theme), // Pass status color
+            ),
+            const SizedBox(height: 16),
+             _buildInfoCard(
+              title: 'Added By Doctor',
+              value: doctorName,
+              icon: Icons.person_outline,
+              theme: theme,
+            ),
+            // Add more _buildInfoCard widgets for other report details if available
           ],
         ),
       ),
     );
+  }
+
+   Color _getStatusColor(String status, ThemeData theme) {
+    switch (status) {
+      case 'Normal Results':
+        return Colors.green;
+      case 'Requires Attention':
+        return Colors.orange;
+      case 'Urgent':
+        return Colors.red;
+      default:
+        return theme.colorScheme.onSurface.withOpacity(0.7); // Default color
+    }
   }
 
   Widget _buildInfoCard({
@@ -92,6 +92,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
     required String value,
     required IconData icon,
     required ThemeData theme,
+    Color? valueColor,
   }) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -116,11 +117,11 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: theme.textTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge?.copyWith(color: valueColor ?? theme.textTheme.bodyLarge?.color),
             ),
           ],
         ),
       ),
     );
   }
-}
+} 
