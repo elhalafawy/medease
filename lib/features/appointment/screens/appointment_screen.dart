@@ -50,32 +50,72 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
     }
   }
 
+  // // Helper to generate 30-minute slots between start and end time
+  // List<String> generateTimeSlots(String startTime, String endTime) {
+  //   List<String> slots = [];
+  //   TimeOfDay start = TimeOfDay(
+  //     hour: int.parse(startTime.split(":")[0]),
+  //     minute: int.parse(startTime.split(":")[1]),
+  //   );
+  //   TimeOfDay end = TimeOfDay(
+  //     hour: int.parse(endTime.split(":")[0]),
+  //     minute: int.parse(endTime.split(":")[1]),
+  //   );
+  //   TimeOfDay current = start;
+  //   while (current.hour < end.hour || (current.hour == end.hour && current.minute < end.minute)) {
+  //     final hourStr = current.hour.toString().padLeft(2, '0');
+  //     final minStr = current.minute.toString().padLeft(2, '0');
+  //     slots.add("$hourStr:$minStr");
+  //     int newMinute = current.minute + 30;
+  //     int newHour = current.hour;
+  //     if (newMinute >= 60) {
+  //       newHour += 1;
+  //       newMinute -= 60;
+  //     }
+  //     current = TimeOfDay(hour: newHour, minute: newMinute);
+  //   }
+  //   return slots;
+  // }
+
   // Helper to generate 30-minute slots between start and end time
-  List<String> generateTimeSlots(String startTime, String endTime) {
-    List<String> slots = [];
-    TimeOfDay start = TimeOfDay(
-      hour: int.parse(startTime.split(":")[0]),
-      minute: int.parse(startTime.split(":")[1]),
-    );
-    TimeOfDay end = TimeOfDay(
-      hour: int.parse(endTime.split(":")[0]),
-      minute: int.parse(endTime.split(":")[1]),
-    );
-    TimeOfDay current = start;
-    while (current.hour < end.hour || (current.hour == end.hour && current.minute < end.minute)) {
-      final hourStr = current.hour.toString().padLeft(2, '0');
-      final minStr = current.minute.toString().padLeft(2, '0');
-      slots.add("$hourStr:$minStr");
-      int newMinute = current.minute + 30;
-      int newHour = current.hour;
-      if (newMinute >= 60) {
-        newHour += 1;
-        newMinute -= 60;
-      }
-      current = TimeOfDay(hour: newHour, minute: newMinute);
+List<TimeOfDay> generateTimeSlots(TimeOfDay start, TimeOfDay end) {
+  List<TimeOfDay> slots = [];
+  TimeOfDay current = start;
+  while (current.hour < end.hour || (current.hour == end.hour && current.minute < end.minute)) {
+    slots.add(current);
+    int newMinute = current.minute + 30;
+    int newHour = current.hour;
+    if (newMinute >= 60) {
+      newHour += 1;
+      newMinute -= 60;
     }
-    return slots;
+    current = TimeOfDay(hour: newHour, minute: newMinute);
   }
+  return slots;
+}
+
+// Use this in your addTimeSlot logic:
+Future<void> addTimeSlots({
+  required String doctorId,
+  required DateTime availableDate,
+  required TimeOfDay fromTime,
+  required TimeOfDay toTime,
+  String status = 'available',
+  String? recurringRule,
+}) async {
+  final supabase = Supabase.instance.client;
+  List<TimeOfDay> slots = generateTimeSlots(fromTime, toTime);
+  for (final slot in slots) {
+    final slotStr = '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
+    await supabase.from('time_slots_duplicate').insert({
+      'doctor_id': doctorId,
+      'available_date': availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
+      'time_slot': slotStr,
+      'status': status,
+      'recurring_rule': recurringRule,
+    });
+  }
+}
 
   Future<void> fetchAvailableTimeSlots() async {
     setState(() {
@@ -87,18 +127,19 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
     final selectedDate = dates[selectedDayIndex];
     // Fetch slots from Supabase
     final slots = await supabase
-        .from('time_slots')
-        .select("doctor_id, available_date, start_time, end_time, status")
+        .from('time_slots_duplicate')
+        .select("doctor_id, available_date, time_slot, status")
         .eq('doctor_id', doctorId)
         .eq('available_date', selectedDate)
-        .order('start_time', ascending: true);
+        .eq('status', 'available')
+        .order('time_slot', ascending: true);
     setState(() {
       loadingSlots = false;
       availableTimeSlots = (slots as List?)?.cast<Map<String, dynamic>>() ?? [];
       // selectedTimeIndex = 0;
       times.clear();
       for (final slot in availableTimeSlots) {
-        times.addAll(generateTimeSlots(slot['start_time'], slot['end_time']));
+        times.add(slot['time_slot']);
       }
     });
   }
@@ -184,11 +225,12 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
       // Check if the time slot is available
       final timeSlot = await supabase
-          .from('time_slots')
+          .from('time_slots_duplicate')
           .select()
           .eq('doctor_id', doctorId)
           .eq('available_date', selectedDate.toIso8601String().split('T')[0])
           .eq('status', 'available')
+          .eq('time_slot', times[selectedTimeIndex])
           .maybeSingle();
 
       if (timeSlot == null) {
@@ -215,7 +257,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
         // Update the time slot status
         await supabase
-            .from('time_slots')
+            .from('time_slots_duplicate')
             .update({'status': 'booked'})
             .eq('slot_id', timeSlot['slot_id']);
 

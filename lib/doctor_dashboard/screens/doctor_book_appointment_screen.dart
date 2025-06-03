@@ -6,10 +6,12 @@ class DoctorBookAppointmentScreen extends StatefulWidget {
   const DoctorBookAppointmentScreen({super.key});
 
   @override
-  State<DoctorBookAppointmentScreen> createState() => _DoctorBookAppointmentScreenState();
+  State<DoctorBookAppointmentScreen> createState() =>
+      _DoctorBookAppointmentScreenState();
 }
 
-class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScreen> {
+class _DoctorBookAppointmentScreenState
+    extends State<DoctorBookAppointmentScreen> {
   List<int> selectedDayIndices = [];
   int selectedTimeIndex = -1;
   late List<DateTime> next7Days;
@@ -30,33 +32,39 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
     final supabase = Supabase.instance.client;
     try {
       final response = await supabase
-          .from('time_slots')
+          .from('time_slots_duplicate')
           .select()
           .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
+          .eq('status', 'available')
           .order('available_date');
-      
+
       if (response != null && response is List) {
         setState(() {
-          confirmedAppointments = response.map((slot) {
-            try {
-              // Convert the database format to the format expected by the UI
-              final date = DateTime.parse(slot['available_date'] as String);
-              final startParts = (slot['start_time'] as String).split(':');
-              final endParts = (slot['end_time'] as String).split(':');
-              
-              return {
-                'day': date,
-                'from': TimeOfDay(hour: int.parse(startParts[0]), minute: int.parse(startParts[1])),
-                'to': TimeOfDay(hour: int.parse(endParts[0]), minute: int.parse(endParts[1])),
-              };
-            } catch (e) {
-              print('Error parsing slot: $e');
-              return null;
-            }
-          })
-          .where((slot) => slot != null)
-          .cast<Map<String, dynamic>>()
-          .toList();
+          confirmedAppointments = response
+              .map((slot) {
+                try {
+                  // Convert the database format to the format expected by the UI
+                  final date = DateTime.parse(slot['available_date'] as String);
+                  final startParts = (slot['start_time'] as String).split(':');
+                  final endParts = (slot['end_time'] as String).split(':');
+
+                  return {
+                    'day': date,
+                    'from': TimeOfDay(
+                        hour: int.parse(startParts[0]),
+                        minute: int.parse(startParts[1])),
+                    'to': TimeOfDay(
+                        hour: int.parse(endParts[0]),
+                        minute: int.parse(endParts[1])),
+                  };
+                } catch (e) {
+                  print('Error parsing slot: $e');
+                  return null;
+                }
+              })
+              .where((slot) => slot != null)
+              .cast<Map<String, dynamic>>()
+              .toList();
         });
       } else {
         setState(() {
@@ -73,19 +81,21 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
 
   List<String> get availableTimes {
     if (fromTime == null || toTime == null) return [];
-    
+
     final List<String> times = [];
     TimeOfDay currentTime = fromTime!;
-    
-    while (currentTime.hour < toTime!.hour || 
-           (currentTime.hour == toTime!.hour && currentTime.minute <= toTime!.minute)) {
+
+    while (currentTime.hour < toTime!.hour ||
+        (currentTime.hour == toTime!.hour &&
+            currentTime.minute <= toTime!.minute)) {
       times.add(_formatTime(currentTime));
       currentTime = TimeOfDay(
-        hour: currentTime.minute == 30 ? currentTime.hour + 1 : currentTime.hour,
+        hour:
+            currentTime.minute == 30 ? currentTime.hour + 1 : currentTime.hour,
         minute: currentTime.minute == 30 ? 0 : 30,
       );
     }
-    
+
     return times;
   }
 
@@ -193,40 +203,122 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
     );
   }
 
-  Future<void> addTimeSlot({
-    required String doctorId,
-    required DateTime availableDate,
-    required TimeOfDay startTime,
-    required TimeOfDay endTime,
-    String status = 'available',
-    String? recurringRule,
-  }) async {
-    final supabase = Supabase.instance.client;
-    final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
-    final end = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
+  // Future<void> addTimeSlot({
+  //   required String doctorId,
+  //   required DateTime availableDate,
+  //   required TimeOfDay startTime,
+  //   required TimeOfDay endTime,
+  //   String status = 'available',
+  //   String? recurringRule,
+  // }) async {
+  //   final supabase = Supabase.instance.client;
+  //   // final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
+  //   // final end = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
+  //   List<String> slots =
+  //       generateTimeSlots(startTime.toString(), endTime.toString());
+  //   await supabase.from('time_slots_duplicate').insert({
+  //     'doctor_id': doctorId,
+  //     'available_date':
+  //         availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
+  //     'time_slot': slots,
+  //     'status': status,
+  //     'recurring_rule': recurringRule,
+  //   });
+  // }
 
-    await supabase.from('time_slots').insert({
+  // // Helper to generate 30-minute slots between start and end time
+  // List<String> generateTimeSlots(String startTime, String endTime) {
+  //   List<String> slots = [];
+  //   TimeOfDay start = TimeOfDay(
+  //     hour: int.parse(startTime.split(":")[0]),
+  //     minute: int.parse(startTime.split(":")[1]),
+  //   );
+  //   TimeOfDay end = TimeOfDay(
+  //     hour: int.parse(endTime.split(":")[0]),
+  //     minute: int.parse(endTime.split(":")[1]),
+  //   );
+  //   TimeOfDay current = start;
+  //   print(start.toString());
+  //   print(end.toString());
+  //   while (current.hour < end.hour ||
+  //       (current.hour == end.hour && current.minute < end.minute)) {
+  //     final hourStr = current.hour.toString().padLeft(2, '0');
+  //     final minStr = current.minute.toString().padLeft(2, '0');
+  //     slots.add("$hourStr:$minStr");
+  //     int newMinute = current.minute + 30;
+  //     int newHour = current.hour;
+  //     if (newMinute >= 60) {
+  //       newHour += 1;
+  //       newMinute -= 60;
+  //     }
+  //     current = TimeOfDay(hour: newHour, minute: newMinute);
+  //   }
+  //   print(current.toString());
+  //   return slots;
+  // }
+
+// ... existing code ...
+
+// Helper to generate 30-minute slots between start and end time
+List<TimeOfDay> generateTimeSlots(TimeOfDay start, TimeOfDay end) {
+  List<TimeOfDay> slots = [];
+  TimeOfDay current = start;
+  while (current.hour < end.hour || (current.hour == end.hour && current.minute < end.minute)) {
+    slots.add(current);
+    int newMinute = current.minute + 30;
+    int newHour = current.hour;
+    if (newMinute >= 60) {
+      newHour += 1;
+      newMinute -= 60;
+    }
+    current = TimeOfDay(hour: newHour, minute: newMinute);
+  }
+  return slots;
+}
+
+// Use this in your addTimeSlot logic:
+Future<void> addTimeSlots({
+  required String doctorId,
+  required DateTime availableDate,
+  required TimeOfDay fromTime,
+  required TimeOfDay toTime,
+  String status = 'available',
+  String? recurringRule,
+}) async {
+  final supabase = Supabase.instance.client;
+  List<TimeOfDay> slots = generateTimeSlots(fromTime, toTime);
+  for (final slot in slots) {
+    final slotStr = '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
+    await supabase.from('time_slots_duplicate').insert({
       'doctor_id': doctorId,
       'available_date': availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
-      'start_time': start,
-      'end_time': end,
+      'time_slot': slotStr,
       'status': status,
       'recurring_rule': recurringRule,
     });
   }
+}
+
+// ... existing code ...
+
+// In your button's onPressed, call addTimeSlots for each selected day:
+
+
+// ... existing code ...
 
   Future<void> deleteAppointment(DateTime date, TimeOfDay startTime) async {
     final supabase = Supabase.instance.client;
     try {
-      final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
-      
+      final start =
+          '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
+
       await supabase
           .from('time_slots')
           .delete()
           .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
           .eq('available_date', date.toIso8601String().split('T')[0])
           .eq('start_time', start);
-      
+
       // Refresh the appointments list after deletion
       await loadAppointments();
     } catch (e) {
@@ -243,10 +335,13 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
   }) async {
     final supabase = Supabase.instance.client;
     try {
-      final oldStart = '${oldStartTime.hour.toString().padLeft(2, '0')}:${oldStartTime.minute.toString().padLeft(2, '0')}:00';
-      final newStart = '${newStartTime.hour.toString().padLeft(2, '0')}:${newStartTime.minute.toString().padLeft(2, '0')}:00';
-      final newEnd = '${newEndTime.hour.toString().padLeft(2, '0')}:${newEndTime.minute.toString().padLeft(2, '0')}:00';
-      
+      final oldStart =
+          '${oldStartTime.hour.toString().padLeft(2, '0')}:${oldStartTime.minute.toString().padLeft(2, '0')}:00';
+      final newStart =
+          '${newStartTime.hour.toString().padLeft(2, '0')}:${newStartTime.minute.toString().padLeft(2, '0')}:00';
+      final newEnd =
+          '${newEndTime.hour.toString().padLeft(2, '0')}:${newEndTime.minute.toString().padLeft(2, '0')}:00';
+
       await supabase
           .from('time_slots')
           .update({
@@ -257,7 +352,7 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
           .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
           .eq('available_date', oldDate.toIso8601String().split('T')[0])
           .eq('start_time', oldStart);
-      
+
       // Refresh the appointments list after update
       await loadAppointments();
     } catch (e) {
@@ -273,7 +368,9 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
       appBar: AppBar(
         backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
-        title: Text("Doctor's Schedule", style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
+        title: Text("Doctor's Schedule",
+            style: theme.textTheme.titleLarge
+                ?.copyWith(color: theme.colorScheme.primary)),
         centerTitle: true,
         foregroundColor: theme.colorScheme.primary,
       ),
@@ -296,7 +393,8 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
             builder: (context, scrollController) => Container(
               decoration: BoxDecoration(
                 color: theme.scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
                   BoxShadow(
                     color: theme.colorScheme.primary.withOpacity(0.04),
@@ -307,7 +405,8 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
               ),
               child: SingleChildScrollView(
                 controller: scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -324,25 +423,37 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                     ),
                     Row(
                       children: [
-                        Text('Dr.Ahmed', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
+                        Text('Dr.Ahmed',
+                            style: theme.textTheme.titleLarge
+                                ?.copyWith(color: theme.colorScheme.primary)),
                         const Spacer(),
-                        const Icon(Icons.star, color: Color(0xFFF5B100), size: 20),
+                        const Icon(Icons.star,
+                            color: Color(0xFFF5B100), size: 20),
                         const SizedBox(width: 4),
-                        Text('4.8', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
+                        Text('4.8',
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: theme.colorScheme.primary)),
                       ],
                     ),
                     const SizedBox(height: 6),
-                    Text('Neurologist  |  Hospital', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary)),
+                    Text('Neurologist  |  Hospital',
+                        style: theme.textTheme.bodyMedium
+                            ?.copyWith(color: theme.colorScheme.primary)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.access_time, color: theme.colorScheme.primary, size: 18),
+                        Icon(Icons.access_time,
+                            color: theme.colorScheme.primary, size: 18),
                         const SizedBox(width: 6),
-                        Text('10:30am - 5:30pm', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
+                        Text('10:30am - 5:30pm',
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(color: theme.colorScheme.primary)),
                       ],
                     ),
                     const SizedBox(height: 18),
-                    Text('Select Day', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
+                    Text('Select Day',
+                        style: AppTheme.titleLarge
+                            .copyWith(color: AppTheme.primaryColor)),
                     const SizedBox(height: 10),
                     SizedBox(
                       height: 90,
@@ -364,19 +475,34 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                             },
                             child: Container(
                               margin: const EdgeInsets.only(right: 12),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF7DDCFF) : Colors.white,
+                                color: isSelected
+                                    ? const Color(0xFF7DDCFF)
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15)),
+                                border: Border.all(
+                                    color: theme.colorScheme.primary
+                                        .withOpacity(0.15)),
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.weekday % 7],
+                                    [
+                                      "Sun",
+                                      "Mon",
+                                      "Tue",
+                                      "Wed",
+                                      "Thu",
+                                      "Fri",
+                                      "Sat"
+                                    ][d.weekday % 7],
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : theme.colorScheme.primary,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : theme.colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -384,7 +510,9 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                   Text(
                                     "${d.day}/${d.month}",
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : theme.colorScheme.primary,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : theme.colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -403,22 +531,32 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                             onTap: () async {
                               final picked = await showTimePicker(
                                 context: context,
-                                initialTime: fromTime ?? const TimeOfDay(hour: 9, minute: 0),
+                                initialTime: fromTime ??
+                                    const TimeOfDay(hour: 9, minute: 0),
                               );
-                              if (picked != null) setState(() => fromTime = picked);
+                              if (picked != null)
+                                setState(() => fromTime = picked);
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.08)),
+                                border: Border.all(
+                                    color: theme.colorScheme.primary
+                                        .withOpacity(0.08)),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('From', style: theme.textTheme.bodyLarge),
-                                  Text(_formatTime(fromTime), style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                                  Text('From',
+                                      style: theme.textTheme.bodyLarge),
+                                  Text(_formatTime(fromTime),
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
@@ -430,22 +568,31 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                             onTap: () async {
                               final picked = await showTimePicker(
                                 context: context,
-                                initialTime: toTime ?? const TimeOfDay(hour: 17, minute: 0),
+                                initialTime: toTime ??
+                                    const TimeOfDay(hour: 17, minute: 0),
                               );
-                              if (picked != null) setState(() => toTime = picked);
+                              if (picked != null)
+                                setState(() => toTime = picked);
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 16),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.08)),
+                                border: Border.all(
+                                    color: theme.colorScheme.primary
+                                        .withOpacity(0.08)),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text('To', style: theme.textTheme.bodyLarge),
-                                  Text(_formatTime(toTime), style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                                  Text(_formatTime(toTime),
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ),
@@ -453,19 +600,25 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         ),
                       ],
                     ),
-                     if (fromTime != null && toTime != null && selectedDayIndices.isNotEmpty) ...[
+                    if (fromTime != null &&
+                        toTime != null &&
+                        selectedDayIndices.isNotEmpty) ...[
                       const SizedBox(height: 18),
-                      Text('Available Time', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary)),
+                      Text('Available Time',
+                          style: theme.textTheme.titleLarge
+                              ?.copyWith(color: theme.colorScheme.primary)),
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 44,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: availableTimes.length,
-                          separatorBuilder: (context, i) => const SizedBox(width: 12),
+                          separatorBuilder: (context, i) =>
+                              const SizedBox(width: 12),
                           itemBuilder: (context, i) {
                             final isUnavailable = unavailableTimes.contains(i);
-                            final isSelected = !isUnavailable && selectedTimeIndex == i;
+                            final isSelected =
+                                !isUnavailable && selectedTimeIndex == i;
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
@@ -477,12 +630,14 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                 });
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 18, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? theme.colorScheme.primary
                                       : isUnavailable
-                                          ? theme.colorScheme.primary.withOpacity(0.2)
+                                          ? theme.colorScheme.primary
+                                              .withOpacity(0.2)
                                           : Colors.white,
                                   borderRadius: BorderRadius.circular(22),
                                   border: Border.all(
@@ -490,10 +645,17 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                         ? theme.colorScheme.primary
                                         : isUnavailable
                                             ? theme.colorScheme.surface
-                                            : theme.colorScheme.primary.withOpacity(0.15),
+                                            : theme.colorScheme.primary
+                                                .withOpacity(0.15),
                                   ),
                                   boxShadow: isSelected
-                                      ? [BoxShadow(color: theme.colorScheme.primary.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 2))]
+                                      ? [
+                                          BoxShadow(
+                                              color: theme.colorScheme.primary
+                                                  .withOpacity(0.08),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2))
+                                        ]
                                       : [],
                                 ),
                                 child: Text(
@@ -519,24 +681,20 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-                            String doctorId = 'b55f005f-3185-4fa3-9098-2179e0751621';
-
-                            if (selectedDayIndices.isNotEmpty && fromTime != null && toTime != null) {
-                              for (var idx in selectedDayIndices) {
-                                await addTimeSlot(
-                                  doctorId: doctorId,
-                                  availableDate: next7Days[idx],
-                                  startTime: fromTime!,
-                                  endTime: toTime!,
-                                );
-                                print("idx" + idx.toString());
-                              }
-                              // Refresh appointments after adding new ones
-                                print("idx" + selectedDayIndices.toString());
-                              await loadAppointments();
-                              _showSuccessDialog();
-                            }
-                          },
+  String doctorId = 'b55f005f-3185-4fa3-9098-2179e0751621';
+  if (selectedDayIndices.isNotEmpty && fromTime != null && toTime != null) {
+    for (var idx in selectedDayIndices) {
+      await addTimeSlots(
+        doctorId: doctorId,
+        availableDate: next7Days[idx],
+        fromTime: fromTime!,
+        toTime: toTime!,
+      );
+    }
+    await loadAppointments();
+    _showSuccessDialog();
+  }
+},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: theme.colorScheme.primary,
                             foregroundColor: Colors.white,
@@ -552,25 +710,36 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                     ),
                     if (confirmedAppointments.isNotEmpty) ...[
                       const SizedBox(height: 24),
-                      Text('Confirmed Appointments:', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Text('Confirmed Days:',
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: confirmedAppointments.length,
                         itemBuilder: (context, idx) {
-                          if (idx >= confirmedAppointments.length) return const SizedBox.shrink();
-                          
+                          if (idx >= confirmedAppointments.length)
+                            return const SizedBox.shrink();
+
                           final appt = confirmedAppointments[idx];
                           final day = appt['day'] as DateTime;
                           final from = appt['from'] as TimeOfDay?;
                           final to = appt['to'] as TimeOfDay?;
-                          
+
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 4),
                             child: ListTile(
                               title: Text(
-                                '${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][day.weekday % 7]} - ${day.day}/${day.month}',
+                                '${[
+                                  "Sun",
+                                  "Mon",
+                                  "Tue",
+                                  "Wed",
+                                  "Thu",
+                                  "Fri",
+                                  "Sat"
+                                ][day.weekday % 7]} - ${day.day}/${day.month}',
                                 style: theme.textTheme.bodyLarge,
                               ),
                               subtitle: Text(
@@ -581,47 +750,51 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.edit, color: Colors.blue),
+                                    icon: const Icon(Icons.edit,
+                                        color: Colors.blue),
                                     onPressed: () async {
                                       if (idx < confirmedAppointments.length) {
                                         final oldDate = day;
                                         final oldStartTime = from!;
-                                        
+
                                         // Find the closest day in next7Days
-                                        final dayIndex = next7Days.indexWhere((d) => 
-                                          d.year == day.year && 
-                                          d.month == day.month && 
-                                          d.day == day.day
-                                        );
-                                        
+                                        final dayIndex = next7Days.indexWhere(
+                                            (d) =>
+                                                d.year == day.year &&
+                                                d.month == day.month &&
+                                                d.day == day.day);
+
                                         if (dayIndex != -1) {
                                           setState(() {
                                             selectedDayIndices = [dayIndex];
                                             fromTime = appt['from'];
                                             toTime = appt['to'];
-                                            if (idx < confirmedAppointments.length) {
-                                              confirmedAppointments.removeAt(idx);
+                                            if (idx <
+                                                confirmedAppointments.length) {
+                                              confirmedAppointments
+                                                  .removeAt(idx);
                                             }
                                           });
-                                          
+
                                           await updateAppointment(
-                                            oldDate: oldDate,
-                                            oldStartTime: oldStartTime,
-                                            newDate: next7Days[dayIndex],
-                                            newStartTime: from!,
-                                            newEndTime: to!
-                                          );
+                                              oldDate: oldDate,
+                                              oldStartTime: oldStartTime,
+                                              newDate: next7Days[dayIndex],
+                                              newStartTime: from!,
+                                              newEndTime: to!);
                                         }
                                       }
                                     },
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    icon: const Icon(Icons.delete,
+                                        color: Colors.red),
                                     onPressed: () async {
                                       if (idx < confirmedAppointments.length) {
                                         await deleteAppointment(day, from!);
                                         setState(() {
-                                          if (idx < confirmedAppointments.length) {
+                                          if (idx <
+                                              confirmedAppointments.length) {
                                             confirmedAppointments.removeAt(idx);
                                           }
                                         });
@@ -644,4 +817,4 @@ class _DoctorBookAppointmentScreenState extends State<DoctorBookAppointmentScree
       ),
     );
   }
-} 
+}
