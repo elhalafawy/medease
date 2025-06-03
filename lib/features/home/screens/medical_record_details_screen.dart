@@ -123,8 +123,12 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () { /* Do nothing for now */ },
-                      icon: const Icon(Icons.medical_services),
-                      label: const Text('X-Ray'),
+                      icon: Image.asset(
+                        'assets/icons/Radiology.png',
+                        width: 24,
+                        height: 24,
+                      ),
+                      label: const Text('Radiology'),
                       style: OutlinedButton.styleFrom(
                         backgroundColor: theme.colorScheme.surface,
                         foregroundColor: theme.colorScheme.primary,

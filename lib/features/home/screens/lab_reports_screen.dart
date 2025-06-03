@@ -3,6 +3,8 @@ import '../../../core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase
 import 'package:intl/intl.dart'; // Import for date formatting
 import 'lab_radiology_report_details_screen.dart'; // Import the new details screen
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class LabReportsScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -14,6 +16,7 @@ class LabReportsScreen extends StatefulWidget {
 
 class _LabReportsScreenState extends State<LabReportsScreen> {
   final SupabaseClient _supabase = Supabase.instance.client; // Supabase client instance
+  final ImagePicker _picker = ImagePicker();
   List<Map<String, dynamic>> _labReports = []; // List for lab reports
   List<Map<String, dynamic>> _radiologyReports = []; // List for radiology reports
   bool _isLoading = true; // Loading state
@@ -57,6 +60,91 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
     }
   }
 
+  Future<void> _pickAndUploadImage(Map<String, dynamic> report) async {
+    try {
+      // Show bottom sheet for picking source
+      final source = await showModalBottomSheet<ImageSource>(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera),
+                  title: const Text('Camera'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (source == null) return;
+
+      // Pick the image
+      final XFile? image = await _picker.pickImage(source: source);
+      if (image == null) return;
+
+      setState(() => _isLoading = true);
+
+      // Upload to Supabase Storage
+      final String fileExt = image.path.split('.').last;
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      
+      // Construct the file path using patient_id, report type, and report ID
+      final String reportType = _selectedCategory == 0 ? 'lab' : 'radiology';
+      // Ensure report_id or Radiology_id is not null before converting to string
+      final String reportId = _selectedCategory == 0 
+          ? (report['report_id']?.toString() ?? 'unknown_report')
+          : (report['Radiology_id']?.toString() ?? 'unknown_radiology');
+      // Ensure patient_id is not null before converting to string
+      final String patientId = report['patient_id']?.toString() ?? 'unknown_patient';
+
+      final String filePath = '$patientId/$reportType/$reportId/$fileName';
+
+      // Upload file to the 'labreports' bucket
+      final File imageFile = File(image.path);
+      await _supabase.storage.from('labreports').upload(filePath, imageFile);
+
+      // Get public URL from the 'labreports' bucket
+      final String imageUrl = _supabase.storage.from('labreports').getPublicUrl(filePath);
+
+      // Update the report in the database with the image URL
+      final String tableName = _selectedCategory == 0 ? 'lab_reports' : 'Radiology';
+      final String idField = _selectedCategory == 0 ? 'report_id' : 'Radiology_id';
+      
+      await _supabase
+          .from(tableName)
+          .update({'report_url': imageUrl})
+          .eq(idField, report[idField]);
+
+      // Refresh the reports
+      await _loadReports();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Report uploaded successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error uploading report: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -76,7 +164,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
           },
         ),
         centerTitle: true,
-        title: Text('Lab Reports & Radiology', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)), // Updated title
+        title: Text('Lab Tests & Radiology', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)), // Updated title
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -257,11 +345,9 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: Implement Download functionality
-                  },
-                  icon: Icon(Icons.download, color: theme.colorScheme.primary),
-                  label: Text('Download', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
+                  onPressed: () => _pickAndUploadImage(report),
+                  icon: Icon(Icons.upload, color: theme.colorScheme.primary),
+                  label: Text('Upload', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
