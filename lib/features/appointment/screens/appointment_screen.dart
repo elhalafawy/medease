@@ -25,13 +25,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   String userNote = "";
 
   final List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
-  final List<String> dates = [
-  "2025-06-02",
-  "2025-06-03",
-  "2025-06-04",
-  "2025-06-05",
-  "2025-06-06"
-];
+  List<String> dates = []; // Make dates list dynamic
   final List<dynamic> times = ["9:30" , "10:30" , "11:30" , "12:30" , "13:30"];
 
   final supabase = Supabase.instance.client;
@@ -43,7 +37,17 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   @override
   void initState() {
     super.initState();
+    _generateDates(); // Generate dates dynamically
     fetchAvailableTimeSlots();
+  }
+
+  void _generateDates() {
+    final today = DateTime.now();
+    dates.clear(); // Clear existing dates
+    for (int i = 0; i < 7; i++) { // Generate next 7 days
+      final date = today.add(Duration(days: i));
+      dates.add("${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}");
+    }
   }
 
   // Helper to generate 30-minute slots between start and end time
@@ -92,7 +96,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
       loadingSlots = false;
       availableTimeSlots = (slots as List?)?.cast<Map<String, dynamic>>() ?? [];
       // selectedTimeIndex = 0;
-      dates.addAll(availableTimeSlots.map((slot) => slot['available_date'] as String));
       times.clear();
       for (final slot in availableTimeSlots) {
         times.addAll(generateTimeSlots(slot['start_time'], slot['end_time']));
@@ -101,6 +104,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   }
 
   Future<void> _showConfirmationDialog() async {
+    if (isBooking) return; // Prevent showing dialog if booking is already in progress
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -115,14 +119,20 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: isBooking ? null : () { // Disable button while booking
                 Navigator.pop(context);
                 _bookAppointment();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
               ),
-              child: const Text('Confirm'),
+              child: isBooking
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : const Text('Confirm'),
             ),
           ],
         );
@@ -178,69 +188,68 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
           .select()
           .eq('doctor_id', doctorId)
           .eq('available_date', selectedDate.toIso8601String().split('T')[0])
-          // .eq('start_time', times[selectedTimeIndex])
           .eq('status', 'available')
           .maybeSingle();
-          
+
       if (timeSlot == null) {
         CustomSnackBar.show(context: context, message: 'Selected time slot is not available');
         setState(() => isBooking = false);
         return;
       }
 
-      CustomSnackBar.show(context: context, message: 'time_slots: $timeSlot');
-      
-      dates.add(selectedDate.toIso8601String().split('T')[0]);
-      times.addAll(generateTimeSlots(timeSlot['start_time'], timeSlot['end_time']));
+      // Start a transaction (using try-catch for error handling)
+      try {
+        final newAppointment = {
+          'appointment_id': const Uuid().v4(),
+          'doctor_id': doctorId,
+          'patient_id': patientId,
+          'date': selectedDate.toIso8601String(),
+          'time': times[selectedTimeIndex],
+          'status': 'pending',
+          'patient_confirmed': true,
+          'doctor_confirmed': false,
+          'notes': userNote,
+          'time_slot_id': timeSlot['slot_id'],
+        };
+        await supabase.from('appointments').insert(newAppointment);
 
-      final newAppointment = {
-        'appointment_id': const Uuid().v4(),
-        'doctor_id': doctorId,
-        'patient_id': patientId,
-        'date': selectedDate.toIso8601String(),
-        'time': times[selectedTimeIndex],
-        'status': 'pending',
-        'patient_confirmed': true,
-        'doctor_confirmed': false,
-        'notes': userNote,
-      };
+        // Update the time slot status
+        await supabase
+            .from('time_slots')
+            .update({'status': 'booked'})
+            .eq('slot_id', timeSlot['slot_id']);
 
-      // Start a transaction
-      final response = await supabase.from('appointments').insert(newAppointment);
-      if (!response.error) {
-        CustomSnackBar.show(context: context, message: 'Error: ${response.error?.message}');
-        print('Error: ${response.error?.message}');
-        setState(() => isBooking = false);
-        return;
+        if (!mounted) return;
+        CustomSnackBar.show(
+          context: context,
+          message: 'Appointment booked successfully!',
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainNavigation(
+              goToAppointment: true,
+              initialAppointments: [newAppointment],
+            ),
+          ),
+        );
+      } catch (e) {
+         if (!mounted) return;
+         CustomSnackBar.show(
+            context: context,
+            message: 'Error booking appointment: ${e.toString()}',
+          );
+          print('Error booking appointment during insert/update: $e');
       }
 
-      // Update the time slot status
-      await supabase
-          .from('time_slots')
-          .update({'status': 'booked'})
-          .eq('slot_id', timeSlot['slot_id']);
-
-      if (!mounted) return;
-      CustomSnackBar.show(
-        context: context,
-        message: 'Appointment booked successfully!',
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainNavigation(
-            goToAppointment: true,
-            initialAppointments: [newAppointment],
-          ),
-        ),
-      );
     } catch (e) {
       if (!mounted) return;
       CustomSnackBar.show(
         context: context,
-        message: 'Error booking appointment: $e',
+        message: 'Error during appointment process: ${e.toString()}',
       );
+       print('Error during appointment process: $e');
     } finally {
       if (mounted) {
         setState(() => isBooking = false);
@@ -381,53 +390,55 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
       children: [
         Text("Appointment", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Row(
-            children: List.generate(days.length, (index) {
+        SizedBox(
+          height: 90, // Set a fixed height for the horizontal list
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: dates.length, // Use the dynamically generated dates list
+            itemBuilder: (context, index) {
               final isSelected = index == selectedDayIndex;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedDayIndex = index;
-                      selectedTimeIndex = 0;
-                    });
-                    fetchAvailableTimeSlots();
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF7DDCFF) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Column(
-                      children: [
-                        Text(
-                          days[index],
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: isSelected ? Colors.white : theme.colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
+              final date = DateTime.parse(dates[index]); // Parse the date string
+              final dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.weekday % 7]; // Get day of the week
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedDayIndex = index;
+                    selectedTimeIndex = 0;
+                  });
+                  fetchAvailableTimeSlots();
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 12), // Add spacing between items
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xFF7DDCFF) : Colors.transparent, // Use transparent for unselected
+                    borderRadius: BorderRadius.circular(16),
+                     border: Border.all(color: isSelected ? Colors.transparent : theme.colorScheme.primary.withOpacity(0.15)), // Add border for unselected
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        dayOfWeek, // Display day of the week
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Text(
-                          dates[index],
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: isSelected ? Colors.white : theme.colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      const SizedBox(height: 6), // Add spacing between day and date
+                      Text(
+                        "${date.day}/${date.month}", // Display date in Day/Month format
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               );
-            }),
+            },
           ),
         ),
       ],

@@ -8,12 +8,14 @@ class PatientMedicalRecordScreen extends StatefulWidget {
   final String patientName;
   final String patientAge;
   final String patientId;
+  final String? appointmentId; // Add optional appointmentId
 
   const PatientMedicalRecordScreen({
     super.key,
     required this.patientName,
     required this.patientAge,
     required this.patientId,
+    this.appointmentId,
   });
 
   @override

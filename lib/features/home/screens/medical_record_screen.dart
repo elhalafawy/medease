@@ -25,9 +25,33 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   Future<void> _loadRecords() async {
     try {
       setState(() => _isLoading = true);
+
+      // Get the current user
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User not logged in.')),
+          );
+          setState(() => _isLoading = false);
+        }
+        return;
+      }
+
+      // Get the patient_id for the current user
+      final patientResponse = await _supabase
+          .from('patients')
+          .select('patient_id')
+          .eq('user_id', user.id)
+          .single();
+
+      final patientId = patientResponse['patient_id'];
+
+      // Fetch medical records for this patient
       final response = await _supabase
           .from('medical_records')
           .select('*, doctors!medical_records_doctor_id_fkey(name)')
+          .eq('patient_id', patientId) // Filter by patient_id
           .order('created_at', ascending: false);
 
       setState(() {

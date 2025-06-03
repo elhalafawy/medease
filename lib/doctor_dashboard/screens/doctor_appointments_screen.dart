@@ -112,7 +112,19 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
     if (selectedDayIndex == 0) {
       return allAppointments;
     } else {
-      return allAppointments.where((appt) => appt['day'] == daysFull[selectedDayIndex]).toList();
+      // Adjusting weekday comparison: DateTime.sunday is 7, Monday is 1
+      // selectedDayIndex 1 is Sunday, 2 is Monday...
+      final selectedWeekday = selectedDayIndex == 1 ? 7 : selectedDayIndex - 1; // Map selectedDayIndex to DateTime.weekday
+      return allAppointments.where((appt) {
+        try {
+          final appointmentDate = DateTime.parse(appt['date']);
+          return appointmentDate.weekday == selectedWeekday;
+        } catch (e) {
+          // Handle potential parsing errors, maybe skip this appointment
+          print('Error parsing appointment date: ${appt['date']} - $e');
+          return false;
+        }
+      }).toList();
     }
   }
   
@@ -484,26 +496,28 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                 const SizedBox(height: 18),
               // Days selector
               SizedBox(
-                height: 38,
+                height: 50,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: daysShort.length,
-                  separatorBuilder: (context, i) => const SizedBox(width: 6),
+                  separatorBuilder: (context, i) => const SizedBox(width: 8),
                   itemBuilder: (context, i) => GestureDetector(
                     onTap: () => setState(() => selectedDayIndex = i),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: selectedDayIndex == i ? theme.colorScheme.primary : theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.colorScheme.primary),
+                        border: Border.all(color: theme.colorScheme.primary.withOpacity(selectedDayIndex == i ? 0 : 0.5)),
                       ),
-                      child: Text(
-                        daysShort[i],
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: selectedDayIndex == i ? Colors.white : theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                      child: Center(
+                        child: Text(
+                          daysShort[i],
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: selectedDayIndex == i ? Colors.white : theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),

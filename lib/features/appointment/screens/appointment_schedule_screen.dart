@@ -39,13 +39,41 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
   }
 
   Future<void> loadAppointments() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
-      final response = await Supabase.instance.client.from('appointments').select('*');
+      // Get the current user
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) {
+        setState(() {
+          _error = 'User not logged in';
+          _loading = false;
+        });
+        return;
+      }
+
+      // Get the patient_id for the current user
+      final patientResponse = await Supabase.instance.client
+          .from('patients')
+          .select('patient_id')
+          .eq('user_id', user.id)
+          .single();
+
+      final patientId = patientResponse['patient_id'];
+
+      // Fetch appointments for this patient
+      final response = await Supabase.instance.client
+          .from('appointments')
+          .select('*')
+          .eq('patient_id', patientId); // Filter by patient_id
+
       setState(() {
         _appointments = List<Map<String, dynamic>>.from(response);
         _loading = false;
       });
-      _appointments = List<Map<String, dynamic>>.from(response);
+      // _appointments = List<Map<String, dynamic>>.from(response);
     } catch (e) {
       setState(() {
         _error = 'Failed to load appointments';
@@ -288,7 +316,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                 child: CircleAvatar(
                   backgroundColor: Colors.grey[200],
                   backgroundImage: AssetImage(
-                    appointment['imageUrl'] ?? appointment['image'] ?? 'E:\Medease\Final\medease\assets\icons\facebook_icon.png',
+                    appointment['imageUrl'] ?? appointment['image'] ?? 'assets/images/doctor_photo.png',
                   ),
                   radius: 32,
                 ),
