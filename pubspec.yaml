@@ -29,6 +29,7 @@ dependencies:
   fl_chart: ^0.66.2
   supabase_flutter: ^2.3.4
   google_generative_ai: ^0.2.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

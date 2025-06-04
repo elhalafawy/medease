@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:intl/intl.dart'; // Import for date formatting
+import 'package:cached_network_image/cached_network_image.dart'; // Import for caching network images
 
 class LabRadiologyReportDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> reportData;
@@ -18,7 +19,8 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
         : 'N/A';
     final String status = reportData['status'] ?? 'N/A';
     final String doctorName = reportData['doctors']?['name'] ?? 'N/A';
-    // You can add more fields here if they exist in your fetched reportData, e.g., 'result', 'description'
+    // Access the report_url
+    final String? reportUrl = reportData['report_url'];
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -68,6 +70,26 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
               theme: theme,
             ),
             // Add more _buildInfoCard widgets for other report details if available
+
+            // Display the uploaded image if reportUrl exists
+            if (reportUrl != null && reportUrl.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              Text(
+                'Uploaded File:',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Center( // Center the image
+                child: CachedNetworkImage( // Use CachedNetworkImage for better performance
+                  imageUrl: reportUrl,
+                  placeholder: (context, url) => CircularProgressIndicator(), // Placeholder while loading
+                  errorWidget: (context, url, error) => Icon(Icons.error), // Error widget if image fails to load
+                ),
+              ),
+            ],
           ],
         ),
       ),
