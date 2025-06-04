@@ -25,24 +25,65 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadReports(); // Load data on init
+    _loadReports();
+    _cleanupExistingUrls(); // Add cleanup on init
   }
 
   Future<void> _loadReports() async {
     try {
       setState(() => _isLoading = true);
       
-      // Fetch Lab Reports
+      print('Loading reports...');
+
+      // Get the current user
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Get the patient_id for the current user
+      final patientResponse = await _supabase
+          .from('patients')
+          .select('patient_id')
+          .eq('user_id', user.id)
+          .single();
+
+      final patientId = patientResponse['patient_id'];
+      print('Current patient ID: $patientId');
+
+      // Fetch Lab Reports for current patient
       final labResponse = await _supabase
           .from('lab_reports')
-          .select('report_id, patient_id, doctor_id, status, created_at, Title, doctors!lab_reports_doctor_id_fkey(name)')
+          .select('''
+            *,
+            doctors:lab_reports_doctor_id_fkey (
+              name
+            )
+          ''')
+          .eq('patient_id', patientId)
           .order('created_at', ascending: false);
 
-      // Fetch Radiology Reports
+      // Fetch Radiology Reports for current patient
       final radiologyResponse = await _supabase
-          .from('Radiology') // Assuming your radiology table is named 'Radiology'
-          .select('Radiology_id, patient_id, doctor_id, status, created_at, Title, doctors!Radiology_doctor_id_fkey(name)') // Select necessary columns and join with doctors table
+          .from('Radiology')
+          .select('''
+            *,
+            doctors:Radiology_doctor_id_fkey (
+              name
+            )
+          ''')
+          .eq('patient_id', patientId)
           .order('created_at', ascending: false);
+
+      print('Lab Reports Response:');
+      print(labResponse);
+      print('Radiology Reports Response:');
+      print(radiologyResponse);
+
+      if (radiologyResponse is List && radiologyResponse.isNotEmpty) {
+        print('First radiology report keys: ${radiologyResponse[0].keys.toList()}');
+        print('First radiology report_url: ${radiologyResponse[0]['report_url']}');
+      }
 
       setState(() {
         _labReports = List<Map<String, dynamic>>.from(labResponse);
@@ -50,7 +91,9 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
         _isLoading = false;
       });
 
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error loading reports: $e');
+      print('Stack trace: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading reports: ${e.toString()}')),
@@ -62,7 +105,9 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
 
   Future<void> _pickAndUploadImage(Map<String, dynamic> report) async {
     try {
-      // Show bottom sheet for picking source
+      print('Starting upload process for report:');
+      print('Report data: $report');
+
       final source = await showModalBottomSheet<ImageSource>(
         context: context,
         builder: (BuildContext context) {
@@ -87,61 +132,188 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
 
       if (source == null) return;
 
-      // Pick the image
-      final XFile? image = await _picker.pickImage(source: source);
+      final XFile? image = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+      );
+      
       if (image == null) return;
 
       setState(() => _isLoading = true);
 
-      // Upload to Supabase Storage
-      final String fileExt = image.path.split('.').last;
-      final String fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      // Get report identification details
+      final bool isLabReport = _selectedCategory == 0;
+      final String reportId = isLabReport 
+          ? report['report_id']?.toString() ?? 'unknown'
+          : report['Radiology_id']?.toString() ?? 'unknown';
       
-      // Construct the file path using patient_id, report type, and report ID
-      final String reportType = _selectedCategory == 0 ? 'lab' : 'radiology';
-      // Ensure report_id or Radiology_id is not null before converting to string
-      final String reportId = _selectedCategory == 0 
-          ? (report['report_id']?.toString() ?? 'unknown_report')
-          : (report['Radiology_id']?.toString() ?? 'unknown_radiology');
-      // Ensure patient_id is not null before converting to string
-      final String patientId = report['patient_id']?.toString() ?? 'unknown_patient';
+      print('Processing upload for ${isLabReport ? "Lab Report" : "Radiology Report"} ID: $reportId');
 
-      final String filePath = '$patientId/$reportType/$reportId/$fileName';
+      // Create storage path
+      final String fileExt = image.path.split('.').last.toLowerCase();
+      final String fileName = 'report_${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      // Create a clean storage path without any bucket prefix
+      final String filePath = '$reportId/$fileName';
 
-      // Upload file to the 'labreports' bucket
+      print('Storage details:');
+      print('File path: $filePath');
+      print('File extension: $fileExt');
+      print('Using bucket: ${isLabReport ? "labreports" : "radiology"}');
+
+      // Upload file
       final File imageFile = File(image.path);
-      await _supabase.storage.from('labreports').upload(filePath, imageFile);
-
-      // Get public URL from the 'labreports' bucket
-      final String imageUrl = _supabase.storage.from('labreports').getPublicUrl(filePath);
-
-      // Update the report in the database with the image URL
-      final String tableName = _selectedCategory == 0 ? 'lab_reports' : 'Radiology';
-      final String idField = _selectedCategory == 0 ? 'report_id' : 'Radiology_id';
       
-      await _supabase
-          .from(tableName)
-          .update({'report_url': imageUrl})
-          .eq(idField, report[idField]);
+      try {
+        print('Uploading file to storage...');
+        // Upload to appropriate storage bucket based on report type
+        final storageResponse = await _supabase.storage
+            .from(isLabReport ? 'labreports' : 'radiology')
+            .upload(filePath, imageFile, fileOptions: const FileOptions(
+              cacheControl: '3600',
+              upsert: true
+            ));
+        print('Storage upload response: $storageResponse');
 
-      // Refresh the reports
-      await _loadReports();
+        // Get the public URL directly after upload
+        final publicUrl = _supabase.storage
+            .from(isLabReport ? 'labreports' : 'radiology')
+            .getPublicUrl(filePath);
+            
+        print('Generated public URL: $publicUrl');
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Report uploaded successfully')),
-        );
+        // Update database with the file path
+        final String tableName = isLabReport ? 'lab_reports' : 'Radiology';
+        final String idField = isLabReport ? 'report_id' : 'Radiology_id';
+
+        print('Updating database:');
+        print('Table: $tableName');
+        print('ID Field: $idField');
+        print('Report ID: $reportId');
+        print('File path: $filePath');
+        print('Public URL: $publicUrl');
+
+        // Update the database record with the file path
+        final updateResponse = await _supabase
+            .from(tableName)
+            .update({'report_url': filePath}) // Store only the file path
+            .eq(idField, reportId);
+        print('Database update response: $updateResponse');
+
+        // Verify the update
+        final verifyResponse = await _supabase
+            .from(tableName)
+            .select('report_url')
+            .eq(idField, reportId)
+            .single();
+        
+        print('Stored file path: ${verifyResponse['report_url']}');
+
+        // Refresh the reports to get the updated data
+        await _loadReports();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${isLabReport ? "Lab" : "Radiology"} report file uploaded successfully'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+
+      } catch (error) {
+        print('Error during upload or database update: $error');
+        throw 'Failed to upload or save report: $error';
       }
+
     } catch (e) {
+      print('Error in upload process: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading report: ${e.toString()}')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _cleanupExistingUrls() async {
+    try {
+      print('Starting URL cleanup...');
+      
+      // Get the current user
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Get the patient_id for the current user
+      final patientResponse = await _supabase
+          .from('patients')
+          .select('patient_id')
+          .eq('user_id', user.id)
+          .single();
+
+      final patientId = patientResponse['patient_id'];
+
+      // Clean up Lab Reports
+      final labReports = await _supabase
+          .from('lab_reports')
+          .select('report_id, report_url')
+          .eq('patient_id', patientId);
+
+      for (final report in labReports) {
+        final String? reportUrl = report['report_url'];
+        if (reportUrl != null && reportUrl.contains('supabase.co')) {
+          final reportId = report['report_id'];
+          final bucketIndex = reportUrl.lastIndexOf('labreports/');
+          if (bucketIndex != -1) {
+            final cleanPath = reportUrl.substring(bucketIndex + 'labreports/'.length);
+            print('Cleaning lab report URL: $reportId');
+            print('Old URL: $reportUrl');
+            print('New path: $cleanPath');
+            
+            await _supabase
+                .from('lab_reports')
+                .update({'report_url': cleanPath})
+                .eq('report_id', reportId);
+          }
+        }
+      }
+
+      // Clean up Radiology Reports
+      final radiologyReports = await _supabase
+          .from('Radiology')
+          .select('Radiology_id, report_url')
+          .eq('patient_id', patientId);
+
+      for (final report in radiologyReports) {
+        final String? reportUrl = report['report_url'];
+        if (reportUrl != null && reportUrl.contains('supabase.co')) {
+          final reportId = report['Radiology_id'];
+          final bucketIndex = reportUrl.lastIndexOf('radiology/');
+          if (bucketIndex != -1) {
+            final cleanPath = reportUrl.substring(bucketIndex + 'radiology/'.length);
+            print('Cleaning radiology report URL: $reportId');
+            print('Old URL: $reportUrl');
+            print('New path: $cleanPath');
+            
+            await _supabase
+                .from('Radiology')
+                .update({'report_url': cleanPath})
+                .eq('Radiology_id', reportId);
+          }
+        }
+      }
+
+      print('URL cleanup completed');
+      // Reload reports to get the updated data
+      await _loadReports();
+      
+    } catch (e) {
+      print('Error during URL cleanup: $e');
     }
   }
 
@@ -328,7 +500,7 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => LabRadiologyReportDetailsScreen(
-                          reportData: report, // Pass the entire report map
+                          reportData: report,
                         ),
                       ),
                     );

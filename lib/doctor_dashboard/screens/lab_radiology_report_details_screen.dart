@@ -3,44 +3,18 @@ import '../../../core/theme/app_theme.dart';
 import 'package:intl/intl.dart'; // Import for date formatting
 import 'package:cached_network_image/cached_network_image.dart'; // Import for caching network images
 import 'package:url_launcher/url_launcher.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-class LabRadiologyReportDetailsScreen extends StatelessWidget {
+class LabRadiologyReportDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> reportData;
 
-  LabRadiologyReportDetailsScreen({super.key, required this.reportData});
+  const LabRadiologyReportDetailsScreen({super.key, required this.reportData});
 
-  SupabaseClient get _supabase => Supabase.instance.client;
+  @override
+  State<LabRadiologyReportDetailsScreen> createState() => _LabRadiologyReportDetailsScreenState();
+}
 
-  // Helper function to get public URL
-  String? getPublicUrl(String? filePath) {
-    if (filePath == null) return null;
-
-    try {
-      // Determine if this is a lab report or radiology report
-      final bool isLabReport = reportData.containsKey('report_id');
-      final String bucket = isLabReport ? 'labreports' : 'radiology';
-
-      print('=== URL Generation Debug ===');
-      print('File path: $filePath');
-      print('Bucket: $bucket');
-      
-      // Get the public URL
-      final url = _supabase.storage.from(bucket).getPublicUrl(filePath);
-      print('Generated URL: $url');
-      
-      return url;
-    } catch (e) {
-      print('Error generating public URL: $e');
-      return null;
-    }
-  }
-
-  Future<void> _openFile(String? url) async {
-    if (url == null) {
-      print('Cannot open file: URL is null');
-      return;
-    }
+class _LabRadiologyReportDetailsScreenState extends State<LabRadiologyReportDetailsScreen> {
+  Future<void> _openFile(String url) async {
     try {
       final Uri uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
@@ -50,28 +24,45 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
       }
     } catch (e) {
       print('Error opening file: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error opening file: ${e.toString()}')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final String? reportUrl = reportData['report_url'];
-    final String? publicUrl = getPublicUrl(reportUrl);
 
-    print('=== Report Details Debug ===');
-    print('Report URL from database: $reportUrl');
-    print('Generated public URL: $publicUrl');
+    // Debug: Print all report data
+    print('Building details screen with report data:');
+    print(widget.reportData);
+    print('Raw report_url value: ${widget.reportData['report_url']}');
+    print('Report data keys: ${widget.reportData.keys.toList()}');
 
     // Safely access data from the reportData map
-    final String title = reportData['Title'] ?? 'N/A';
-    final String date = reportData['created_at'] != null
-        ? DateFormat('dd MMM, yyyy').format(DateTime.parse(reportData['created_at']).toLocal())
-        : 'N/A';
-    final String status = reportData['status'] ?? 'N/A';
-    final String doctorName = reportData['doctors']?['name'] ?? 'N/A';
-    final String patientId = reportData['patient_id']?.toString() ?? 'N/A';
-    final String reportId = reportData['report_id']?.toString() ?? reportData['Radiology_id']?.toString() ?? 'N/A';
+    final String title = widget.reportData['Title'] ?? 'N/A';
+    
+    // More robust date handling
+    String date = 'N/A';
+    if (widget.reportData['created_at'] != null) {
+      try {
+        final DateTime dateTime = DateTime.parse(widget.reportData['created_at']);
+        date = DateFormat('dd MMM, yyyy').format(dateTime.toLocal());
+      } catch (e) {
+        print('Error parsing date: ${e.toString()}');
+        // If parsing fails, try to use the date string as is
+        date = widget.reportData['created_at'] ?? 'N/A';
+      }
+    }
+    
+    final String status = widget.reportData['status'] ?? 'N/A';
+    final String doctorName = widget.reportData['doctors']?['name'] ?? 'N/A';
+    final String? reportUrl = widget.reportData['report_url'];
+    final String patientId = widget.reportData['patient_id']?.toString() ?? 'N/A';
+    final String reportId = widget.reportData['report_id']?.toString() ?? widget.reportData['Radiology_id']?.toString() ?? 'N/A';
 
     // Debug: Print extracted data
     print('Extracted report details:');
@@ -142,7 +133,7 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _buildInfoCard(
-              title: 'Added by Doctor',
+              title: 'Added By Doctor',
               value: doctorName,
               icon: Icons.person_outline,
               theme: theme,
@@ -158,7 +149,7 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          publicUrl == null ? Icons.upload_file : 
+                          reportUrl == null ? Icons.upload_file : 
                           isPdfUrl(reportUrl) ? Icons.picture_as_pdf :
                           isImageUrl(reportUrl) ? Icons.image : 
                           Icons.file_present,
@@ -175,26 +166,24 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    if (publicUrl == null)
+                    if (reportUrl == null || reportUrl.isEmpty)
                       Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.no_photography,
-                                size: 48,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.description_outlined,
+                              size: 48,
+                              color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'No report file available',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface.withOpacity(0.7),
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'No report file uploaded yet',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.7),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       )
                     else if (isImageUrl(reportUrl))
@@ -203,19 +192,16 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: CachedNetworkImage(
-                              imageUrl: publicUrl,
+                              imageUrl: reportUrl,
                               placeholder: (context, url) => Container(
                                 height: 200,
                                 color: theme.colorScheme.surface,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: theme.colorScheme.primary,
-                                  ),
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
                                 ),
                               ),
                               errorWidget: (context, url, error) {
                                 print('Error loading image: $error');
-                                print('Attempted URL: $url');
                                 return Container(
                                   height: 200,
                                   color: theme.colorScheme.surface,
@@ -242,79 +228,118 @@ class LabRadiologyReportDetailsScreen extends StatelessWidget {
                                 );
                               },
                               fit: BoxFit.contain,
+                              height: 200,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          TextButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => Scaffold(
-                                    appBar: AppBar(
-                                      backgroundColor: Colors.black,
-                                      leading: IconButton(
-                                        icon: const Icon(Icons.close, color: Colors.white),
-                                        onPressed: () => Navigator.pop(context),
-                                      ),
-                                    ),
-                                    body: Container(
-                                      color: Colors.black,
-                                      child: Center(
-                                        child: InteractiveViewer(
-                                          minScale: 0.5,
-                                          maxScale: 4.0,
-                                          child: CachedNetworkImage(
-                                            imageUrl: publicUrl,
-                                            fit: BoxFit.contain,
-                                            placeholder: (context, url) => const Center(
-                                              child: CircularProgressIndicator(color: Colors.white),
-                                            ),
-                                            errorWidget: (context, url, error) => Center(
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
-                                                  const SizedBox(height: 8),
-                                                  Text(
-                                                    'Error loading image: $error',
-                                                    style: const TextStyle(color: Colors.white),
-                                                    textAlign: TextAlign.center,
-                                                  ),
-                                                ],
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => Scaffold(
+                                        appBar: AppBar(
+                                          backgroundColor: Colors.black,
+                                          leading: IconButton(
+                                            icon: const Icon(Icons.close, color: Colors.white),
+                                            onPressed: () => Navigator.pop(context),
+                                          ),
+                                        ),
+                                        body: Container(
+                                          color: Colors.black,
+                                          child: Center(
+                                            child: InteractiveViewer(
+                                              minScale: 0.5,
+                                              maxScale: 4.0,
+                                              child: CachedNetworkImage(
+                                                imageUrl: reportUrl,
+                                                fit: BoxFit.contain,
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
+                                  );
+                                },
+                                icon: Icon(Icons.fullscreen, color: theme.colorScheme.primary),
+                                label: Text(
+                                  'View Full Screen',
+                                  style: TextStyle(color: theme.colorScheme.primary),
                                 ),
-                              );
-                            },
-                            icon: Icon(Icons.fullscreen, color: theme.colorScheme.primary),
-                            label: Text(
-                              'View Full Screen',
-                              style: TextStyle(color: theme.colorScheme.primary),
-                            ),
+                              ),
+                            ],
                           ),
                         ],
                       )
                     else if (isPdfUrl(reportUrl))
-                      ElevatedButton.icon(
-                        onPressed: () => _openFile(publicUrl),
-                        icon: const Icon(Icons.picture_as_pdf),
-                        label: const Text('Open PDF'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.picture_as_pdf,
+                              size: 48,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'PDF Document',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () => _openFile(reportUrl),
+                              icon: const Icon(Icons.open_in_new),
+                              label: const Text('Open PDF'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1A237E),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       )
                     else
-                      ElevatedButton.icon(
-                        onPressed: () => _openFile(publicUrl),
-                        icon: const Icon(Icons.open_in_new),
-                        label: const Text('Open File'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.file_present,
+                              size: 48,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'File Available',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () => _openFile(reportUrl),
+                              icon: const Icon(Icons.open_in_new),
+                              label: const Text('Open File'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF1A237E),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],
