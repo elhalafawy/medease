@@ -829,12 +829,11 @@ class _PatientMedicalRecordScreenState extends State<PatientMedicalRecordScreen>
                                 'statusColor': statusColor,
                                 'result': status, // Using status for result as per existing structure
                                 'desc': 'Report added by Dr. $doctorName', // Assuming similar description structure
-                                'report_id': reportId, // Pass the Radiology_id as report_id
                                 'report_url': report['report_url'], // Add the report_url from the database
                                 'Title': title, // Add Title field for consistency
                                 'created_at': report['created_at'], // Add created_at for proper date handling
                                 'doctors': {'name': doctorName}, // Add doctors object for consistency
-                                'Radiology_id': reportId, // Add Radiology_id for proper identification
+                                'Radiology_id': report['Radiology_id'], // Pass the Radiology_id directly from the original report
                               },
                             );
                           },
