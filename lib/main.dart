@@ -6,13 +6,15 @@ import 'core/theme/app_theme.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/analysis_result_provider.dart';
 
-final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.light);
+final ValueNotifier<ThemeMode> themeModeNotifier =
+    ValueNotifier(ThemeMode.light);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: 'https://uajmedkdzatiketenyle.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVham1lZGtkemF0aWtldGVueWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY4ODQ4MjYsImV4cCI6MjA2MjQ2MDgyNn0.ip3VGZBh0risZSMbrM81mDIsw0EzICYtXIrJIBGBhfY',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVham1lZGtkemF0aWtldGVueWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY4ODQ4MjYsImV4cCI6MjA2MjQ2MDgyNn0.ip3VGZBh0risZSMbrM81mDIsw0EzICYtXIrJIBGBhfY',
   );
   runApp(const MyApp());
 }

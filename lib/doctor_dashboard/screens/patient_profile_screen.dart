@@ -28,9 +28,10 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
       });
       final response = await _supabase
           .from('patients')
-          .select('patient_id, full_name, age, gender, contact_info, profile_image, date_of_birth, email')
+          .select(
+              'patient_id, full_name, age, gender, contact_info, profile_image, date_of_birth, email')
           .order('full_name');
-      
+
       setState(() {
         _patients = List<Map<String, dynamic>>.from(response);
         _isLoading = false;
@@ -61,7 +62,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
     }
 
     if (_patients.isEmpty) {
-       return Scaffold(
+      return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -119,9 +120,10 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                     ),
                   );
                 } else {
-                   ScaffoldMessenger.of(context).showSnackBar(
-                     const SnackBar(content: Text('Patient record has no valid ID.')),
-                   );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Patient record has no valid ID.')),
+                  );
                 }
               },
               child: Container(
@@ -146,7 +148,9 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                           radius: 40,
                           backgroundImage: patient['profile_image'] != null
                               ? NetworkImage(patient['profile_image'])
-                              : const AssetImage('assets/images/profile_picture.png') as ImageProvider,
+                              : const AssetImage(
+                                      'assets/images/profile_picture.png')
+                                  as ImageProvider,
                         ),
                         const SizedBox(width: 20),
                         Expanded(
@@ -183,7 +187,8 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                     const SizedBox(height: 15),
                     _buildInfoRow('Email', patientEmail),
                     const SizedBox(height: 15),
-                    _buildInfoRow('Date of Birth', patient['date_of_birth'] ?? 'N/A'),
+                    _buildInfoRow(
+                        'Date of Birth', patient['date_of_birth'] ?? 'N/A'),
                     const SizedBox(height: 20),
                     Center(
                       child: Text(
@@ -221,14 +226,17 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
           child: label == 'Email' && value.contains('@')
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  children: value.split('@').map((part) => Text(
-                    part + (value.split('@').last != part ? '@' : ''),
-                    textAlign: TextAlign.right,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  )).toList(),
+                  children: value
+                      .split('@')
+                      .map((part) => Text(
+                            part + (value.split('@').last != part ? '@' : ''),
+                            textAlign: TextAlign.right,
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppTheme.primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ))
+                      .toList(),
                 )
               : Text(
                   value,
@@ -242,4 +250,4 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
       ],
     );
   }
-} 
+}

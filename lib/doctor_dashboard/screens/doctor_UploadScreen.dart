@@ -7,6 +7,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme/app_theme.dart';
+import 'patient_medical_record_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../features/upload/models/analysis_result.dart';
+import 'doctor_ocr_result_screen.dart';
 
 class DoctorUploadscreen extends StatefulWidget {
   const DoctorUploadscreen({super.key});
@@ -24,13 +28,18 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
   String _ocrText = '';
   bool _busy = false;
 
-  String? _selectedPatient;
+  List<Map<String, dynamic>> _patients = [];
+  String? _selectedPatientId;
+  String? _selectedPatientName;
+  String? _selectedPatientDOB;
+  bool _isLoadingPatients = true;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     _initCamera();
+    _loadPatients();
   }
 
   Future<void> _initCamera() async {
@@ -48,6 +57,37 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
     }
   }
 
+  Future<void> _loadPatients() async {
+    try {
+      setState(() => _isLoadingPatients = true);
+      final response = await Supabase.instance.client
+          .from('patients')
+          .select('patient_id, full_name, date_of_birth')
+          .order('full_name');
+      setState(() {
+        _patients = List<Map<String, dynamic>>.from(response);
+        _isLoadingPatients = false;
+      });
+    } catch (e) {
+      print('Error loading patients: $e');
+      setState(() => _isLoadingPatients = false);
+    }
+  }
+
+  void _showOcrResultScreen(BuildContext context, AnalysisResult analysis) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DoctorOcrResultScreen(
+          analysis: analysis,
+          patientId: _selectedPatientId!,
+          patientName: _selectedPatientName ?? '',
+          patientDOB: _selectedPatientDOB ?? 'Unknown',
+        ),
+      ),
+    );
+  }
+
   Future<void> _doOCR(XFile img) async {
     try {
       setState(() => _busy = true);
@@ -60,11 +100,17 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
         _ocrText = res.text;
         _busy = false;
       });
-      _pageController.animateToPage(
-        4,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+
+      // تحليل نص الروشتة باستخدام AnalysisResult
+      final analysis = await AnalysisResult.fromText(_ocrText);
+      // انتقل لصفحة عرض النتائج
+      if (_selectedPatientId != null) {
+        _showOcrResultScreen(context, analysis);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a patient first')),
+        );
+      }
     } catch (e, st) {
       print('OCR failed: $e\n$st');
       setState(() => _busy = false);
@@ -96,6 +142,14 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
+          if (_selectedPatientId == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Please select a patient first')),
+            );
+            return;
+          }
+
+          // Navigate to camera page for scanning
           setState(() {
             _imageFile = null;
             _ocrText = '';
@@ -113,7 +167,8 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
             const SizedBox(height: 8),
             Text(label,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge!.copyWith(color: Colors.white)),
+                style:
+                    theme.textTheme.bodyLarge!.copyWith(color: Colors.white)),
           ],
         ),
       ),
@@ -173,20 +228,35 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    DropdownButton<String>(
-                      value: _selectedPatient,
-                      dropdownColor: theme.cardColor,
-                      style: theme.textTheme.titleLarge,
-                      hint: Text("Select Patient", style: theme.textTheme.titleLarge),
-                      iconEnabledColor: theme.primaryColor,
-                      items: ['Manar', 'Ahmed', 'Mohamed'].map((name) {
-                        return DropdownMenuItem<String>(
-                          value: name,
-                          child: Center(child: Text(name, style: theme.textTheme.bodyLarge)),
-                        );
-                      }).toList(),
-                      onChanged: (value) => setState(() => _selectedPatient = value),
-                    ),
+                    if (_isLoadingPatients)
+                      const CircularProgressIndicator()
+                    else
+                      DropdownButton<String>(
+                        value: _selectedPatientId,
+                        dropdownColor: theme.cardColor,
+                        style: theme.textTheme.titleLarge,
+                        hint: Text("Select Patient",
+                            style: theme.textTheme.titleLarge),
+                        iconEnabledColor: theme.primaryColor,
+                        items: _patients.map((patient) {
+                          return DropdownMenuItem<String>(
+                            value: patient['patient_id'],
+                            child: Text(patient['full_name']),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            final patient = _patients
+                                .firstWhere((p) => p['patient_id'] == value);
+                            setState(() {
+                              _selectedPatientId = value;
+                              _selectedPatientName = patient['full_name'];
+                              _selectedPatientDOB =
+                                  patient['date_of_birth']?.toString();
+                            });
+                          }
+                        },
+                      ),
                     const SizedBox(height: 24),
                     Expanded(
                       child: GridView.count(
@@ -194,9 +264,11 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
                         children: [
-                          _buildTile(context, 'Prescriptions', Icons.medical_services),
+                          _buildTile(
+                              context, 'Prescriptions', Icons.medical_services),
                           _buildTile(context, 'Lab reports', Icons.science),
-                          _buildTile(context, 'Medication', Icons.local_pharmacy),
+                          _buildTile(
+                              context, 'Medication', Icons.local_pharmacy),
                           _buildTile(context, 'X-Ray', Icons.wb_iridescent),
                         ],
                       ),
@@ -214,7 +286,10 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                     CameraPreview(_camCtrl!),
                     Center(child: _frameOverlay()),
                     if (_busy)
-                      Container(color: Colors.black26, child: const Center(child: CircularProgressIndicator())),
+                      Container(
+                          color: Colors.black26,
+                          child:
+                              const Center(child: CircularProgressIndicator())),
                     Positioned(
                       bottom: 24,
                       left: 24,
@@ -223,9 +298,11 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.photo, size: 32, color: Colors.white),
+                            icon: const Icon(Icons.photo,
+                                size: 32, color: Colors.white),
                             onPressed: () async {
-                              final img = await ImagePicker().pickImage(source: ImageSource.gallery);
+                              final img = await ImagePicker()
+                                  .pickImage(source: ImageSource.gallery);
                               if (img != null) await _doOCR(img);
                             },
                           ),
@@ -242,7 +319,8 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                             child: const Icon(Icons.camera_alt, size: 32),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.insert_drive_file, size: 32, color: Colors.white),
+                            icon: const Icon(Icons.insert_drive_file,
+                                size: 32, color: Colors.white),
                             onPressed: () {},
                           ),
                         ],
@@ -253,7 +331,9 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
 
               // Page 2: Original Image
               _imageFile == null
-                  ? Center(child: Text('No image yet', style: theme.textTheme.bodyLarge))
+                  ? Center(
+                      child: Text('No image yet',
+                          style: theme.textTheme.bodyLarge))
                   : Image.file(File(_imageFile!.path), fit: BoxFit.contain),
 
               // Page 3: Crop Overlay
@@ -262,7 +342,9 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                   : Stack(
                       children: [
                         Image.file(File(_imageFile!.path), fit: BoxFit.contain),
-                        Center(child: Opacity(opacity: .4, child: _frameOverlay())),
+                        Center(
+                            child:
+                                Opacity(opacity: .4, child: _frameOverlay())),
                       ],
                     ),
 
@@ -285,8 +367,8 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                           icon: const Icon(Icons.copy),
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: _ocrText));
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(content: Text('Copied')));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Copied')));
                           },
                         ),
                         IconButton(

@@ -6,12 +6,12 @@ class AppTheme {
   static const double kBorderRadiusMedium = 12.0;
   static const double kBorderRadiusLarge = 16.0;
   static const double kBorderRadiusXLarge = 20.0;
-  
+
   static const double kPaddingSmall = 8.0;
   static const double kPaddingMedium = 12.0;
   static const double kPaddingLarge = 16.0;
   static const double kPaddingXLarge = 20.0;
-  
+
   static const double kElevationSmall = 2.0;
   static const double kElevationMedium = 4.0;
   static const double kElevationLarge = 8.0;
@@ -19,31 +19,31 @@ class AppTheme {
   // Brand Colors (Consistent for both modes where applicable, or defined per mode)
   static const Color primaryColor = Color(0xFF022E5B);
   static const Color secondaryColor = Color(0xFF00264D);
-  
+
   // Background Colors
   static const Color backgroundColor = Color(0xFFF3F4F6);
   static const Color appBarBackgroundColor = Color(0xFFF8F9FB);
   static const Color darkBackground = Color(0xFF181A20);
   static const Color darkSurface = Color(0xFF23262F);
-  
+
   // Text Colors
   static const Color textColor = Color(0xFF3C4A59);
   static const Color greyColor = Color(0xFFADADAD);
   static const Color darkText = Color(0xFFE5E7EB);
   static const Color darkGrey = Color(0xFF7B7F87);
-  
+
   // Border Colors
   static const Color borderColor = Color(0xFFE8F3F1);
   static const Color darkBorder = Color(0xFF35383F);
-  
+
   // Status Colors
   static const Color errorColor = Color(0xFFE53935);
   static const Color successColor = Color(0xFF43A047);
   static const Color warningColor = Color(0xFFFFA000);
-  
+
   // Booking colors
-  static const Color bookingDayColor = Color(0xFF73D0ED); 
-  static const Color bookingTimeColor = Color(0xFFEDAE73); 
+  static const Color bookingDayColor = Color(0xFF73D0ED);
+  static const Color bookingTimeColor = Color(0xFFEDAE73);
   // Notification icon and background colors (Light Mode)
   static const Color notifCalendarIcon = Color(0xFF2563EB);
   static const Color notifCalendarBg = Color(0xFFE8F1FB);
@@ -62,11 +62,10 @@ class AppTheme {
   static const Color darkDialog = Color(0xFF23262F);
   static const Color darkInput = Color(0xFF23262F);
 
-
-
   // Night mode colors (Standardized)
   static const Color nightBackground = Color(0xFF18191A);
-  static const Color nightSurface = Color(0xFF242526); // Used for cards, dialogs, inputs
+  static const Color nightSurface =
+      Color(0xFF242526); // Used for cards, dialogs, inputs
   static const Color nightCard = nightSurface; // Standardized
   static const Color nightDialog = nightSurface; // Standardized
   static const Color nightInput = nightSurface; // Standardized
@@ -75,23 +74,33 @@ class AppTheme {
   static const Color nightGrey = Color(0xFFB0B3B8);
   static const Color nightPrimary = Color.fromARGB(255, 2, 50, 104);
   static const Color nightSecondary = Color.fromARGB(255, 0, 47, 93);
-  static const Color nightError = Color(0xFFEF9A9A); // Adjusted for dark mode visibility
-  static const Color nightSuccess = Color(0xFFA5D6A7); // Adjusted for dark mode visibility
-  static const Color nightWarning = Color(0xFFFFCC80); // Adjusted for dark mode visibility
+  static const Color nightError =
+      Color(0xFFEF9A9A); // Adjusted for dark mode visibility
+  static const Color nightSuccess =
+      Color(0xFFA5D6A7); // Adjusted for dark mode visibility
+  static const Color nightWarning =
+      Color(0xFFFFCC80); // Adjusted for dark mode visibility
 
   // Night mode notification colors
-  static const Color nightNotifCalendarIcon = Color(0xFF60A5FA); // Adjusted for contrast
+  static const Color nightNotifCalendarIcon =
+      Color(0xFF60A5FA); // Adjusted for contrast
   static const Color nightNotifCalendarBg = Color(0xFF1E3A8A);
-  static const Color nightNotifChatIcon = Color(0xFFF472B6); // Adjusted for contrast
+  static const Color nightNotifChatIcon =
+      Color(0xFFF472B6); // Adjusted for contrast
   static const Color nightNotifChatBg = Color(0xFF831843);
-  static const Color nightNotifMedicineIcon = Color(0xFFFACC15); // Adjusted for contrast
+  static const Color nightNotifMedicineIcon =
+      Color(0xFFFACC15); // Adjusted for contrast
   static const Color nightNotifMedicineBg = Color(0xFF78350F);
-  static const Color nightNotifVaccineIcon = Color(0xFF22D3EE); // Adjusted for contrast
+  static const Color nightNotifVaccineIcon =
+      Color(0xFF22D3EE); // Adjusted for contrast
   static const Color nightNotifVaccineBg = Color(0xFF164E63);
-  static const Color nightNotifUpdateIcon = Color(0xFFF87171); // Adjusted for contrast
+  static const Color nightNotifUpdateIcon =
+      Color(0xFFF87171); // Adjusted for contrast
   static const Color nightNotifUpdateBg = Color(0xFF7F1D1D);
-  static const Color nightNotifCardBorder = Color(0xFF4B5563); // Adjusted for contrast
-  static const Color nightNotifPageBg = Color(0xFF1F2937); // Adjusted for contrast
+  static const Color nightNotifCardBorder =
+      Color(0xFF4B5563); // Adjusted for contrast
+  static const Color nightNotifPageBg =
+      Color(0xFF1F2937); // Adjusted for contrast
 
   // Text Styles Constants
   static const double kFontSizeXS = 12.0;
@@ -223,21 +232,29 @@ class AppTheme {
 
   // Text Styles (Night Mode)
   // Using get accessors for potential future dynamic adjustments, but primarily copying with color changes.
-  static TextStyle get nightDisplayLarge => displayLarge.copyWith(color: nightText);
-  static TextStyle get nightDisplayMedium => displayMedium.copyWith(color: nightText);
-  static TextStyle get nightDisplaySmall => displaySmall.copyWith(color: nightText);
-  static TextStyle get nightHeadlineLarge => headlineLarge.copyWith(color: nightText);
-  static TextStyle get nightHeadlineMedium => headlineMedium.copyWith(color: nightText);
-  static TextStyle get nightHeadlineSmall => headlineSmall.copyWith(color: nightText);
+  static TextStyle get nightDisplayLarge =>
+      displayLarge.copyWith(color: nightText);
+  static TextStyle get nightDisplayMedium =>
+      displayMedium.copyWith(color: nightText);
+  static TextStyle get nightDisplaySmall =>
+      displaySmall.copyWith(color: nightText);
+  static TextStyle get nightHeadlineLarge =>
+      headlineLarge.copyWith(color: nightText);
+  static TextStyle get nightHeadlineMedium =>
+      headlineMedium.copyWith(color: nightText);
+  static TextStyle get nightHeadlineSmall =>
+      headlineSmall.copyWith(color: nightText);
   static TextStyle get nightTitleLarge => titleLarge.copyWith(color: nightText);
-  static TextStyle get nightTitleMedium => titleMedium.copyWith(color: nightText);
+  static TextStyle get nightTitleMedium =>
+      titleMedium.copyWith(color: nightText);
   static TextStyle get nightTitleSmall => titleSmall.copyWith(color: nightText);
   static TextStyle get nightBodyLarge => bodyLarge.copyWith(color: nightText);
   static TextStyle get nightBodyMedium => bodyMedium.copyWith(color: nightText);
   // Using nightGrey for less prominent text in dark mode
   static TextStyle get nightBodySmall => bodySmall.copyWith(color: nightGrey);
   static TextStyle get nightLabelLarge => labelLarge.copyWith(color: nightText);
-  static TextStyle get nightLabelMedium => labelMedium.copyWith(color: nightText);
+  static TextStyle get nightLabelMedium =>
+      labelMedium.copyWith(color: nightText);
   static TextStyle get nightLabelSmall => labelSmall.copyWith(color: nightGrey);
 
   // --- Theme Data Definitions ---
@@ -252,7 +269,8 @@ class AppTheme {
       onPrimaryContainer: Colors.white, // Text/icons on primary container
       secondary: secondaryColor,
       onSecondary: Colors.white, // Text/icons on secondary color
-      secondaryContainer: Color(0xFFE0E0E0), // Example secondary container color
+      secondaryContainer:
+          Color(0xFFE0E0E0), // Example secondary container color
       onSecondaryContainer: textColor, // Text/icons on secondary container
       tertiary: bookingTimeColor, // Example tertiary color
       onTertiary: Colors.white, // Text/icons on tertiary color
@@ -272,7 +290,8 @@ class AppTheme {
       outlineVariant: greyColor, // Less prominent borders
       shadow: Colors.black54, // Shadows
       scrim: Colors.black54, // Scrim for modals
-      inverseSurface: darkBackground, // For elements on dark background in light theme
+      inverseSurface:
+          darkBackground, // For elements on dark background in light theme
       onInverseSurface: darkText, // Text/icons on inverse surface
       inversePrimary: nightPrimary, // Primary color for inverse theme
       surfaceTint: primaryColor, // Surface tint color
@@ -321,7 +340,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: kPaddingLarge, vertical: kPaddingMedium),
+          padding: const EdgeInsets.symmetric(
+              horizontal: kPaddingLarge, vertical: kPaddingMedium),
           textStyle: labelLarge.copyWith(color: lightColorScheme.onPrimary),
           elevation: kElevationMedium,
         ),
@@ -332,7 +352,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: kPaddingMedium, vertical: kPaddingSmall),
+          padding: const EdgeInsets.symmetric(
+              horizontal: kPaddingMedium, vertical: kPaddingSmall),
           textStyle: labelLarge.copyWith(color: lightColorScheme.primary),
         ),
       ),
@@ -343,7 +364,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: kPaddingLarge, vertical: kPaddingMedium),
+          padding: const EdgeInsets.symmetric(
+              horizontal: kPaddingLarge, vertical: kPaddingMedium),
           textStyle: labelLarge.copyWith(color: lightColorScheme.primary),
         ),
       ),
@@ -358,16 +380,16 @@ class AppTheme {
         elevation: kElevationLarge,
       ),
 
-
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: lightColorScheme.surface,
         elevation: kElevationSmall,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           side: BorderSide(color: lightColorScheme.outlineVariant, width: 0.5),
         ),
-        margin: EdgeInsets.zero, // Cards usually have margin from parent padding
+        margin:
+            EdgeInsets.zero, // Cards usually have margin from parent padding
       ),
 
       // Input Decoration Theme (for TextFields, TextFormFields)
@@ -403,7 +425,7 @@ class AppTheme {
       ),
 
       // Dialog Theme
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: lightColorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusLarge),
@@ -416,7 +438,8 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: lightColorScheme.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(kBorderRadiusLarge)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(kBorderRadiusLarge)),
         ),
       ),
 
@@ -478,7 +501,8 @@ class AppTheme {
       outlineVariant: nightGrey, // Less prominent dark borders
       shadow: Colors.black87, // Darker shadows
       scrim: Colors.black87, // Scrim for modals in dark mode
-      inverseSurface: backgroundColor, // For elements on light background in dark theme
+      inverseSurface:
+          backgroundColor, // For elements on light background in dark theme
       onInverseSurface: textColor, // Text/icons on inverse surface
       inversePrimary: primaryColor, // Primary color for inverse theme
       surfaceTint: nightPrimary, // Surface tint color in dark mode
@@ -512,7 +536,8 @@ class AppTheme {
 
       // AppBar Theme (Dark Mode)
       appBarTheme: AppBarTheme(
-        backgroundColor: darkColorScheme.surface, // Use surface color for consistency
+        backgroundColor:
+            darkColorScheme.surface, // Use surface color for consistency
         foregroundColor: nightText, // Color of icons and text in AppBar
         elevation: kElevationSmall,
         titleTextStyle: nightTitleLarge.copyWith(color: nightText),
@@ -528,7 +553,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: kPaddingLarge, vertical: kPaddingMedium),
+          padding: const EdgeInsets.symmetric(
+              horizontal: kPaddingLarge, vertical: kPaddingMedium),
           textStyle: nightLabelLarge.copyWith(color: darkColorScheme.onPrimary),
           elevation: kElevationMedium,
         ),
@@ -539,7 +565,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: kPaddingMedium, vertical: kPaddingSmall),
+          padding: const EdgeInsets.symmetric(
+              horizontal: kPaddingMedium, vertical: kPaddingSmall),
           textStyle: nightLabelLarge.copyWith(color: darkColorScheme.primary),
         ),
       ),
@@ -550,30 +577,32 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: kPaddingLarge, vertical: kPaddingMedium),
+          padding: const EdgeInsets.symmetric(
+              horizontal: kPaddingLarge, vertical: kPaddingMedium),
           textStyle: nightLabelLarge.copyWith(color: darkColorScheme.primary),
         ),
       ),
-        iconButtonTheme: IconButtonThemeData(
-          style: IconButton.styleFrom(
-            foregroundColor: nightText,
-          ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: nightText,
         ),
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: darkColorScheme.secondary,
-          foregroundColor: darkColorScheme.onSecondary,
-          elevation: kElevationLarge,
-        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: darkColorScheme.secondary,
+        foregroundColor: darkColorScheme.onSecondary,
+        elevation: kElevationLarge,
+      ),
 
       // Card Theme (Dark Mode)
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: darkColorScheme.surface,
         elevation: kElevationSmall,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           side: BorderSide(color: darkColorScheme.outlineVariant, width: 0.5),
         ),
-        margin: EdgeInsets.zero, // Cards usually have margin from parent padding
+        margin:
+            EdgeInsets.zero, // Cards usually have margin from parent padding
       ),
 
       // Input Decoration Theme (Dark Mode)
@@ -586,30 +615,40 @@ class AppTheme {
         suffixIconColor: nightGrey,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: darkColorScheme.outline, width: 1), // Use color from color scheme
+          borderSide: BorderSide(
+              color: darkColorScheme.outline,
+              width: 1), // Use color from color scheme
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: darkColorScheme.outline, width: 1), // Use color from color scheme
+          borderSide: BorderSide(
+              color: darkColorScheme.outline,
+              width: 1), // Use color from color scheme
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: darkColorScheme.primary, width: 2), // Use color from color scheme
+          borderSide: BorderSide(
+              color: darkColorScheme.primary,
+              width: 2), // Use color from color scheme
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: darkColorScheme.error, width: 1), // Use color from color scheme
+          borderSide: BorderSide(
+              color: darkColorScheme.error,
+              width: 1), // Use color from color scheme
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: darkColorScheme.error, width: 2), // Use color from color scheme
+          borderSide: BorderSide(
+              color: darkColorScheme.error,
+              width: 2), // Use color from color scheme
         ),
         contentPadding: const EdgeInsets.symmetric(
             horizontal: kPaddingMedium, vertical: kPaddingMedium),
       ),
 
       // Dialog Theme (Dark Mode)
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: darkColorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusLarge),
@@ -622,7 +661,8 @@ class AppTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: darkColorScheme.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(kBorderRadiusLarge)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(kBorderRadiusLarge)),
         ),
       ),
 
@@ -666,12 +706,13 @@ class CustomBottomBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const CustomBottomBar({super.key, required this.currentIndex, required this.onTap});
+  const CustomBottomBar(
+      {super.key, required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       height: 68,
       width: double.infinity,
@@ -679,7 +720,7 @@ class CustomBottomBar extends StatelessWidget {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((13*255).toInt()),
+            color: Colors.black.withAlpha((13 * 255).toInt()),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -690,17 +731,19 @@ class CustomBottomBar extends StatelessWidget {
         children: [
           _buildNavItem(context, "assets/icons/ic_home.png", "Home", 0),
           _buildNavItem(context, "assets/icons/ic_upload.png", "Upload", 1),
-          _buildNavItem(context, "assets/icons/ic_appointment.png", "Appointment", 2),
+          _buildNavItem(
+              context, "assets/icons/ic_appointment.png", "Appointment", 2),
           _buildNavItem(context, "assets/icons/ic_profile.png", "Profile", 3),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(BuildContext context, String iconPath, String label, int index) {
+  Widget _buildNavItem(
+      BuildContext context, String iconPath, String label, int index) {
     final theme = Theme.of(context);
     final bool isSelected = currentIndex == index;
-    
+
     return GestureDetector(
       onTap: () => onTap(index),
       child: Column(
@@ -709,7 +752,10 @@ class CustomBottomBar extends StatelessWidget {
           Image.asset(
             iconPath,
             height: 24,
-            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6), // Use color scheme
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurface
+                    .withOpacity(0.6), // Use color scheme
           ),
           const SizedBox(height: 4),
           Text(
@@ -717,7 +763,10 @@ class CustomBottomBar extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6), // Use color scheme
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface
+                      .withOpacity(0.6), // Use color scheme
             ),
           ),
         ],
