@@ -757,14 +757,14 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                       children: [
                         _buildInfoRow(
                             'Patient Name',
-                            patientData?['full_name'] ?? 'N/A'),
+                            patientData?['full_name'] ?? ' '),
                         const Divider(),
                         _buildInfoRow('Phone Number',
-                            patientData?['contact_info'] ?? 'N/A'),
+                            patientData?['contact_info'] ?? ' '),
                         const Divider(),
                         _buildInfoRow(
                             'Email',
-                            patientData?['email'] ?? 'N/A'),
+                            patientData?['email'] ?? ' '),
                         const Divider(),
                         _buildInfoRow(
                             'Notes',

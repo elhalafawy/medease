@@ -260,49 +260,51 @@ class _DoctorBookAppointmentScreenState
 // ... existing code ...
 
 // Helper to generate 30-minute slots between start and end time
-List<TimeOfDay> generateTimeSlots(TimeOfDay start, TimeOfDay end) {
-  List<TimeOfDay> slots = [];
-  TimeOfDay current = start;
-  while (current.hour < end.hour || (current.hour == end.hour && current.minute < end.minute)) {
-    slots.add(current);
-    int newMinute = current.minute + 30;
-    int newHour = current.hour;
-    if (newMinute >= 60) {
-      newHour += 1;
-      newMinute -= 60;
+  List<TimeOfDay> generateTimeSlots(TimeOfDay start, TimeOfDay end) {
+    List<TimeOfDay> slots = [];
+    TimeOfDay current = start;
+    while (current.hour < end.hour ||
+        (current.hour == end.hour && current.minute < end.minute)) {
+      slots.add(current);
+      int newMinute = current.minute + 30;
+      int newHour = current.hour;
+      if (newMinute >= 60) {
+        newHour += 1;
+        newMinute -= 60;
+      }
+      current = TimeOfDay(hour: newHour, minute: newMinute);
     }
-    current = TimeOfDay(hour: newHour, minute: newMinute);
+    return slots;
   }
-  return slots;
-}
 
 // Use this in your addTimeSlot logic:
-Future<void> addTimeSlots({
-  required String doctorId,
-  required DateTime availableDate,
-  required TimeOfDay fromTime,
-  required TimeOfDay toTime,
-  String status = 'available',
-  String? recurringRule,
-}) async {
-  final supabase = Supabase.instance.client;
-  List<TimeOfDay> slots = generateTimeSlots(fromTime, toTime);
-  for (final slot in slots) {
-    final slotStr = '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
-    await supabase.from('time_slots_duplicate').insert({
-      'doctor_id': doctorId,
-      'available_date': availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
-      'time_slot': slotStr,
-      'status': status,
-      'recurring_rule': recurringRule,
-    });
+  Future<void> addTimeSlots({
+    required String doctorId,
+    required DateTime availableDate,
+    required TimeOfDay fromTime,
+    required TimeOfDay toTime,
+    String status = 'available',
+    String? recurringRule,
+  }) async {
+    final supabase = Supabase.instance.client;
+    List<TimeOfDay> slots = generateTimeSlots(fromTime, toTime);
+    for (final slot in slots) {
+      final slotStr =
+          '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
+      await supabase.from('time_slots_duplicate').insert({
+        'doctor_id': doctorId,
+        'available_date':
+            availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
+        'time_slot': slotStr,
+        'status': status,
+        'recurring_rule': recurringRule,
+      });
+    }
   }
-}
 
 // ... existing code ...
 
 // In your button's onPressed, call addTimeSlots for each selected day:
-
 
 // ... existing code ...
 
@@ -681,20 +683,23 @@ Future<void> addTimeSlots({
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () async {
-  String doctorId = 'b55f005f-3185-4fa3-9098-2179e0751621';
-  if (selectedDayIndices.isNotEmpty && fromTime != null && toTime != null) {
-    for (var idx in selectedDayIndices) {
-      await addTimeSlots(
-        doctorId: doctorId,
-        availableDate: next7Days[idx],
-        fromTime: fromTime!,
-        toTime: toTime!,
-      );
-    }
-    await loadAppointments();
-    _showSuccessDialog();
-  }
-},
+                            String doctorId =
+                                'b55f005f-3185-4fa3-9098-2179e0751621';
+                            if (selectedDayIndices.isNotEmpty &&
+                                fromTime != null &&
+                                toTime != null) {
+                              for (var idx in selectedDayIndices) {
+                                await addTimeSlots(
+                                  doctorId: doctorId,
+                                  availableDate: next7Days[idx],
+                                  fromTime: fromTime!,
+                                  toTime: toTime!,
+                                );
+                              }
+                              await loadAppointments();
+                              _showSuccessDialog();
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: theme.colorScheme.primary,
                             foregroundColor: Colors.white,

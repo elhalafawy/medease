@@ -23,12 +23,86 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   List<Map<String, dynamic>> _appointments = [];
   bool _loading = true;
   String? _error;
+  int selectedTimeIndex = 0;
+  bool loadingSlots = true;
+  List<Map<String, dynamic>> availableTimes = [];
 
   @override
   void initState() {
     super.initState();
     fetchAppointments();
+    final today = DateTime.now();
+    final dateStr = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", dateStr);
   }
+
+  Future<void> fetchtimeSlots(String doctorId, String date) async {
+  setState(() {
+    loadingSlots = true;
+    _error = null;
+  });
+  try {
+    final response = await Supabase.instance.client
+        .from('time_slots_duplicate')
+        .select('*')
+        .eq('doctor_id', doctorId)
+        .eq('available_date', date)
+        .eq('status', 'available')
+        .order('time_slot', ascending: true);
+       setState(() {
+     availableTimes = List<Map<String, dynamic>>.from(response);
+//      for (var slot in availableTimes) {
+//   print(slot['time_slot']);
+// }
+     loadingSlots = false;
+   });
+  } catch (e) {
+    setState(() {
+      _error = 'Failed to load time slots';
+      loadingSlots = false;
+    });
+  }
+}
+
+  Future<void> updateAppointmentTimeSlot({
+  required String appointmentId,
+  required String newTimeSlotId,
+  required String oldTimeSlotId,
+  required String newTime,
+  required String newDate,
+}) async {
+  try {
+    // 1. Update the appointment with the new time and time_slot_id
+    await Supabase.instance.client
+        .from('appointments')
+        .update({
+          'time': newTime,
+          'time_slot_id': newTimeSlotId,
+          'date': newDate,
+        })
+        .eq('appointment_id', appointmentId);
+
+    // 2. Mark the old time slot as available
+    await Supabase.instance.client
+        .from('time_slots_duplicate')
+        .update({'status': 'available'})
+        .eq('slot_id', oldTimeSlotId);
+
+    // 3. Mark the new time slot as booked
+    await Supabase.instance.client
+        .from('time_slots_duplicate')
+        .update({'status': 'booked'})
+        .eq('slot_id', newTimeSlotId);
+
+    // Optionally, refresh appointments or slots
+    await fetchAppointments();
+    // await fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", date);
+  } catch (e) {
+    setState(() {
+      _error = 'Failed to update appointment time slot';
+    });
+  }
+}
 
   Future<void> fetchAppointments() async {
     setState(() {
@@ -38,7 +112,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
     try {
       final response = await Supabase.instance.client
           .from('appointments')
-          .select('*, patients:patient_id(full_name)').order('date', ascending: true);
+          .select('*, patients:patient_id(full_name)').order('date', ascending: true).order("time", ascending: true);
           // print(response);
       setState(() {
         _appointments = List<Map<String, dynamic>>.from(response);
@@ -157,6 +231,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   }
 
   void _showAppointmentDetails(Map<String, dynamic> appt) {
+    // print(appt['notes']);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -205,7 +280,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            if ((appt['message'] ?? '').isNotEmpty) ...[
+            if ((appt['notes']).isNotEmpty) ...[
               Text('Message from patient:', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor)),
               const SizedBox(height: 6),
               Container(
@@ -215,7 +290,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                   color: AppTheme.primaryColor.withOpacity(0.07),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(appt['message'], style: AppTheme.bodyLarge),
+                child: Text(appt['notes'], style: AppTheme.bodyLarge),
               ),
               const SizedBox(height: 16),
             ],
@@ -247,6 +322,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                     height: 38,
                     child: ElevatedButton.icon(
                       onPressed: () async {
+                        fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", appt['date']);
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -391,7 +467,21 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                     itemCount: daysShort.length,
                     separatorBuilder: (context, i) => const SizedBox(width: 6),
                     itemBuilder: (context, i) => GestureDetector(
-                      onTap: () => setState(() => selectedDay = i),
+                      onTap: () {
+                        setState(() {
+                          selectedDay = i;
+                          // Calculate the date string for the selected day
+                          DateTime today = DateTime.now();
+                          int currentWeekday = today.weekday; // 1 (Mon) - 7 (Sun)
+                          int targetWeekday = selectedDay == 0 ? 7 : selectedDay; // 1 (Mon) - 7 (Sun)
+                          int daysToAdd = (targetWeekday - currentWeekday) % 7;
+                          if (daysToAdd < 0) daysToAdd += 7;
+                          DateTime newDate = today.add(Duration(days: daysToAdd));
+                          String dateStr = "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
+                          fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", dateStr);
+                          loadingSlots = false;
+                        });
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
@@ -414,15 +504,46 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                 const SizedBox(height: 18),
                 Text('Time', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                TextField(
-                  controller: timeController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.access_time, color: AppTheme.primaryColor),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    hintText: 'Enter time',
-                  ),
-                  style: AppTheme.bodyLarge,
-                ),
+                loadingSlots
+                  ? const Center(child: CircularProgressIndicator())
+                  : availableTimes.isEmpty
+                    ? const Text('No available slots for this day.')
+                    : SizedBox(
+                        height: 220, // Adjust height as needed
+                        child: GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3, // Three columns
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 2.5, // Adjust for pill shape
+                          ),
+                          itemCount: availableTimes.length,
+                          itemBuilder: (context, index) {
+                            final isSelected = index == selectedTimeIndex;
+                            return GestureDetector(
+                              onTap: () => setState(() => selectedTimeIndex = index),
+                              child: Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppTheme.primaryColor : Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
+                                  ),
+                                ),
+                                child: Text(
+                                  availableTimes[index]['time_slot'] ?? 'N/A',
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.black,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                 const SizedBox(height: 24),
                 Row(
                   children: [
@@ -445,7 +566,10 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         onPressed: () {
                           setState(() {
                             appt['day'] = days[selectedDay];
-                            appt['time'] = timeController.text;
+                            appt['date'] = selectedDayIndex; // TODO: change to the selected date
+                            print(appt['date']);
+                            appt['time'] = availableTimes[selectedTimeIndex]['time_slot'];
+                            updateAppointmentTimeSlot(appointmentId: appt['appointment_id'], newTimeSlotId: availableTimes[selectedTimeIndex]['slot_id'], oldTimeSlotId: appt['time_slot_id'], newTime: appt['time'], newDate: appt['date'] );
                           });
                           Navigator.pop(context);
                         },
@@ -469,6 +593,16 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
         ),
       ),
     );
+  }
+
+  String getDateStrForSelectedDay(int selectedDayIndex) {
+    DateTime today = DateTime.now();
+    int currentWeekday = today.weekday; // 1 (Mon) - 7 (Sun)
+    int targetWeekday = selectedDayIndex == 0 ? 7 : selectedDayIndex; // 1 (Mon) - 7 (Sun)
+    int daysToAdd = (targetWeekday - currentWeekday) % 7;
+    if (daysToAdd < 0) daysToAdd += 7;
+    DateTime newDate = today.add(Duration(days: daysToAdd));
+    return "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
   }
 
   @override
@@ -620,7 +754,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                     ),
                                   ],
                                 ),
-                                        if ((appt['message'] ?? '').isNotEmpty) ...[
+                                        if ((appt['notes'] ?? '').isNotEmpty) ...[
                                           const SizedBox(height: 10),
                                           Row(
                                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,7 +763,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                               const SizedBox(width: 6),
                                               Expanded(
                                                 child: Text(
-                                                  appt['message'],
+                                                  appt['notes'],
                                                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary),
                                                   maxLines: 2,
                                                   overflow: TextOverflow.ellipsis,
