@@ -22,8 +22,7 @@ class DoctorOcrResultScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmation'),
-        content:
-            const Text('Do you want to save the data to the medical record?'),
+        content: const Text('Do you want to proceed to create medical record?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -46,45 +45,46 @@ class DoctorOcrResultScreen extends StatelessWidget {
           );
           return;
         }
+
         final doctorResponse = await Supabase.instance.client
             .from('doctors')
             .select('doctor_id')
             .eq('user_id', currentUser.id)
             .maybeSingle();
+
         if (doctorResponse == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Doctor profile not found')),
           );
           return;
         }
-        final doctorId = doctorResponse['doctor_id'];
-        await Supabase.instance.client.from('medical_records').insert({
-          'patient_id': patientId,
-          'doctor_id': doctorId,
-          'medical_condition': analysis.diagnosis,
-          'symptoms': analysis.symptoms.join(', '),
-          'notes': analysis.rawText,
-          'tests': analysis.requiredTests.join(', '),
-          'medications': analysis.medications.join(', '),
-          'created_at': DateTime.now().toIso8601String(),
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Medical record saved successfully')),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PatientMedicalRecordScreen(
-              patientName: patientName,
-              patientAge: patientDOB,
-              patientId: patientId,
+
+        // Navigate directly to new medical record screen with pre-filled data
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PatientMedicalRecordScreen(
+                patientName: patientName,
+                patientAge: patientDOB,
+                patientId: patientId,
+                preFilledData: {
+                  'medical_condition': analysis.diagnosis,
+                  'symptoms': analysis.symptoms.join(', '),
+                  'notes': '', // Keep notes empty for doctor to fill
+                  'medications': analysis.medications.join(', '),
+                  'tests': analysis.requiredTests.join(', '),
+                },
+              ),
             ),
-          ),
-        );
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving medical record: $e')),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
       }
     }
   }
