@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'lab_reports_screen.dart';
 
 class MedicalRecordDetailsScreen extends StatelessWidget {
   final String patientName;
@@ -100,7 +101,14 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () { /* Do nothing for now */ },
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LabReportsScreen(initialCategory: 0),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.science),
                       label: const Text('Lab Results'),
                       style: OutlinedButton.styleFrom(
@@ -122,7 +130,14 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () { /* Do nothing for now */ },
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LabReportsScreen(initialCategory: 1),
+                          ),
+                        );
+                      },
                       icon: Image.asset(
                         'assets/icons/Radiology.png',
                         width: 24,
