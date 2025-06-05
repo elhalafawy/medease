@@ -7,8 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class LabReportsScreen extends StatefulWidget {
+  final int initialCategory; // 0 for Lab Tests, 1 for Radiology
   final VoidCallback? onBack;
-  const LabReportsScreen({super.key, this.onBack});
+  const LabReportsScreen({super.key, this.onBack, this.initialCategory = 0});
 
   @override
   State<LabReportsScreen> createState() => _LabReportsScreenState();
@@ -20,11 +21,12 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
   List<Map<String, dynamic>> _labReports = []; // List for lab reports
   List<Map<String, dynamic>> _radiologyReports = []; // List for radiology reports
   bool _isLoading = true; // Loading state
-  int _selectedCategory = 0; // 0 for Lab Tests, 1 for Radiology
+  int _selectedCategory = 0;
 
   @override
   void initState() {
     super.initState();
+    _selectedCategory = widget.initialCategory; // Set from parameter
     _loadReports();
     _cleanupExistingUrls(); // Add cleanup on init
   }
@@ -495,18 +497,15 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: Implement View Report functionality
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => LabRadiologyReportDetailsScreen(
-                          reportData: report,
-                        ),
+                        builder: (context) => LabReportsScreen(initialCategory: 0),
                       ),
                     );
                   },
-                  icon: Icon(Icons.remove_red_eye, color: theme.colorScheme.primary),
-                  label: Text('View Report', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
+                  icon: const Icon(Icons.science),
+                  label: const Text('Lab Results'),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
