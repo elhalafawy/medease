@@ -283,7 +283,10 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
               else
                 Stack(
                   children: [
-                    CameraPreview(_camCtrl!),
+                    Listener(
+                      behavior: HitTestBehavior.opaque,
+                      child: CameraPreview(_camCtrl!),
+                    ),
                     Center(child: _frameOverlay()),
                     if (_busy)
                       Container(

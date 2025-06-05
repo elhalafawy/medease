@@ -180,66 +180,69 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         separatorBuilder: (context, i) => const SizedBox(height: 18),
         itemBuilder: (context, i) {
           final n = notifications[i];
-          return GestureDetector(
-            onTap: n['onTap'] != null ? () => (n['onTap'] as void Function(BuildContext))(context) : null,
-            child: Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.2),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.shadow.withOpacity(0.05),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+          return Listener(
+            behavior: HitTestBehavior.opaque,
+            child: GestureDetector(
+              onTap: n['onTap'] != null ? () => (n['onTap'] as void Function(BuildContext))(context) : null,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: theme.colorScheme.outline.withOpacity(0.2),
                   ),
-                ],
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
-                leading: Stack(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: n['iconBg'] as Color,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Icon(n['icon'] as IconData, color: n['iconColor'] as Color, size: 28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.shadow.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
-                    if ((n['badge'] as int) > 0)
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: CircleAvatar(
-                          radius: 10,
-                          backgroundColor: theme.colorScheme.error,
-                          child: Text(
-                            '${n['badge']}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onError,
-                              fontWeight: FontWeight.bold,
+                  ],
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+                  leading: Stack(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: n['iconBg'] as Color,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(n['icon'] as IconData, color: n['iconColor'] as Color, size: 28),
+                      ),
+                      if ((n['badge'] as int) > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: CircleAvatar(
+                            radius: 10,
+                            backgroundColor: theme.colorScheme.error,
+                            child: Text(
+                              '${n['badge']}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onError,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-                title: Text(
-                  n['title'] as String,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onSurface,
+                    ],
                   ),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    n['subtitle'] as String,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  title: Text(
+                    n['title'] as String,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      n['subtitle'] as String,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      ),
                     ),
                   ),
                 ),

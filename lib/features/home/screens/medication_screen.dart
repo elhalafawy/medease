@@ -29,6 +29,13 @@ class _MedicationScreenState extends State<MedicationScreen> {
     try {
       setState(() => _isLoading = true);
       final allMeds = await _medicationService.getAllUserMedications();
+      final now = DateTime.now();
+      for (final med in allMeds) {
+        final end = DateTime.parse(med['end_date']);
+        if (med['status'] == 'active' && end.isBefore(now)) {
+          await _medicationService.moveToHistory(med['medication_id'], 'completed');
+        }
+      }
       print('DEBUG: All medications fetched: ${allMeds.length}');
       print('DEBUG: First medication: ${allMeds.isNotEmpty ? allMeds.first : "No medications"}');
       
@@ -231,6 +238,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
                               .toList(),
                           onEdit: showHistory ? null : () => _editMedication(index),
                           onDelete: showHistory ? null : () => _removeMedication(index),
+                          status: med['status'],
                         );
                       },
                     ),
@@ -345,7 +353,43 @@ class _MedicationScreenState extends State<MedicationScreen> {
     required List<TimeOfDay> reminderTimes,
     VoidCallback? onDelete,
     VoidCallback? onEdit,
+    String? status,
   }) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final end = DateTime(endDate.year, endDate.month, endDate.day);
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    String medStatus = status ?? 'active';
+    Color badgeColor = Colors.green;
+    String badgeText = 'Active';
+    if (medStatus == 'canceled') {
+      badgeColor = Colors.red;
+      badgeText = 'Canceled';
+    } else if (medStatus == 'completed') {
+      badgeColor = Colors.blue;
+      badgeText = 'Completed';
+    } else if (today.isAfter(end)) {
+      badgeColor = Colors.blue;
+      badgeText = 'Completed';
+      medStatus = 'completed';
+    }
+    int total = 0;
+    int remaining = 0;
+    if (frequency == 'As needed') {
+      total = 0;
+      remaining = 0;
+    } else {
+      int timesPerDay = 1;
+      if (frequency == 'Once daily') timesPerDay = 1;
+      else if (frequency == 'Twice daily') timesPerDay = 2;
+      else if (frequency == 'Three times daily') timesPerDay = 3;
+      else if (frequency == 'Four times daily') timesPerDay = 4;
+      int days = end.difference(start).inDays + 1;
+      total = days * timesPerDay;
+      int daysPassed = today.isBefore(start) ? 0 : (today.isAfter(end) ? days : today.difference(start).inDays + 1);
+      int taken = daysPassed * timesPerDay;
+      remaining = (total - taken).clamp(0, total);
+    }
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(12),
@@ -370,7 +414,24 @@ class _MedicationScreenState extends State<MedicationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: theme.textTheme.bodyLarge),
+                    Row(
+                      children: [
+                        Text(title, style: theme.textTheme.bodyLarge),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: badgeColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: badgeColor, width: 1.2),
+                          ),
+                          child: Text(
+                            badgeText,
+                            style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     Text(subtitle, style: theme.textTheme.bodyMedium),
                   ],
@@ -418,9 +479,30 @@ class _MedicationScreenState extends State<MedicationScreen> {
               Icon(Icons.access_time, size: 16, color: theme.disabledColor),
               const SizedBox(width: 4),
               Text(
-                reminderTimes.map((time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}').join(', '),
+                reminderTimes.isEmpty
+                  ? '--'
+                  : reminderTimes.map((time) {
+                      final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+                      final minute = time.minute.toString().padLeft(2, '0');
+                      final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+                      return '$hour:$minute $period';
+                    }).join(', '),
                 style: theme.textTheme.bodyMedium,
               ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.calculate_outlined, size: 16, color: theme.disabledColor),
+              const SizedBox(width: 4),
+              Text(
+                'Total pills: ',
+                style: theme.textTheme.bodyMedium,
+              ),
+              frequency == 'As needed'
+                ? const Text('--', style: TextStyle(fontWeight: FontWeight.bold))
+                : Text('$remaining / $total', style: const TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
         ],

@@ -280,7 +280,10 @@ class _UploadScreenState extends State<UploadScreen> {
             else
             Stack(
               children: [
-                CameraPreview(_camCtrl!),
+                Listener(
+                  behavior: HitTestBehavior.opaque,
+                  child: CameraPreview(_camCtrl!),
+                ),
                 Center(child: _frameOverlay()),
                 if (_busy)
                   Container(color: Colors.black26, child: const Center(child: CircularProgressIndicator())),
