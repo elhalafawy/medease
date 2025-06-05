@@ -1,3 +1,5 @@
+// TODO: fix a bug where the time slots are not updated when the day is changed unless we double click on the day
+
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
