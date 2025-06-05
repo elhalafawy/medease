@@ -239,7 +239,7 @@ Future<void> addTimeSlots({
         return;
       }
 
-      // Start a transaction (using try-catch for error handling)
+      // Start a transaction (using try-catch for error handling
       try {
         final newAppointment = {
           'appointment_id': const Uuid().v4(),

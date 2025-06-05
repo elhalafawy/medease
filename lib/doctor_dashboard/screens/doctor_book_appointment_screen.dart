@@ -313,7 +313,7 @@ Future<void> addTimeSlots({
           '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
 
       await supabase
-          .from('time_slots')
+          .from('time_slots_duplicate')
           .delete()
           .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
           .eq('available_date', date.toIso8601String().split('T')[0])

@@ -38,7 +38,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
     try {
       final response = await Supabase.instance.client
           .from('appointments')
-          .select('*, patients:patient_id(full_name)');
+          .select('*, patients:patient_id(full_name)').order('date', ascending: true);
           // print(response);
       setState(() {
         _appointments = List<Map<String, dynamic>>.from(response);
