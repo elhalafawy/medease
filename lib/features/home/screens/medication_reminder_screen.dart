@@ -203,150 +203,249 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter medication name',
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        prefixIcon: Container(
+                          width: 110,
+                          alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
-                            color: selectedColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: const Icon(Icons.medication_outlined, size: 24),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Name:', style: TextStyle(fontWeight: FontWeight.w500)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter medication name',
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 4),
+                            border: Border(
+                              right: BorderSide(
+                                color: Colors.grey.withOpacity(0.4),
+                                width: 1,
+                              ),
                             ),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter medication name';
-                              }
-                              return null;
-                            },
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.medication_outlined, size: 24, color: selectedColor),
+                              const SizedBox(width: 8),
+                              Text('Name:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                            ],
                           ),
                         ),
-                      ],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: unselectedColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: unselectedColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: selectedColor, width: 1.5),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        isDense: true,
+                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter medication name';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Container(
+                    TextFormField(
+                      controller: _dosageController,
+                      decoration: InputDecoration(
+                        hintText: 'e.g. 250mg',
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        prefixIcon: Container(
+                          width: 110,
+                          alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
-                            color: selectedColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: const Icon(Icons.medical_services_outlined, size: 22),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Dosage:', style: TextStyle(fontWeight: FontWeight.w500)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _dosageController,
-                            decoration: const InputDecoration(
-                              hintText: 'e.g. 250mg',
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 4),
+                            border: Border(
+                              right: BorderSide(
+                                color: Colors.grey.withOpacity(0.4),
+                                width: 1,
+                              ),
                             ),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter dosage';
-                              }
-                              return null;
-                            },
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.medical_services_outlined, size: 24, color: selectedColor),
+                              const SizedBox(width: 8),
+                              Text('Dosage:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                            ],
                           ),
                         ),
-                      ],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: unselectedColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: unselectedColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: selectedColor, width: 1.5),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        isDense: true,
+                      ),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter dosage';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: selectedColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(12),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: unselectedColor),
+                        color: Colors.white,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 125,
+                            alignment: Alignment.centerLeft,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                right: BorderSide(
+                                  color: Colors.grey.withOpacity(0.4),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.repeat, size: 24, color: selectedColor),
+                                const SizedBox(width: 8),
+                                Text('Frequency:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                              ],
+                            ),
                           ),
-                          padding: const EdgeInsets.all(8),
-                          child: const Icon(Icons.repeat, size: 22),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Frequency:', style: TextStyle(fontWeight: FontWeight.w500)),
-                        const SizedBox(width: 8),
-                        Text(getFrequencyLabel(_selectedFrequency)),
-                      ],
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(getFrequencyLabel(_selectedFrequency), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 14),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
+                    TextFormField(
+                      controller: _notesController,
+                      decoration: InputDecoration(
+                        hintText: 'Any notes...',
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        prefixIcon: Container(
+                          width: 110,
+                          alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
-                            color: selectedColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: const Icon(Icons.sticky_note_2_outlined, size: 22),
-                        ),
-                        const SizedBox(width: 10),
-                        const Text('Notes:', style: TextStyle(fontWeight: FontWeight.w500)),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _notesController,
-                            decoration: const InputDecoration(
-                              hintText: 'Any notes...',
-                              border: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 4),
+                            border: Border(
+                              right: BorderSide(
+                                color: Colors.grey.withOpacity(0.4),
+                                width: 1,
+                              ),
                             ),
-                            maxLines: 2,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.sticky_note_2_outlined, size: 24, color: selectedColor),
+                              const SizedBox(width: 8),
+                              Text('Notes:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                            ],
                           ),
                         ),
-                      ],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: unselectedColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: unselectedColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: selectedColor, width: 1.5),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        isDense: true,
+                      ),
+                      maxLines: 2,
                     ),
                     const SizedBox(height: 16),
                     // --- Total pills calculation or placeholder ---
                     Builder(
                       builder: (context) {
+                        String totalPillsText;
                         if (_selectedFrequency == 'As needed') {
-                          return Row(
+                          totalPillsText = '--';
+                        } else {
+                          int days = 1;
+                          if (_startDate != null && _endDate != null) {
+                            days = _endDate!.difference(_startDate!).inDays + 1;
+                          }
+                          int timesPerDay = 1;
+                          if (_selectedFrequency == 'Once daily') timesPerDay = 1;
+                          else if (_selectedFrequency == 'Twice daily') timesPerDay = 2;
+                          else if (_selectedFrequency == 'Three times daily') timesPerDay = 3;
+                          else if (_selectedFrequency == 'Four times daily') timesPerDay = 4;
+                          int total = days * timesPerDay;
+                          totalPillsText = '$total';
+                        }
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: unselectedColor),
+                            color: Colors.white,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                          child: Row(
                             children: [
-                              const Icon(Icons.calculate_outlined, size: 20),
-                              const SizedBox(width: 8),
-                              Text('Total pills needed: ', style: TextStyle(fontWeight: FontWeight.w500)),
-                              const Text('--', style: TextStyle(fontWeight: FontWeight.bold)),
+                              Container(
+                                width: 180,
+                                alignment: Alignment.centerLeft,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                      color: Colors.grey.withOpacity(0.4),
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.calculate_outlined, size: 24, color: selectedColor),
+                                    const SizedBox(width: 8),
+                                    Text('Total pills needed:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(totalPillsText, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              ),
                             ],
-                          );
-                        }
-                        int days = 1;
-                        if (_startDate != null && _endDate != null) {
-                          days = _endDate!.difference(_startDate!).inDays + 1;
-                        }
-                        int timesPerDay = 1;
-                        if (_selectedFrequency == 'Once daily') timesPerDay = 1;
-                        else if (_selectedFrequency == 'Twice daily') timesPerDay = 2;
-                        else if (_selectedFrequency == 'Three times daily') timesPerDay = 3;
-                        else if (_selectedFrequency == 'Four times daily') timesPerDay = 4;
-                        int total = days * timesPerDay;
-                        return Row(
-                          children: [
-                            const Icon(Icons.calculate_outlined, size: 20),
-                            const SizedBox(width: 8),
-                            Text('Total pills needed: ', style: TextStyle(fontWeight: FontWeight.w500)),
-                            Text('$total', style: const TextStyle(fontWeight: FontWeight.bold)),
-                          ],
+                          ),
                         );
                       },
                     ),
@@ -359,21 +458,83 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
             Row(
               children: [
                 Expanded(
-                  child: ListTile(
-                    shape: RoundedRectangleBorder(borderRadius: borderRadius),
-                    tileColor: unselectedColor,
-                    title: const Text('Start Date'),
-                    subtitle: Text(_startDate != null ? DateFormat('yyyy-MM-dd').format(_startDate!) : 'Select date'),
+                  child: TextFormField(
+                    readOnly: true,
+                    controller: TextEditingController(text: _startDate != null ? DateFormat('dd/MM/yyyy').format(_startDate!) : 'Select date'),
+                    decoration: InputDecoration(
+                      labelText: 'Start Date',
+                      labelStyle: TextStyle(color: textColor.withOpacity(0.7)),
+                      prefixIcon: Container(
+                        width: 60,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            right: BorderSide(
+                              color: Colors.grey.withOpacity(0.4),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Icon(Icons.calendar_today, size: 24, color: selectedColor),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: unselectedColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: unselectedColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: selectedColor, width: 1.5),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      isDense: true,
+                    ),
                     onTap: () => _selectDate(context, true),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: ListTile(
-                    shape: RoundedRectangleBorder(borderRadius: borderRadius),
-                    tileColor: unselectedColor,
-                    title: const Text('End Date'),
-                    subtitle: Text(_endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : 'Select date'),
+                  child: TextFormField(
+                    readOnly: true,
+                    controller: TextEditingController(text: _endDate != null ? DateFormat('dd/MM/yyyy').format(_endDate!) : 'Select date'),
+                    decoration: InputDecoration(
+                      labelText: 'End Date',
+                      labelStyle: TextStyle(color: textColor.withOpacity(0.7)),
+                      prefixIcon: Container(
+                        width: 60,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            right: BorderSide(
+                              color: Colors.grey.withOpacity(0.4),
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Icon(Icons.calendar_today, size: 24, color: selectedColor),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: unselectedColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: unselectedColor),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: selectedColor, width: 1.5),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      isDense: true,
+                    ),
                     onTap: () => _selectDate(context, false),
                   ),
                 ),
@@ -385,10 +546,10 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
-                color: unselectedColor,
-                borderRadius: BorderRadius.circular(18),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: unselectedColor),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: freqOptions.map((freq) {
@@ -410,14 +571,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             color: selected ? selectedColor : Colors.transparent,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: selected ? selectedColor : Colors.transparent,
-                              width: 1.5,
-                            ),
-                            boxShadow: selected
-                                ? [BoxShadow(color: selectedColor.withOpacity(0.08), blurRadius: 6, offset: Offset(0, 2))]
-                                : [],
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(
                             child: Text(
@@ -461,11 +615,11 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: unselectedColor,
+                          color: Colors.white,
                           borderRadius: borderRadius,
-                          border: Border.all(color: selectedColor, width: 1.2),
+                          border: Border.all(color: unselectedColor),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
