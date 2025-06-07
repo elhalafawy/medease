@@ -43,9 +43,6 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     'Twice daily',
     'Three times daily',
     'Four times daily',
-    'Every 6 hours',
-    'Every 8 hours',
-    'Every 12 hours',
     'As needed',
   ];
 
