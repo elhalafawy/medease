@@ -15,6 +15,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _records = [];
   bool _isLoading = true;
+  int? _selectedYear;
+  List<int> _availableYears = [];
 
   @override
   void initState() {
@@ -56,6 +58,11 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
 
       setState(() {
         _records = List<Map<String, dynamic>>.from(response);
+        _availableYears = _records
+            .map((r) => DateTime.parse(r['created_at']).year)
+            .toSet()
+            .toList()
+          ..sort((a, b) => b.compareTo(a)); // Descending order
         _isLoading = false;
       });
     } catch (e) {
@@ -71,6 +78,9 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    var filteredRecords = _selectedYear == null
+      ? _records
+      : _records.where((r) => DateTime.parse(r['created_at']).year == _selectedYear).toList();
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -100,7 +110,9 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 children: [
                   _buildLabReportsButton(context, theme),
                   const SizedBox(height: 16),
-                  if (_records.isEmpty)
+                  _buildYearFilter(theme),
+                  const SizedBox(height: 16),
+                  if (filteredRecords.isEmpty)
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -112,7 +124,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                       ),
                     )
                   else
-                    ..._records.map((record) => _buildRecordItem(
+                    ...filteredRecords.map((record) => _buildRecordItem(
                       patientName: record['doctors']?['name'] ?? 'N/A',
                       diagnosis: record['medical_condition'] ?? 'N/A',
                       symptoms: record['symptoms'] ?? 'N/A',
@@ -149,6 +161,29 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
             borderRadius: BorderRadius.circular(30),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildYearFilter(ThemeData theme) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          ChoiceChip(
+            label: Text('All'),
+            selected: _selectedYear == null,
+            onSelected: (_) => setState(() => _selectedYear = null),
+          ),
+          ..._availableYears.map((year) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: ChoiceChip(
+              label: Text(year.toString()),
+              selected: _selectedYear == year,
+              onSelected: (_) => setState(() => _selectedYear = year),
+            ),
+          )),
+        ],
       ),
     );
   }

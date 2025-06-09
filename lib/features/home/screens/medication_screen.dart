@@ -18,6 +18,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
   List<Map<String, dynamic>> _historyMedications = [];
   bool showHistory = false;
   bool _isLoading = true;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -182,7 +183,9 @@ class _MedicationScreenState extends State<MedicationScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final meds = showHistory ? _historyMedications : _activeMedications;
+    final meds = (showHistory ? _historyMedications : _activeMedications)
+        .where((med) => med['name'].toString().toLowerCase().contains(_searchQuery))
+        .toList();
     
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -212,10 +215,7 @@ class _MedicationScreenState extends State<MedicationScreen> {
               child: Column(
                 children: [
                   _buildSearchBar(theme),
-                  const SizedBox(height: 16),
                   _buildTabs(theme),
-                  const SizedBox(height: 4),
-                  Divider(color: theme.dividerColor, thickness: 1, endIndent: 200),
                   const SizedBox(height: 10),
                   Expanded(
                     child: ListView.builder(
@@ -317,28 +317,32 @@ class _MedicationScreenState extends State<MedicationScreen> {
   }
 
   Widget _buildSearchBar(ThemeData theme) {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(23),
+    return TextField(
+      decoration: InputDecoration(
+        prefixIcon: Icon(Icons.search, color: theme.disabledColor),
+        hintText: 'Search medications',
+        hintStyle: theme.textTheme.bodyMedium,
+        filled: true,
+        fillColor: theme.colorScheme.surface,
+        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(23),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(23),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(23),
+          borderSide: BorderSide.none,
+        ),
       ),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: theme.disabledColor),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search medications',
-                hintStyle: theme.textTheme.bodyMedium,
-                border: InputBorder.none,
-              ),
-            ),
-          )
-        ],
-      ),
+      onChanged: (value) {
+        setState(() {
+          _searchQuery = value.trim().toLowerCase();
+        });
+      },
     );
   }
 
