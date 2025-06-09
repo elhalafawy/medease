@@ -500,12 +500,12 @@ class _LabReportsScreenState extends State<LabReportsScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => LabReportsScreen(initialCategory: 0),
+                        builder: (context) => LabRadiologyReportDetailsScreen(reportData: report),
                       ),
                     );
                   },
-                  icon: const Icon(Icons.science),
-                  label: const Text('Lab Results'),
+                  icon: const Icon(Icons.remove_red_eye),
+                  label: const Text('View Report'),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
