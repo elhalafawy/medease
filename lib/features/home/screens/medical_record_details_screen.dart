@@ -4,21 +4,23 @@ import 'lab_reports_screen.dart';
 class MedicalRecordDetailsScreen extends StatelessWidget {
   final String patientName;
   final String symptoms;
-  final String tests;
   final String medications;
   final String notes;
   final DateTime date;
   final String? profileImageUrl;
+  final List<Map<String, dynamic>> labReports;
+  final List<Map<String, dynamic>> radiologyReports;
 
   const MedicalRecordDetailsScreen({
     super.key,
     required this.patientName,
     required this.symptoms,
-    required this.tests,
     required this.medications,
     required this.notes,
     required this.date,
     this.profileImageUrl,
+    required this.labReports,
+    required this.radiologyReports,
   });
 
   @override
@@ -53,7 +55,7 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             _buildInfoCard(
-              title: 'Patient Name',
+              title: 'Doctor Name',
               value: patientName,
               icon: Icons.person,
               theme: theme,
@@ -73,13 +75,24 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
               theme: theme,
             ),
             const SizedBox(height: 16),
-            _buildInfoCard(
-              title: 'Tests',
-              value: tests,
-              icon: Icons.science,
-              theme: theme,
-            ),
-            const SizedBox(height: 16),
+            if (labReports.isNotEmpty) ...[
+              _buildMultiInfoCard(
+                title: 'Lab Tests',
+                items: labReports.map((report) => report['Title'] as String).toList(),
+                icon: Icons.science,
+                theme: theme,
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (radiologyReports.isNotEmpty) ...[
+              _buildMultiInfoCard(
+                title: 'Radiology Tests',
+                items: radiologyReports.map((report) => report['Title'] as String).toList(),
+                icon: Icons.image,
+                theme: theme,
+              ),
+              const SizedBox(height: 16),
+            ],
             _buildInfoCard(
               title: 'Medications',
               value: medications,
@@ -200,6 +213,55 @@ class MedicalRecordDetailsScreen extends StatelessWidget {
               value,
               style: theme.textTheme.bodyLarge,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMultiInfoCard({
+    required String title,
+    required List<String> items,
+    required IconData icon,
+    required ThemeData theme,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: theme.colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (items.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: items.map((item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    item,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                )).toList(),
+              )
+            else
+              Text(
+                'N/A',
+                style: theme.textTheme.bodyLarge,
+              ),
           ],
         ),
       ),

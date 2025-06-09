@@ -17,11 +17,15 @@ class LabRadiologyReportDetailsScreen extends StatefulWidget {
 class _LabRadiologyReportDetailsScreenState extends State<LabRadiologyReportDetailsScreen> {
   SupabaseClient get _supabase => Supabase.instance.client;
   String? _publicUrl;
+  List<Map<String, dynamic>> _medicalRecords = [];
+  bool _isLoadingMedicalRecords = true;
+  String? selectedMedicalRecordId;
 
   @override
   void initState() {
     super.initState();
     _generatePublicUrl();
+    _loadMedicalRecords();
   }
 
   Future<void> _generatePublicUrl() async {
@@ -70,6 +74,36 @@ class _LabRadiologyReportDetailsScreenState extends State<LabRadiologyReportDeta
           SnackBar(content: Text('Error opening file: ${e.toString()}')),
         );
       }
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchMedicalRecords() async {
+    final records = await _supabase
+        .from('medical_records')
+        .select('record_id, record_number, created_at')
+        .eq('patient_id', widget.reportData['patient_id'])
+        .order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(records);
+  }
+
+  Future<void> _loadMedicalRecords() async {
+    try {
+      setState(() {
+        _isLoadingMedicalRecords = true;
+      });
+      final response = await _supabase
+          .from('medical_records')
+          .select('record_id, record_number, created_at')
+          .eq('patient_id', widget.reportData['patient_id'])
+          .order('created_at', ascending: false);
+      setState(() {
+        _medicalRecords = List<Map<String, dynamic>>.from(response);
+        _isLoadingMedicalRecords = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingMedicalRecords = false;
+      });
     }
   }
 

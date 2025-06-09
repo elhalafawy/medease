@@ -76,7 +76,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
       });
       final response = await _supabase
           .from('medical_records')
-          .select('*, doctors!medical_records_doctor_id_fkey(name)')
+          .select('*, doctors!medical_records_doctor_id_fkey(name), lab_reports(report_id, Title, created_at, status), Radiology(Radiology_id, Title, created_at, status)')
           .eq('patient_id', widget.patientId)
           .order('created_at', ascending: false);
       setState(() {
@@ -105,7 +105,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
             padding: const EdgeInsets.all(16),
             itemCount: _medicalRecords.length,
             itemBuilder: (context, index) =>
-                _buildMedicalRecordCard(_medicalRecords[index]),
+                _buildMedicalRecordCard(_medicalRecords[index], index),
           );
   }
 
@@ -147,7 +147,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
     );
   }
 
-  Widget _buildMedicalRecordCard(Map<String, dynamic> record) {
+  Widget _buildMedicalRecordCard(Map<String, dynamic> record, int index) {
     final String date = record['created_at'] != null
         ? DateTime.parse(record['created_at'])
             .toLocal()
@@ -156,10 +156,13 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
         : 'N/A';
     final String symptoms = record['symptoms'] ?? 'N/A';
     final String notes = record['notes'] ?? 'N/A';
-    final String tests = record['tests'] ?? 'N/A';
     final String medications = record['medications'] ?? 'N/A';
     final String doctorName = record['doctors']?['name'] ?? 'N/A';
     final String recordId = record['record_id']?.toString() ?? '';
+
+    final List<Map<String, dynamic>> labReports = (record['lab_reports'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final List<Map<String, dynamic>> radiologyReports = (record['Radiology'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -173,6 +176,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Date: $date',
@@ -185,12 +189,82 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildInfoRow('Symptoms', symptoms),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Symptoms',
+                style: AppTheme.bodyMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '${_medicalRecords.length - index}',
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            symptoms,
+            style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+          ),
           const SizedBox(height: 8),
           _buildInfoRow('Notes', notes),
           const SizedBox(height: 8),
-          _buildInfoRow('Tests', tests),
+          if (labReports.isNotEmpty) ...[
+            Text(
+              'Lab Tests',
+              style: AppTheme.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: labReports.map((report) => Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  report['Title'] ?? 'N/A',
+                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                ),
+              )).toList(),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (radiologyReports.isNotEmpty) ...[
+            Text(
+              'Radiology Tests',
+              style: AppTheme.bodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: radiologyReports.map((report) => Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Text(
+                  report['Title'] ?? 'N/A',
+                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                ),
+              )).toList(),
+            ),
           const SizedBox(height: 8),
+          ],
           _buildInfoRow('Medications', medications),
           const SizedBox(height: 16),
           Row(
@@ -331,20 +405,6 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                     label: 'Medications', icon: Icons.medical_services_outlined),
                 style: AppTheme.bodyLarge,
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _labTestsController,
-                decoration: themedInputDecoration(
-                    label: 'Lab Tests', icon: Icons.science),
-                style: AppTheme.bodyLarge,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _radiologyTestsController,
-                decoration: themedInputDecoration(
-                    label: 'Radiology Tests', icon: Icons.biotech),
-                style: AppTheme.bodyLarge,
-              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -360,31 +420,11 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                         final symptoms = _symptomsController.text.trim();
                         final notes = _notesController.text.trim();
                         final medications = _medicationsController.text.trim();
-                        final labTests = _labTestsController.text.trim();
-                        final radiologyTests = _radiologyTestsController.text.trim();
-                        String labTest1 = '';
-                        String labTest2 = '';
-                        if (labTests.isNotEmpty) {
-                          final parts = labTests.split(RegExp(r'[\n,]+')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-                          if (parts.isNotEmpty) labTest1 = parts[0];
-                          if (parts.length > 1) labTest2 = parts[1];
-                        }
-                        String radiologyTest1 = '';
-                        String radiologyTest2 = '';
-                        if (radiologyTests.isNotEmpty) {
-                          final parts = radiologyTests.split(RegExp(r'[\n,]+')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-                          if (parts.isNotEmpty) radiologyTest1 = parts[0];
-                          if (parts.length > 1) radiologyTest2 = parts[1];
-                        }
                         await _addManualMedicalRecord(
                           medicalCondition: medicalCondition,
                           symptoms: symptoms,
                           notes: notes,
                           medications: medications,
-                          labTest1: labTest1,
-                          labTest2: labTest2,
-                          radiologyTest1: radiologyTest1,
-                          radiologyTest2: radiologyTest2,
                         );
                         if (mounted) {
                           Navigator.pop(context);
@@ -463,20 +503,6 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                     label: 'Medications', icon: Icons.medical_services_outlined),
                 style: AppTheme.bodyLarge,
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _labTestsController,
-                decoration: themedInputDecoration(
-                    label: 'Lab Tests', icon: Icons.science),
-                style: AppTheme.bodyLarge,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _radiologyTestsController,
-                decoration: themedInputDecoration(
-                    label: 'Radiology Tests', icon: Icons.biotech),
-                style: AppTheme.bodyLarge,
-              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -496,25 +522,17 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                             _notesController.text.trim();
                         final String updatedMedications =
                             _medicationsController.text.trim();
-                        final String updatedLabTests =
-                            _labTestsController.text.trim();
-                        final String updatedRadiologyTests =
-                            _radiologyTestsController.text.trim();
                         await _updateMedicalRecord(
                           record['record_id'],
                           updatedCondition,
                           updatedSymptoms,
                           updatedNotes,
                           updatedMedications,
-                          updatedLabTests,
-                          updatedRadiologyTests,
                         );
                         _conditionController.clear();
                         _symptomsController.clear();
                         _notesController.clear();
                         _medicationsController.clear();
-                        _labTestsController.clear();
-                        _radiologyTestsController.clear();
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -543,10 +561,6 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
     required String symptoms,
     required String notes,
     required String medications,
-    required String labTest1,
-    required String labTest2,
-    required String radiologyTest1,
-    required String radiologyTest2,
   }) async {
     try {
       final currentUser = _supabase.auth.currentUser;
@@ -581,10 +595,6 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
         'symptoms': symptoms,
         'notes': notes,
         'medications': medications,
-        'lab_test1': labTest1,
-        'lab_test2': labTest2,
-        'radiology_test1': radiologyTest1,
-        'radiology_test2': radiologyTest2,
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -607,24 +617,8 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
     String symptoms,
     String notes,
     String medications,
-    String labTests,
-    String radiologyTests,
   ) async {
     try {
-      String labTest1 = '';
-      String labTest2 = '';
-      if (labTests.isNotEmpty) {
-        final parts = labTests.split(RegExp(r'[\n,]+')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-        if (parts.isNotEmpty) labTest1 = parts[0];
-        if (parts.length > 1) labTest2 = parts[1];
-      }
-      String radiologyTest1 = '';
-      String radiologyTest2 = '';
-      if (radiologyTests.isNotEmpty) {
-        final parts = radiologyTests.split(RegExp(r'[\n,]+')).map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
-        if (parts.isNotEmpty) radiologyTest1 = parts[0];
-        if (parts.length > 1) radiologyTest2 = parts[1];
-      }
       final response = await _supabase
           .from('medical_records')
           .update({
@@ -632,10 +626,6 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
             'symptoms': symptoms,
             'notes': notes,
             'medications': medications,
-            'lab_test1': labTest1,
-            'lab_test2': labTest2,
-            'radiology_test1': radiologyTest1,
-            'radiology_test2': radiologyTest2,
           })
           .eq('record_id', recordId)
           .select();
@@ -751,7 +741,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                   padding: EdgeInsets.only(bottom: 80 + MediaQuery.of(context).padding.bottom),
                   itemCount: _medicalRecords.length,
                   itemBuilder: (context, index) =>
-                      _buildMedicalRecordCard(_medicalRecords[index]),
+                      _buildMedicalRecordCard(_medicalRecords[index], index),
                 ),
     );
   }

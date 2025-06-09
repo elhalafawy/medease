@@ -34,12 +34,19 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
   bool _isLoadingLabReports = true;
   bool _isLoadingRadiology = true;
   int selectedLabRadiologyTab = 0;
+  List<Map<String, dynamic>> _medicalRecords = [];
+  bool _isLoadingMedicalRecords = true;
 
   @override
   void initState() {
     super.initState();
-    _loadLabReports();
-    _loadRadiologyReports();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await _loadMedicalRecords();
+    await _loadLabReports();
+    await _loadRadiologyReports();
     _cleanupExistingUrls();
   }
 
@@ -150,6 +157,14 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
           .order('created_at', ascending: false);
       setState(() {
         _labReports = List<Map<String, dynamic>>.from(response);
+        _labReports = _labReports.map((report) {
+          final medicalRecordId = report['medical_record_id'];
+          final recordIndex = _medicalRecords.indexWhere((mr) => mr['record_id'] == medicalRecordId);
+          if (recordIndex != -1) {
+            report['sequential_record_number'] = _medicalRecords.length - recordIndex;
+          }
+          return report;
+        }).toList();
         _isLoadingLabReports = false;
       });
     } catch (e) {
@@ -176,6 +191,14 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
           .order('created_at', ascending: false);
       setState(() {
         _radiologyReports = List<Map<String, dynamic>>.from(response);
+        _radiologyReports = _radiologyReports.map((report) {
+          final medicalRecordId = report['medical_record_id'];
+          final recordIndex = _medicalRecords.indexWhere((mr) => mr['record_id'] == medicalRecordId);
+          if (recordIndex != -1) {
+            report['sequential_record_number'] = _medicalRecords.length - recordIndex;
+          }
+          return report;
+        }).toList();
         _isLoadingRadiology = false;
       });
     } catch (e) {
@@ -189,6 +212,27 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
           _isLoadingRadiology = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadMedicalRecords() async {
+    try {
+      setState(() {
+        _isLoadingMedicalRecords = true;
+      });
+      final response = await _supabase
+          .from('medical_records')
+          .select('record_id, record_number, created_at')
+          .eq('patient_id', widget.patientId)
+          .order('created_at', ascending: false);
+      setState(() {
+        _medicalRecords = List<Map<String, dynamic>>.from(response);
+        _isLoadingMedicalRecords = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingMedicalRecords = false;
+      });
     }
   }
 
@@ -343,6 +387,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
     final String reportUrl = report['report_url'] ?? '';
     final String recordId = report['report_id']?.toString() ?? report['Radiology_id']?.toString() ?? '';
     final bool isRadiology = type == 'Radiology Report';
+    final String medicalRecordNumber = report['sequential_record_number']?.toString() ?? 'N/A';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -376,6 +421,9 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
             ],
           ),
           const SizedBox(height: 8),
+          Text('Medical Record #$medicalRecordNumber',
+              style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+          const SizedBox(height: 8),
           Text('Date: $date',
               style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
           if (description.isNotEmpty) ...[
@@ -385,10 +433,9 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
           ],
           const SizedBox(height: 20),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -399,55 +446,81 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.remove_red_eye,
-                      color: AppTheme.primaryColor),
-                  label: Text('View',
-                      style: AppTheme.bodyLarge
-                          .copyWith(color: AppTheme.primaryColor)),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.primaryColor),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.remove_red_eye,
+                          color: AppTheme.primaryColor),
+                      const SizedBox(width: 4), // Spacing between icon and text
+                      Text(
+                        'View',
+                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontSize: 12.0),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 8), // Added space
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   onPressed: () => _pickAndUploadFile(report, isRadiology),
-                  icon: const Icon(Icons.upload_file, color: AppTheme.primaryColor),
-                  label: FittedBox(
-                    fit: BoxFit.fitWidth,
-                    child: Text('Upload',
-                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
-                  ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.primaryColor),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.upload_file, color: AppTheme.primaryColor),
+                      const SizedBox(width: 4), // Spacing between icon and text
+                      Text(
+                        'Upload',
+                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontSize: 12.0),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8), // Added space
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   onPressed: () => _showEditLabRadiologyRecordDialog(context, report, isRadiology: isRadiology, recordId: recordId),
-                  icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
-                  label: Text('Edit',
-                      style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.primaryColor),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.edit, color: AppTheme.primaryColor),
+                      const SizedBox(width: 4), // Spacing between icon and text
+                      Text(
+                        'Edit',
+                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontSize: 12.0),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8), // Added space
               Expanded(
-                child: OutlinedButton.icon(
+                child: OutlinedButton(
                   onPressed: () {
                     if (recordId.isNotEmpty) {
                       _deleteLabRadiologyRecord(recordId, isRadiology: isRadiology);
@@ -458,14 +531,24 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                       );
                     }
                   },
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  label: Text('Delete',
-                      style: AppTheme.bodyLarge.copyWith(color: Colors.red)),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.delete_outline, color: Colors.red),
+                      const SizedBox(width: 4), // Spacing between icon and text
+                      Text(
+                        'Delete',
+                        style: AppTheme.bodyLarge.copyWith(color: Colors.red, fontSize: 12.0),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -494,12 +577,18 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
     final TextEditingController titleController = TextEditingController();
     DateTime? selectedDate;
     String? selectedStatus;
+    String? selectedMedicalRecordId;
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.9 - 16, // Adjusted width
+              maxHeight: MediaQuery.of(context).size.height * 0.8, // 80% of screen height
+            ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -520,6 +609,44 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
                 ),
                 const SizedBox(height: 20),
+                  _isLoadingMedicalRecords
+                      ? const Center(child: CircularProgressIndicator())
+                      : Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                decoration: themedInputDecoration(label: 'Medical Record', icon: Icons.folder),
+                                value: selectedMedicalRecordId,
+                                hint: const Text(
+                                  'Select Medical Record',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                isExpanded: true,
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedMedicalRecordId = newValue;
+                                  });
+                                },
+                                items: _medicalRecords.asMap().entries.map<DropdownMenuItem<String>>((entry) {
+                                  final index = entry.key;
+                                  final record = entry.value;
+                                  final displayedRecordNumber = _medicalRecords.length - index;
+                                  final date = record['created_at']?.toString().split('T').first ?? '';
+                                  return DropdownMenuItem<String>(
+                                    value: record['record_id'],
+                                    child: Text(
+                                      'Record #$displayedRecordNumber ($date)',
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                  const SizedBox(height: 16),
                 TextField(
                   controller: titleController,
                   decoration: themedInputDecoration(
@@ -555,9 +682,14 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   decoration: themedInputDecoration(
                       label: 'Status', icon: Icons.info_outline),
                   value: selectedStatus,
-                  hint: Text('Select Status',
+                    hint: Text(
+                      'Select Status',
                       style: AppTheme.bodyLarge
-                          .copyWith(color: AppTheme.greyColor)),
+                          .copyWith(color: AppTheme.greyColor),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    isExpanded: true,
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedStatus = newValue;
@@ -574,6 +706,8 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                         status['value'],
                         style:
                             AppTheme.bodyLarge.copyWith(color: status['color']),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                       ),
                     );
                   }).toList(),
@@ -592,9 +726,9 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                           final String title = titleController.text.trim();
                           final DateTime? date = selectedDate;
                           final String? status = selectedStatus;
-                          if (title.isNotEmpty && date != null && status != null) {
+                            if (title.isNotEmpty && date != null && status != null && selectedMedicalRecordId != null) {
                             Navigator.of(context).pop();
-                            _addLabRadiologyRecord(title, date, status, isRadiology);
+                              _addLabRadiologyRecord(title, date, status, isRadiology, selectedMedicalRecordId!);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -617,6 +751,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   ],
                 ),
               ],
+              ),
             ),
           ),
         ),
@@ -625,7 +760,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
   }
 
   Future<void> _addLabRadiologyRecord(
-      String title, DateTime date, String status, bool isRadiology) async {
+    String title, DateTime date, String status, bool isRadiology, String medicalRecordId) async {
     try {
       if (isRadiology) {
         final currentUser = _supabase.auth.currentUser;
@@ -659,7 +794,26 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
           'Title': title,
           'status': status,
           'created_at': date.toIso8601String(),
+          'medical_record_id': medicalRecordId,
         });
+
+        // Update the associated medical record with the radiology test title
+        final medicalRecord = await _supabase
+            .from('medical_records')
+            .select('radiology_tests')
+            .eq('record_id', medicalRecordId)
+            .single();
+
+        String existingRadiologyTests = medicalRecord['radiology_tests'] ?? '';
+        String updatedRadiologyTests = existingRadiologyTests.isEmpty
+            ? title
+            : '${existingRadiologyTests}, ${title}';
+
+        await _supabase
+            .from('medical_records')
+            .update({'radiology_tests': updatedRadiologyTests})
+            .eq('record_id', medicalRecordId);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Radiology report added successfully!')));
@@ -698,7 +852,26 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
         'Title': title,
         'status': status,
         'created_at': date.toIso8601String(),
+        'medical_record_id': medicalRecordId,
       });
+
+      // Update the associated medical record with the lab test title
+      final medicalRecord = await _supabase
+          .from('medical_records')
+          .select('lab_tests')
+          .eq('record_id', medicalRecordId)
+          .single();
+
+      String existingLabTests = medicalRecord['lab_tests'] ?? '';
+      String updatedLabTests = existingLabTests.isEmpty
+          ? title
+          : '${existingLabTests}, ${title}';
+
+      await _supabase
+          .from('medical_records')
+          .update({'lab_tests': updatedLabTests})
+          .eq('record_id', medicalRecordId);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Lab report added successfully!')));
@@ -733,6 +906,11 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.9 - 16, // Adjusted width
+              maxHeight: MediaQuery.of(context).size.height * 0.8, // 80% of screen height
+            ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -786,9 +964,14 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   decoration: themedInputDecoration(
                       label: 'Status', icon: Icons.info_outline),
                   value: selectedStatus,
-                  hint: Text('Select Status',
+                    hint: Text(
+                      'Select Status',
                       style: AppTheme.bodyLarge
-                          .copyWith(color: AppTheme.greyColor)),
+                          .copyWith(color: AppTheme.greyColor),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    isExpanded: true,
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedStatus = newValue;
@@ -805,6 +988,8 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                         status['value'],
                         style:
                             AppTheme.bodyLarge.copyWith(color: status['color']),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                       ),
                     );
                   }).toList(),
@@ -858,6 +1043,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   ],
                 ),
               ],
+              ),
             ),
           ),
         ),
@@ -942,6 +1128,8 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
     return InputDecoration(
       labelText: label,
       prefixIcon: icon != null ? Icon(icon, color: AppTheme.primaryColor) : null,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      isDense: true,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: AppTheme.greyColor),

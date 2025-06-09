@@ -52,8 +52,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
       // Fetch medical records for this patient
       final response = await _supabase
           .from('medical_records')
-          .select('*, doctors!medical_records_doctor_id_fkey(name)')
-          .eq('patient_id', patientId) // Filter by patient_id
+          .select('*, doctors!medical_records_doctor_id_fkey(name), lab_reports(report_id, Title, created_at, status), Radiology(Radiology_id, Title, created_at, status)')
+          .eq('patient_id', patientId)
           .order('created_at', ascending: false);
 
       setState(() {
@@ -125,13 +125,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     )
                   else
                     ...filteredRecords.map((record) => _buildRecordItem(
-                      patientName: record['doctors']?['name'] ?? 'N/A',
-                      diagnosis: record['medical_condition'] ?? 'N/A',
-                      symptoms: record['symptoms'] ?? 'N/A',
-                      tests: record['tests'] ?? 'N/A',
-                      medications: record['medications'] ?? 'N/A',
-                      notes: record['notes'] ?? 'N/A',
-                      date: DateTime.parse(record['created_at']),
+                      record: record,
                       context: context,
                       theme: theme,
                     )),
@@ -189,25 +183,30 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   }
 
   Widget _buildRecordItem({
-    required String patientName,
-    required String diagnosis,
-    required String symptoms,
-    required String tests,
-    required String medications,
-    required String notes,
-    required DateTime date,
+    required Map<String, dynamic> record,
     required BuildContext context,
     required ThemeData theme,
   }) {
+    final String doctorName = record['doctors']?['name'] ?? 'N/A';
+    final String diagnosis = record['medical_condition'] ?? 'N/A';
+    final String medications = record['medications'] ?? 'N/A';
+    final String symptoms = record['symptoms'] ?? 'N/A';
+    final String notes = record['notes'] ?? 'N/A';
+    final DateTime date = DateTime.parse(record['created_at']);
+
+    final List<Map<String, dynamic>> labReports = (record['lab_reports'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    final List<Map<String, dynamic>> radiologyReports = (record['Radiology'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => MedicalRecordDetailsScreen(
-              patientName: patientName,
+              patientName: doctorName,
               symptoms: symptoms,
-              tests: tests,
+              labReports: labReports,
+              radiologyReports: radiologyReports,
               medications: medications,
               notes: notes,
               date: date,
@@ -249,7 +248,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    patientName,
+                    'Doctor: $doctorName',
                     style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 6),
@@ -257,11 +256,34 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     'Diagnosis: $diagnosis',
                     style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Tests: $tests',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
-                  ),
+                  if (labReports.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Lab Tests:',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: labReports.map((report) => Text(
+                        report['Title'] ?? 'N/A',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
+                      )).toList(),
+                    ),
+                  ],
+                  if (radiologyReports.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Radiology Tests:',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: radiologyReports.map((report) => Text(
+                        report['Title'] ?? 'N/A',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
+                      )).toList(),
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Text(
                     'Medications: $medications',
