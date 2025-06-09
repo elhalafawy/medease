@@ -11,6 +11,7 @@ import 'patient_medical_record_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/upload/models/analysis_result.dart';
 import 'doctor_ocr_result_screen.dart';
+import 'lab_radiology_report_details_screen.dart';
 
 class DoctorUploadscreen extends StatefulWidget {
   const DoctorUploadscreen({super.key});
@@ -91,29 +92,241 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
   Future<void> _doOCR(XFile img) async {
     try {
       setState(() => _busy = true);
-      final input = InputImage.fromFilePath(img.path);
-      final rec = TextRecognizer();
-      final res = await rec.processImage(input);
-      await rec.close();
+
+      // Get current user (doctor)
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Get doctor ID
+      final doctorResponse = await Supabase.instance.client
+          .from('doctors')
+          .select('doctor_id')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+      if (doctorResponse == null) {
+        throw Exception('Doctor profile not found');
+      }
+
+      final doctorId = doctorResponse['doctor_id'];
+
+      // Upload image to Supabase Storage
+      final bytes = await img.readAsBytes();
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final storagePath = _pageIndex == 1 ? 'lab_reports' : 'radiology';
+
+      // Create a temporary file
+      final tempDir = await Directory.systemTemp.createTemp();
+      final tempFile = File('${tempDir.path}/$fileName');
+      await tempFile.writeAsBytes(bytes);
+
+      // Upload the file
+      await Supabase.instance.client.storage
+          .from(storagePath)
+          .upload(fileName, tempFile);
+
+      // Get the public URL of the uploaded image
+      final imageUrl = Supabase.instance.client.storage
+          .from(storagePath)
+          .getPublicUrl(fileName);
+
+      // Save record to database
+      final tableName = _pageIndex == 1 ? 'lab_reports' : 'Radiology';
+      final record = {
+        'patient_id': _selectedPatientId,
+        'doctor_id': doctorId,
+        'Title':
+            '${_pageIndex == 1 ? "Lab Report" : "Radiology"} - ${DateTime.now().toString().split('.')[0]}',
+        'status': 'pending',
+        'report_url': imageUrl,
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      await Supabase.instance.client.from(tableName).insert(record);
+
       setState(() {
         _imageFile = img;
-        _ocrText = res.text;
         _busy = false;
       });
 
-      // تحليل نص الروشتة باستخدام AnalysisResult
-      final analysis = await AnalysisResult.fromText(_ocrText);
-      // انتقل لصفحة عرض النتائج
-      if (_selectedPatientId != null) {
-        _showOcrResultScreen(context, analysis);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a patient first')),
+      if (mounted) {
+        // Navigate to the details screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LabRadiologyReportDetailsScreen(
+              reportData: {
+                'Title':
+                    '${_pageIndex == 1 ? "Lab Report" : "Radiology"} - ${DateTime.now().toString().split('.')[0]}',
+                'created_at': DateTime.now().toIso8601String(),
+                'status': 'pending',
+                'report_url': imageUrl,
+                'patient_id': _selectedPatientId,
+                'doctors': {'name': 'Current Doctor'},
+              },
+            ),
+          ),
         );
       }
-    } catch (e, st) {
-      print('OCR failed: $e\n$st');
+    } catch (e) {
+      print('Error handling image: $e');
       setState(() => _busy = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  void _showImageOptions(BuildContext context, String type) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take Photo'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final ImagePicker picker = ImagePicker();
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.camera,
+                  );
+                  if (image != null) {
+                    await _handleImageSelection(image, type);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final ImagePicker picker = ImagePicker();
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (image != null) {
+                    await _handleImageSelection(image, type);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.insert_drive_file),
+                title: const Text('Choose File'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final ImagePicker picker = ImagePicker();
+                  final XFile? image = await picker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (image != null) {
+                    await _handleImageSelection(image, type);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleImageSelection(XFile image, String type) async {
+    try {
+      setState(() => _busy = true);
+
+      // Get current user (doctor)
+      final currentUser = Supabase.instance.client.auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Get doctor ID
+      final doctorResponse = await Supabase.instance.client
+          .from('doctors')
+          .select('doctor_id')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+      if (doctorResponse == null) {
+        throw Exception('Doctor profile not found');
+      }
+
+      final doctorId = doctorResponse['doctor_id'];
+
+      // Upload image to Supabase Storage
+      final bytes = await image.readAsBytes();
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final storagePath = type == 'Lab Reports' ? 'lab_reports' : 'radiology';
+
+      // Create a temporary file
+      final tempDir = await Directory.systemTemp.createTemp();
+      final tempFile = File('${tempDir.path}/$fileName');
+      await tempFile.writeAsBytes(bytes);
+
+      // Upload the file
+      await Supabase.instance.client.storage
+          .from(storagePath)
+          .upload(fileName, tempFile);
+
+      // Get the public URL of the uploaded image
+      final imageUrl = Supabase.instance.client.storage
+          .from(storagePath)
+          .getPublicUrl(fileName);
+
+      // Save record to database
+      final tableName = type == 'Lab Reports' ? 'lab_reports' : 'Radiology';
+      final record = {
+        'patient_id': _selectedPatientId,
+        'doctor_id': doctorId,
+        'Title': '${type} Report - ${DateTime.now().toString().split('.')[0]}',
+        'status': 'pending',
+        'report_url': imageUrl,
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      await Supabase.instance.client.from(tableName).insert(record);
+
+      setState(() {
+        _imageFile = image;
+        _busy = false;
+      });
+
+      if (mounted) {
+        // Navigate to the details screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LabRadiologyReportDetailsScreen(
+              reportData: {
+                'Title':
+                    '${type} Report - ${DateTime.now().toString().split('.')[0]}',
+                'created_at': DateTime.now().toIso8601String(),
+                'status': 'pending',
+                'report_url': imageUrl,
+                'patient_id': _selectedPatientId,
+                'doctors': {'name': 'Current Doctor'},
+              },
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error handling image: $e');
+      setState(() => _busy = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -135,13 +348,13 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
     );
   }
 
-  Widget _buildTile(BuildContext context, String label, IconData icon) {
+  Widget _buildTile(BuildContext context, String label, dynamic icon) {
     final theme = Theme.of(context);
     return Card(
       color: theme.primaryColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           if (_selectedPatientId == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Please select a patient first')),
@@ -149,21 +362,29 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
             return;
           }
 
-          // Navigate to camera page for scanning
-          setState(() {
-            _imageFile = null;
-            _ocrText = '';
-          });
-          _pageController.animateToPage(
-            1,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
+          if (label == 'Lab reports' || label == 'Radiology') {
+            // Navigate to camera page directly
+            _pageController.animateToPage(
+              1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          } else {
+            _showImageOptions(context, label);
+          }
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 48, color: Colors.white),
+            if (icon is IconData)
+              Icon(icon, size: 48, color: Colors.white)
+            else if (icon is String)
+              Image.asset(
+                icon,
+                width: 48,
+                height: 48,
+                color: Colors.white,
+              ),
             const SizedBox(height: 8),
             Text(label,
                 textAlign: TextAlign.center,
@@ -269,7 +490,8 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                           _buildTile(context, 'Lab reports', Icons.science),
                           _buildTile(
                               context, 'Medication', Icons.local_pharmacy),
-                          _buildTile(context, 'X-Ray', Icons.wb_iridescent),
+                          _buildTile(context, 'Radiology',
+                              'assets/icons/Radiology.png'),
                         ],
                       ),
                     ),
@@ -283,10 +505,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
               else
                 Stack(
                   children: [
-                    Listener(
-                      behavior: HitTestBehavior.opaque,
-                      child: CameraPreview(_camCtrl!),
-                    ),
+                    CameraPreview(_camCtrl!),
                     Center(child: _frameOverlay()),
                     if (_busy)
                       Container(
