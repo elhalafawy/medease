@@ -157,10 +157,28 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
 
   Future<void> cancelAppointment(String appointmentId) async {
     try {
+      // Fetch the appointment to get the slot_id
+      final appointment = await Supabase.instance.client
+          .from('appointments')
+          .select('time_slot_id')
+          .eq('appointment_id', appointmentId)
+          .single();
+
+      // Cancel the appointment
       await Supabase.instance.client
           .from('appointments')
           .update({'status': 'cancelled'})
           .eq('appointment_id', appointmentId);
+
+      // If slot_id exists, update the slot status to 'available'
+      if (appointment != null && appointment['time_slot_id'] != null) {
+        final slotId = appointment['time_slot_id'];
+        await Supabase.instance.client
+            .from('time_slots_duplicate')
+            .update({'status': 'available'})
+            .eq('slot_id', slotId);
+      }
+
       // Optionally refresh appointments
       await fetchAppointments();
     } catch (e) {

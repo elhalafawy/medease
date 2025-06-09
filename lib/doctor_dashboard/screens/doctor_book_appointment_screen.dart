@@ -403,6 +403,37 @@ class _DoctorBookAppointmentScreenState
         return;
       }
 
+      // Get all slots for the date
+      final existingSlots = await supabase
+          .from('time_slots_duplicate')
+          .select()
+          .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
+          .eq('available_date', newDate.toIso8601String().split('T')[0]);
+
+      // Create a set of existing time slots for quick lookup
+      final existingTimeSlots = <String>{};
+      for (var slot in existingSlots) {
+        existingTimeSlots.add(slot['time_slot'] as String);
+      }
+
+      // Delete slots outside the new time range
+      for (var slot in existingSlots) {
+        final timeSlot = slot['time_slot'] as String;
+        final timeParts = timeSlot.split(':');
+        if (timeParts.length >= 2) {
+          final hour = int.parse(timeParts[0]);
+          final minute = int.parse(timeParts[1]);
+          final slotMinutes = hour * 60 + minute;
+
+          if (slotMinutes < startMinutes || slotMinutes > endMinutes) {
+            await supabase
+                .from('time_slots_duplicate')
+                .delete()
+                .eq('slot_id', slot['slot_id']);
+          }
+        }
+      }
+
       // Generate new time slots
       List<TimeOfDay> newSlots = generateTimeSlots(newStartTime, newEndTime);
       
@@ -411,30 +442,25 @@ class _DoctorBookAppointmentScreenState
         return;
       }
 
-      // First, delete all existing slots for the old date
-      for (final slotId in slotIds) {
-        await supabase
-            .from('time_slots_duplicate')
-            .delete()
-            .eq('slot_id', slotId);
-      }
-
-      // Create new slots for the new date
+      // Create new slots for the new date, avoiding duplicates
       for (final slot in newSlots) {
         final timeStr = '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
-        await supabase.from('time_slots_duplicate').insert({
-          'doctor_id': 'b55f005f-3185-4fa3-9098-2179e0751621',
-          'available_date': newDate.toIso8601String().split('T')[0],
-          'time_slot': timeStr,
-          'status': 'available',
-        });
+        
+        // Only insert if the time slot doesn't already exist
+        if (!existingTimeSlots.contains(timeStr)) {
+          await supabase.from('time_slots_duplicate').insert({
+            'doctor_id': 'b55f005f-3185-4fa3-9098-2179e0751621',
+            'available_date': newDate.toIso8601String().split('T')[0],
+            'time_slot': timeStr,
+            'status': 'available',
+          });
+        }
       }
 
       // Refresh the appointments list after update
       await loadAppointments();
     } catch (e) {
       print('Error updating appointment: $e');
-      // If there's an error, try to reload the appointments to ensure consistency
       await loadAppointments();
     }
   }
@@ -750,12 +776,68 @@ class _DoctorBookAppointmentScreenState
                                 fromTime != null &&
                                 toTime != null) {
                               for (var idx in selectedDayIndices) {
-                                await addTimeSlots(
-                                  doctorId: doctorId,
-                                  availableDate: next7Days[idx],
-                                  fromTime: fromTime!,
-                                  toTime: toTime!,
-                                );
+                                final date = next7Days[idx];
+                                final dateStr = date.toIso8601String().split('T')[0];
+
+                                // Fetch all existing slots for the day
+                                final existingSlots = await Supabase.instance.client
+                                    .from('time_slots_duplicate')
+                                    .select()
+                                    .eq('doctor_id', doctorId)
+                                    .eq('available_date', dateStr)
+                                    .eq('status', 'available');
+
+                                // Convert fromTime and toTime to minutes for comparison
+                                final startMinutes = fromTime!.hour * 60 + fromTime!.minute;
+                                final endMinutes = toTime!.hour * 60 + toTime!.minute;
+
+                                // Delete slots outside the new range
+                                for (var slot in existingSlots) {
+                                  final timeSlot = slot['time_slot'] as String;
+                                  final timeParts = timeSlot.split(':');
+                                  if (timeParts.length >= 2) {
+                                    final hour = int.parse(timeParts[0]);
+                                    final minute = int.parse(timeParts[1]);
+                                    final slotMinutes = hour * 60 + minute;
+                                    if (slotMinutes < startMinutes || slotMinutes > endMinutes) {
+                                      await Supabase.instance.client
+                                          .from('time_slots_duplicate')
+                                          .delete()
+                                          .eq('slot_id', slot['slot_id']);
+                                    }
+                                  }
+                                }
+
+                                // Create a set of existing time slots (after deletion)
+                                final updatedSlots = await Supabase.instance.client
+                                    .from('time_slots_duplicate')
+                                    .select()
+                                    .eq('doctor_id', doctorId)
+                                    .eq('available_date', dateStr)
+                                    .eq('status', 'available');
+                                final existingTimeSlots = <String>{};
+                                for (var slot in updatedSlots) {
+                                  existingTimeSlots.add(slot['time_slot'] as String);
+                                }
+
+                                // Generate new slots
+                                List<TimeOfDay> newSlots = generateTimeSlots(fromTime!, toTime!);
+
+                                // Only add slots that don't exist
+                                for (final slot in newSlots) {
+                                  final timeStr = '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
+                                  if (!existingTimeSlots.contains(timeStr)) {
+                                    await addTimeSlots(
+                                      doctorId: doctorId,
+                                      availableDate: date,
+                                      fromTime: slot,
+                                      toTime: TimeOfDay(
+                                        hour: slot.hour,
+                                        minute: slot.minute + 30 > 59 ? 0 : slot.minute + 30
+                                      ),
+                                    );
+                                  }
+                                }
                               }
                               await loadAppointments();
                               _showSuccessDialog();
@@ -851,7 +933,7 @@ class _DoctorBookAppointmentScreenState
                                             newDate: next7Days[dayIndex],
                                             newStartTime: fromTime!,
                                             newEndTime: toTime!,
-                                          ); print(toTime);
+                                          );
                                         }
                                       }
                                     },
