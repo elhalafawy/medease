@@ -34,6 +34,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   Map<String, dynamic>? patientData;
   bool isLoading = false;
   late BuildContext _scaffoldContext;
+  List<Map<String, dynamic>> availableTimeSlots = [];
+  bool isLoadingTimeSlots = false;
+  String? selectedDate;
+  String? selectedTimeSlotId;
 
   @override
   void didChangeDependencies() {
@@ -101,47 +105,104 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     });
   }
 
-  Future<void> updateAppointment(String appointmentId, String newDate, String newTime) async {
+  Future<void> fetchAvailableTimeSlots(String date) async {
+    setState(() {
+      isLoadingTimeSlots = true;
+      isLoading = true;
+    });
+
+    try {
+      final response = await Supabase.instance.client
+          .from('time_slots_duplicate')
+          .select('slot_id, time_slot, status')
+          .eq('doctor_id', widget.appointment['doctor_id'])
+          .eq('available_date', date)
+          .eq('status', 'available')
+          .order('time_slot', ascending: true);
+
+      if (response != null) {
+        setState(() {
+          availableTimeSlots = List<Map<String, dynamic>>.from(response);
+          isLoadingTimeSlots = false;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching time slots: $e');
+      setState(() {
+        isLoadingTimeSlots = false;
+        availableTimeSlots = [];
+      });
+    }
+  }
+
+  Future<void> updateAppointment(String appointmentId, String newDate, String newTimeSlotId) async {
     if (appointmentId.isEmpty) {
       throw Exception('Invalid appointment ID');
     }
     
     try {
-      // Parse the date string (e.g., "Tue 5" -> "2024-03-05")
-      final now = DateTime.now();
-      final dateParts = newDate.split(' ');
-      final day = int.parse(dateParts[1]);
-      final month = now.month;
-      final year = now.year;
-      final formattedDate = DateTime(year, month, day).toIso8601String().split('T')[0];
+      // Get the time slot details
+      final timeSlotResponse = await Supabase.instance.client
+          .from('time_slots_duplicate')
+          .select('time_slot')
+          .eq('slot_id', newTimeSlotId)
+          .single();
 
+      if (timeSlotResponse == null) {
+        throw Exception('Time slot not found');
+      }
+
+      // Update the appointment
       await Supabase.instance.client
           .from('appointments')
           .update({
-            'date': formattedDate,
-            'time': newTime,
+            'date': newDate,
+            'time': timeSlotResponse['time_slot'],
+            'time_slot_id': newTimeSlotId,
           })
           .eq('appointment_id', appointmentId);
+
+      // Update the old time slot to available
+      final oldTimeSlotId = widget.appointment['time_slot_id'];
+      if (oldTimeSlotId != null) {
+        await Supabase.instance.client
+            .from('time_slots_duplicate')
+            .update({'status': 'available'})
+            .eq('slot_id', oldTimeSlotId);
+      }
+
+      // Update the new time slot to booked
+      await Supabase.instance.client
+          .from('time_slots_duplicate')
+          .update({'status': 'booked'})
+          .eq('slot_id', newTimeSlotId);
       
       if (widget.onUpdate != null) {
         final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
-        updatedAppointment['date'] = newDate; // Keep the display format for UI
-        updatedAppointment['time'] = newTime;
+        updatedAppointment['date'] = newDate;
+        updatedAppointment['time'] = timeSlotResponse['time_slot'];
+        updatedAppointment['time_slot_id'] = newTimeSlotId;
         widget.onUpdate!(updatedAppointment);
       }
     } catch (e) {
       print('Failed to update appointment: $e');
-      throw e; // Re-throw to handle in the UI
+      throw e;
     }
   }
 
   void _showUpdateDialog() {
-    int selectedDayIndex = 2;
+    int selectedDayIndex = 0;
     int selectedTimeIndex = 0;
-    List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
-    List<String> dates = ['3', '4', '5', '6', '7'];
-    List<String> times = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM'];
-
+    List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    List<String> dates = [];
+    // Define all possible slots for the day (customize as needed)
+    final allPossibleSlots = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM'];
+    final now = DateTime.now();
+    for (int i = 0; i < 7; i++) {
+      final date = now.add(Duration(days: i));
+      dates.add(date.day.toString());
+    }
     final appointmentId = widget.appointment['appointment_id']?.toString();
     if (appointmentId == null || appointmentId.isEmpty) {
       CustomSnackBar.show(
@@ -151,7 +212,6 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       );
       return;
     }
-
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -254,8 +314,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   const SizedBox(height: 12),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -272,21 +331,31 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         final isSelected = index == selectedDayIndex;
                         return Expanded(
                           child: GestureDetector(
-                            onTap: () =>
-                                setState(() => selectedDayIndex = index),
+                            onTap: () {
+                              setState(() {
+                                selectedDayIndex = index;
+                                // Calculate the date string for the selected day
+                                final selectedDate = DateTime(
+                                  now.year,
+                                  now.month,
+                                  now.day + index,
+                                ).toIso8601String().split('T')[0];
+                                // Fetch available time slots for the selected date
+                                fetchAvailableTimeSlots(selectedDate);
+                                // Reset selection
+                                selectedTimeIndex = -1;
+                                selectedTimeSlotId = null;
+                              });
+                            },
                             child: Container(
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 4, vertical: 2),
+                              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                               decoration: BoxDecoration(
-                                color: isSelected
-                                    ? const Color(0xFF7DDCFF)
-                                    : Colors.white,
+                                color: isSelected ? const Color(0xFF7DDCFF) : Colors.white,
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
-                                    color: isSelected
-                                        ? const Color(0xFF7DDCFF)
-                                        : Colors.grey.shade300,
-                                    width: 2),
+                                  color: isSelected ? const Color(0xFF7DDCFF) : Colors.grey.shade300,
+                                  width: 2,
+                                ),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: Column(
@@ -294,9 +363,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                   Text(
                                     days[index],
                                     style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFF232B3E),
+                                      color: isSelected ? Colors.white : const Color(0xFF232B3E),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
                                     ),
@@ -305,9 +372,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                   Text(
                                     dates[index],
                                     style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : const Color(0xFF232B3E),
+                                      color: isSelected ? Colors.white : const Color(0xFF232B3E),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
                                     ),
@@ -327,64 +392,76 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     child: const Text(
                       "Available Time",
                       style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Color(0xFF232B3E)),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Color(0xFF232B3E),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: List.generate(times.length, (index) {
-                        final isSelected = index == selectedTimeIndex;
-                        return GestureDetector(
-                          onTap: () =>
-                              setState(() => selectedTimeIndex = index),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFF5B183)
-                                  : const Color(0xFFF3F3F3),
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
-                                  color: isSelected
-                                      ? const Color(0xFFF5B183)
-                                      : Colors.grey.shade300),
-                              boxShadow: isSelected
-                                  ? [
-                                      const BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 4,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ]
-                                  : [],
-                            ),
-                            child: Text(
-                              times[index],
-                              style: TextStyle(
-                                color: isSelected
-                                    ? Colors.white
-                                    : const Color(0xFF9C9C9C),
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
+                  // ... existing code ...
+// if (isLoadingTimeSlots)
+//   const Center(child: CircularProgressIndicator())
+// else 
+if (availableTimeSlots.isEmpty)
+  const Padding(
+    padding: EdgeInsets.all(20),
+    child: Text('No available time slots for this day'),
+  )
+else
+  Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: List.generate(availableTimeSlots.length, (index) {
+        final slotTime = availableTimeSlots[index]['time_slot'];
+        final availableSlotTimes = availableTimeSlots.map((s) => s['time_slot']).toSet();
+        final isAvailable = availableSlotTimes.contains(slotTime);
+        final isSelected = isAvailable && selectedTimeIndex == index;
+        return GestureDetector(
+          onTap: isAvailable
+              ? () => setState(() {
+              isLoadingTimeSlots = false;
+              isLoading = false;
+                    selectedTimeIndex = index;
+                    selectedTimeSlotId = availableTimeSlots.firstWhere((s) => s['time_slot'] == slotTime)['slot_id'];
+                  })
+              : null,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color(0xFFF5B183)
+                  : isAvailable
+                      ? const Color(0xFFF3F3F3)
+                      : Colors.grey[200],
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFFF5B183)
+                    : Colors.grey.shade300,
+              ),
+            ),
+            child: Text(
+              slotTime,
+              style: TextStyle(
+                color: isSelected
+                    ? Colors.white
+                    : isAvailable
+                        ? const Color(0xFF9C9C9C)
+                        : Colors.grey,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      }),
+    ),
+  ),
                   const SizedBox(height: 24),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -394,30 +471,38 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
-                          onPressed: () async {
-                            final newDate = '${days[selectedDayIndex]} ${dates[selectedDayIndex]}';
-                            final newTime = times[selectedTimeIndex];
-                            
-                            try {
-                              await updateAppointment(appointmentId, newDate, newTime);
-                              if (mounted) {
-                                CustomSnackBar.show(
-                                  context: _scaffoldContext,
-                                  message: 'Appointment updated successfully',
-                                );
-                                Navigator.pop(context); // Close the update dialog
-                                Navigator.pop(context); // Return to schedule screen
-                              }
-                            } catch (e) {
-                              if (mounted) {
-                                CustomSnackBar.show(
-                                  context: _scaffoldContext,
-                                  message: 'Failed to update appointment',
-                                  isError: true,
-                                );
-                              }
-                            }
-                          },
+                          onPressed: selectedTimeSlotId == null
+                              ? null
+                              : () async {
+                                  final selectedDate = DateTime(
+                                    now.year,
+                                    now.month,
+                                    now.day + selectedDayIndex,
+                                  ).toIso8601String().split('T')[0];
+                                  try {
+                                    await updateAppointment(
+                                      appointmentId,
+                                      selectedDate,
+                                      selectedTimeSlotId!,
+                                    );
+                                    if (mounted) {
+                                      CustomSnackBar.show(
+                                        context: _scaffoldContext,
+                                        message: 'Appointment updated successfully',
+                                      );
+                                      Navigator.pop(context); // Close the update dialog
+                                      Navigator.pop(context); // Return to schedule screen
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      CustomSnackBar.show(
+                                        context: _scaffoldContext,
+                                        message: 'Failed to update appointment',
+                                        isError: true,
+                                      );
+                                    }
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF14375A),
                             shape: RoundedRectangleBorder(
@@ -439,27 +524,43 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   Future<void> cancelAppointment(String appointmentId) async {
-    if (appointmentId.isEmpty) {
-      throw Exception('Invalid appointment ID');
-    }
-    
-    try {
-      await Supabase.instance.client
-          .from('appointments')
-          .update({'status': 'cancelled'})
-          .eq('appointment_id', appointmentId);
-          
-      
-      if (widget.onUpdate != null) {
-        final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
-        updatedAppointment['status'] = 'cancelled';
-        widget.onUpdate!(updatedAppointment);
-      }
-    } catch (e) {
-      print('Failed to cancel appointment: $e');
-      throw e; // Re-throw to handle in the UI
-    }
+  if (appointmentId.isEmpty) {
+    throw Exception('Invalid appointment ID');
   }
+  
+  try {
+    // Fetch the appointment to get the slot_id
+    final appointment = await Supabase.instance.client
+        .from('appointments')
+        .select('time_slot_id')
+        .eq('appointment_id', appointmentId)
+        .single();
+
+    // Cancel the appointment
+    await Supabase.instance.client
+        .from('appointments')
+        .update({'status': 'cancelled'})
+        .eq('appointment_id', appointmentId);
+
+    // If slot_id exists, update the slot status to 'available'
+    if (appointment != null && appointment['time_slot_id'] != null) {
+      final slotId = appointment['time_slot_id'];
+      await Supabase.instance.client
+          .from('time_slots_duplicate')
+          .update({'status': 'available'})
+          .eq('slot_id', slotId);
+    }
+
+    if (widget.onUpdate != null) {
+      final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
+      updatedAppointment['status'] = 'cancelled';
+      widget.onUpdate!(updatedAppointment);
+    }
+  } catch (e) {
+    print('Failed to cancel appointment: $e');
+    throw e; // Re-throw to handle in the UI
+  }
+}
 
   void _showCancelDialog() {
     final appointmentId = widget.appointment['appointment_id']?.toString();
