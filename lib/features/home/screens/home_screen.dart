@@ -43,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
       'imageUrl': 'assets/images/doctor_photo.png',
     },
   ];
-  String category = 'All';
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     : showDoctors
                         ? DoctorsScreen(
-                            category: category,
+                            category: 'All',
                             onBack: () {
                               setState(() {
                                 showDoctors = false;
@@ -135,8 +134,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Image.asset('assets/images/home_banner.png'),
                                         const SizedBox(height: AppTheme.kPaddingXLarge),
                                         _buildUserWelcome(authProvider, isDarkMode),
-                                        const SizedBox(height: AppTheme.kPaddingXLarge),
-                                        _buildSearchBar(isDarkMode),
                                         const SizedBox(height: AppTheme.kPaddingXLarge),
                                         _buildQuickOptions(isDarkMode),
                                         const SizedBox(height: AppTheme.kPaddingXLarge),

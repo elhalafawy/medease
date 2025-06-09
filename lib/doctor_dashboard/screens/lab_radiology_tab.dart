@@ -412,18 +412,21 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _pickAndUploadFile(report, isRadiology),
                   icon: const Icon(Icons.upload_file, color: AppTheme.primaryColor),
-                  label: Text('Upload',
-                      style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                  label: FittedBox(
+                    fit: BoxFit.fitWidth,
+                    child: Text('Upload',
+                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                  ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppTheme.primaryColor),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                   ),
                 ),
               ),
