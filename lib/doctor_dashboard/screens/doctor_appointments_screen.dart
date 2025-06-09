@@ -39,72 +39,84 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   }
 
   Future<void> fetchtimeSlots(String doctorId, String date) async {
-  setState(() {
-    loadingSlots = true;
-    _error = null;
-  });
-  try {
-    final response = await Supabase.instance.client
-        .from('time_slots_duplicate')
-        .select('*')
-        .eq('doctor_id', doctorId)
-        .eq('available_date', date)
-        .eq('status', 'available')
-        .order('time_slot', ascending: true);
-       setState(() {
-     availableTimes = List<Map<String, dynamic>>.from(response);
-//      for (var slot in availableTimes) {
-//   print(slot['time_slot']);
-// }
-     loadingSlots = false;
-   });
-  } catch (e) {
     setState(() {
-      _error = 'Failed to load time slots';
-      loadingSlots = false;
+      loadingSlots = true;
+      _error = null;
     });
+    try {
+      final response = await Supabase.instance.client
+          .from('time_slots_duplicate')
+          .select('*')
+          .eq('doctor_id', doctorId)
+          .eq('available_date', date)
+          .eq('status', 'available')
+          .order('time_slot', ascending: true);
+
+      // Clear existing slots before adding new ones
+      setState(() {
+        availableTimes = [];
+        // Convert response to list and ensure no duplicates
+        final uniqueSlots = <Map<String, dynamic>>[];
+        final seenSlots = <String>{};
+        
+        for (var slot in response) {
+          final timeSlot = slot['time_slot'] as String?;
+          if (timeSlot != null && !seenSlots.contains(timeSlot)) {
+            seenSlots.add(timeSlot);
+            uniqueSlots.add(slot);
+          }
+        }
+        
+        availableTimes = uniqueSlots;
+        loadingSlots = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load time slots';
+        loadingSlots = false;
+      });
+    }
   }
-}
 
   Future<void> updateAppointmentTimeSlot({
-  required String appointmentId,
-  required String newTimeSlotId,
-  required String oldTimeSlotId,
-  required String newTime,
-  required String newDate,
-}) async {
-  try {
-    // 1. Update the appointment with the new time and time_slot_id
-    await Supabase.instance.client
-        .from('appointments')
-        .update({
-          'time': newTime,
-          'time_slot_id': newTimeSlotId,
-          'date': newDate,
-        })
-        .eq('appointment_id', appointmentId);
+    required String appointmentId,
+    required String newTimeSlotId,
+    required String oldTimeSlotId,
+    required String newTime,
+    required String newDate,
+  }) async {
+    try {
+      // 1. Update the appointment with the new time and time_slot_id
+      await Supabase.instance.client
+          .from('appointments')
+          .update({
+            'time': newTime,
+            'time_slot_id': newTimeSlotId,
+            'date': newDate,
+          })
+          .eq('appointment_id', appointmentId);
 
-    // 2. Mark the old time slot as available
-    await Supabase.instance.client
-        .from('time_slots_duplicate')
-        .update({'status': 'available'})
-        .eq('slot_id', oldTimeSlotId);
+      // 2. Mark the old time slot as available
+      await Supabase.instance.client
+          .from('time_slots_duplicate')
+          .update({'status': 'available'})
+          .eq('slot_id', oldTimeSlotId);
 
-    // 3. Mark the new time slot as booked
-    await Supabase.instance.client
-        .from('time_slots_duplicate')
-        .update({'status': 'booked'})
-        .eq('slot_id', newTimeSlotId);
+      // 3. Mark the new time slot as booked
+      await Supabase.instance.client
+          .from('time_slots_duplicate')
+          .update({'status': 'booked'})
+          .eq('slot_id', newTimeSlotId);
 
-    // Optionally, refresh appointments or slots
-    await fetchAppointments();
-    // await fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", date);
-  } catch (e) {
-    setState(() {
-      _error = 'Failed to update appointment time slot';
-    });
+      // Refresh both appointments and time slots
+      await fetchAppointments();
+      await fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", newDate);
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to update appointment time slot';
+      });
+    }
   }
-}
 
   Future<void> fetchAppointments() async {
     setState(() {
@@ -568,10 +580,28 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         onPressed: () {
                           setState(() {
                             appt['day'] = days[selectedDay];
-                            appt['date'] = selectedDayIndex; // TODO: change to the selected date
-                            print(appt['date']);
-                            appt['time'] = availableTimes[selectedTimeIndex]['time_slot'];
-                            updateAppointmentTimeSlot(appointmentId: appt['appointment_id'], newTimeSlotId: availableTimes[selectedTimeIndex]['slot_id'], oldTimeSlotId: appt['time_slot_id'], newTime: appt['time'], newDate: appt['date'] );
+                            // Calculate the proper date string for the selected day
+                            DateTime today = DateTime.now();
+                            int currentWeekday = today.weekday; // 1 (Mon) - 7 (Sun)
+                            int targetWeekday = selectedDay == 0 ? 7 : selectedDay; // 1 (Mon) - 7 (Sun)
+                            int daysToAdd = (targetWeekday - currentWeekday) % 7;
+                            if (daysToAdd < 0) daysToAdd += 7;
+                            DateTime newDate = today.add(Duration(days: daysToAdd));
+                            String formattedDate = "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
+                            
+                            // Ensure all values are strings
+                            String appointmentId = appt['appointment_id'].toString();
+                            String newTimeSlotId = availableTimes[selectedTimeIndex]['slot_id'].toString();
+                            String oldTimeSlotId = appt['time_slot_id'].toString();
+                            String newTime = availableTimes[selectedTimeIndex]['time_slot'].toString();
+                            
+                            updateAppointmentTimeSlot(
+                              appointmentId: appointmentId,
+                              newTimeSlotId: newTimeSlotId,
+                              oldTimeSlotId: oldTimeSlotId,
+                              newTime: newTime,
+                              newDate: formattedDate
+                            );
                           });
                           Navigator.pop(context);
                         },
@@ -607,6 +637,16 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
     return "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
   }
 
+  // Add this method to handle day selection
+  void _handleDaySelection(int index) {
+    setState(() {
+      selectedDayIndex = index;
+      // Fetch time slots for the selected day
+      final dateStr = getDateStrForSelectedDay(index);
+      fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", dateStr);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -638,7 +678,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                   itemCount: daysShort.length,
                   separatorBuilder: (context, i) => const SizedBox(width: 8),
                   itemBuilder: (context, i) => GestureDetector(
-                    onTap: () => setState(() => selectedDayIndex = i),
+                    onTap: () => _handleDaySelection(i),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(

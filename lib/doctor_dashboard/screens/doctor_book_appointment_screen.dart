@@ -1,3 +1,5 @@
+// TODO: fix the issue where start time can not be later and end time can not be earlier
+
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,35 +38,122 @@ class _DoctorBookAppointmentScreenState
           .select()
           .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
           .eq('status', 'available')
-          .order('available_date');
+          .order('available_date', ascending: true)
+          .order('time_slot', ascending: true);
 
       if (response != null && response is List) {
-        setState(() {
-          confirmedAppointments = response
-              .map((slot) {
-                try {
-                  // Convert the database format to the format expected by the UI
-                  final date = DateTime.parse(slot['available_date'] as String);
-                  final startParts = (slot['start_time'] as String).split(':');
-                  final endParts = (slot['end_time'] as String).split(':');
+        // Group slots by date
+        Map<String, List<Map<String, dynamic>>> groupedSlots = {};
+        
+        for (var slot in response) {
+          try {
+            // Ensure slot is a Map
+            if (slot is! Map<String, dynamic>) {
+              print('Invalid slot format: $slot');
+              continue;
+            }
 
-                  return {
-                    'day': date,
-                    'from': TimeOfDay(
-                        hour: int.parse(startParts[0]),
-                        minute: int.parse(startParts[1])),
-                    'to': TimeOfDay(
-                        hour: int.parse(endParts[0]),
-                        minute: int.parse(endParts[1])),
-                  };
-                } catch (e) {
-                  print('Error parsing slot: $e');
-                  return null;
+            // Add null checks for required fields with type checking
+            final availableDate = slot['available_date'];
+            final timeSlot = slot['time_slot'];
+            final slotId = slot['slot_id'];
+
+            if (availableDate == null || timeSlot == null || slotId == null) {
+              print('Missing required fields in slot: $slot');
+              continue;
+            }
+
+            // Ensure fields are strings
+            if (availableDate is! String || timeSlot is! String) {
+              print('Invalid field types in slot: $slot');
+              continue;
+            }
+
+            // Parse date with error handling
+            DateTime? date;
+            try {
+              date = DateTime.parse(availableDate);
+            } catch (e) {
+              print('Invalid date format: $availableDate');
+              continue;
+            }
+
+            final dateKey = date.toIso8601String().split('T')[0];
+            
+            // Validate time slot format
+            if (!timeSlot.contains(':')) {
+              print('Invalid time format in slot: $timeSlot');
+              continue;
+            }
+
+            final timeParts = timeSlot.split(':');
+            if (timeParts.length < 2) {
+              print('Invalid time format in slot: $timeSlot');
+              continue;
+            }
+
+            // Parse hours and minutes with error handling
+            int? hour = int.tryParse(timeParts[0]);
+            int? minute = int.tryParse(timeParts[1]);
+            
+            if (hour == null || minute == null || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+              print('Invalid time values in slot: $timeSlot');
+              continue;
+            }
+
+            final time = TimeOfDay(hour: hour, minute: minute);
+
+            if (!groupedSlots.containsKey(dateKey)) {
+              groupedSlots[dateKey] = [];
+            }
+
+            groupedSlots[dateKey]!.add({
+              'time': time,
+              'slot_id': slotId.toString(),
+            });
+          } catch (e) {
+            print('Error parsing slot: $e');
+            continue;
+          }
+        }
+
+        // Convert grouped slots to the format expected by the UI
+        setState(() {
+          confirmedAppointments = groupedSlots.entries.map((entry) {
+            try {
+              final date = DateTime.parse(entry.key);
+              final slots = entry.value;
+              
+              // Sort slots by time
+              slots.sort((a, b) {
+                final timeA = a['time'] as TimeOfDay;
+                final timeB = b['time'] as TimeOfDay;
+                if (timeA.hour != timeB.hour) {
+                  return timeA.hour.compareTo(timeB.hour);
                 }
-              })
-              .where((slot) => slot != null)
-              .cast<Map<String, dynamic>>()
-              .toList();
+                return timeA.minute.compareTo(timeB.minute);
+              });
+
+              // Ensure we have slots before accessing first and last
+              if (slots.isEmpty) {
+                return null;
+              }
+
+              return {
+                'day': date,
+                'slots': slots,
+                'start_time': slots.first['time'] as TimeOfDay,
+                'end_time': slots.last['time'] as TimeOfDay,
+                'slot_ids': slots.map((s) => s['slot_id'] as String).toList(),
+              };
+            } catch (e) {
+              print('Error processing date entry: $e');
+              return null;
+            }
+          })
+          .where((appt) => appt != null) // Filter out null entries
+          .cast<Map<String, dynamic>>()
+          .toList();
         });
       } else {
         setState(() {
@@ -100,16 +189,41 @@ class _DoctorBookAppointmentScreenState
   }
 
   Future<void> _pickTime(int dayIdx, String type) async {
+    final initialTime = type == 'from' 
+        ? (fromTime ?? const TimeOfDay(hour: 9, minute: 0))
+        : (toTime ?? const TimeOfDay(hour: 17, minute: 0));
+
     final picked = await showTimePicker(
       context: context,
-      initialTime: fromTime ?? const TimeOfDay(hour: 9, minute: 0),
+      initialTime: initialTime,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: false,
+          ),
+          child: child!,
+        );
+      },
     );
+
     if (picked != null) {
       setState(() {
         if (type == 'from') {
           fromTime = picked;
+          // If end time is before or equal to new start time, reset it
+          if (toTime != null && 
+              (toTime!.hour < picked.hour || 
+               (toTime!.hour == picked.hour && toTime!.minute <= picked.minute))) {
+            toTime = null;
+          }
         } else {
           toTime = picked;
+          // If start time is after or equal to new end time, reset it
+          if (fromTime != null && 
+              (fromTime!.hour > picked.hour || 
+               (fromTime!.hour == picked.hour && fromTime!.minute >= picked.minute))) {
+            fromTime = null;
+          }
         }
       });
     }
@@ -203,68 +317,23 @@ class _DoctorBookAppointmentScreenState
     );
   }
 
-  // Future<void> addTimeSlot({
-  //   required String doctorId,
-  //   required DateTime availableDate,
-  //   required TimeOfDay startTime,
-  //   required TimeOfDay endTime,
-  //   String status = 'available',
-  //   String? recurringRule,
-  // }) async {
-  //   final supabase = Supabase.instance.client;
-  //   // final start = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
-  //   // final end = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}:00';
-  //   List<String> slots =
-  //       generateTimeSlots(startTime.toString(), endTime.toString());
-  //   await supabase.from('time_slots_duplicate').insert({
-  //     'doctor_id': doctorId,
-  //     'available_date':
-  //         availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
-  //     'time_slot': slots,
-  //     'status': status,
-  //     'recurring_rule': recurringRule,
-  //   });
-  // }
-
-  // // Helper to generate 30-minute slots between start and end time
-  // List<String> generateTimeSlots(String startTime, String endTime) {
-  //   List<String> slots = [];
-  //   TimeOfDay start = TimeOfDay(
-  //     hour: int.parse(startTime.split(":")[0]),
-  //     minute: int.parse(startTime.split(":")[1]),
-  //   );
-  //   TimeOfDay end = TimeOfDay(
-  //     hour: int.parse(endTime.split(":")[0]),
-  //     minute: int.parse(endTime.split(":")[1]),
-  //   );
-  //   TimeOfDay current = start;
-  //   print(start.toString());
-  //   print(end.toString());
-  //   while (current.hour < end.hour ||
-  //       (current.hour == end.hour && current.minute < end.minute)) {
-  //     final hourStr = current.hour.toString().padLeft(2, '0');
-  //     final minStr = current.minute.toString().padLeft(2, '0');
-  //     slots.add("$hourStr:$minStr");
-  //     int newMinute = current.minute + 30;
-  //     int newHour = current.hour;
-  //     if (newMinute >= 60) {
-  //       newHour += 1;
-  //       newMinute -= 60;
-  //     }
-  //     current = TimeOfDay(hour: newHour, minute: newMinute);
-  //   }
-  //   print(current.toString());
-  //   return slots;
-  // }
-
-// ... existing code ...
-
-// Helper to generate 30-minute slots between start and end time
+  // Helper to generate 30-minute slots between start and end time
   List<TimeOfDay> generateTimeSlots(TimeOfDay start, TimeOfDay end) {
     List<TimeOfDay> slots = [];
+    
+    // Convert to minutes for easier comparison
+    int startMinutes = start.hour * 60 + start.minute;
+    int endMinutes = end.hour * 60 + end.minute;
+    
+    // If end time is before or equal to start time, return empty list
+    if (endMinutes <= startMinutes) {
+      print('End time must be after start time');
+      return slots;
+    }
+
     TimeOfDay current = start;
     while (current.hour < end.hour ||
-        (current.hour == end.hour && current.minute < end.minute)) {
+        (current.hour == end.hour && current.minute <= end.minute)) {
       slots.add(current);
       int newMinute = current.minute + 30;
       int newHour = current.hour;
@@ -277,7 +346,7 @@ class _DoctorBookAppointmentScreenState
     return slots;
   }
 
-// Use this in your addTimeSlot logic:
+  // Use this in your addTimeSlot logic:
   Future<void> addTimeSlots({
     required String doctorId,
     required DateTime availableDate,
@@ -289,37 +358,26 @@ class _DoctorBookAppointmentScreenState
     final supabase = Supabase.instance.client;
     List<TimeOfDay> slots = generateTimeSlots(fromTime, toTime);
     for (final slot in slots) {
-      final slotStr =
-          '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
+      final timeStr = '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
       await supabase.from('time_slots_duplicate').insert({
         'doctor_id': doctorId,
-        'available_date':
-            availableDate.toIso8601String().split('T')[0], // 'YYYY-MM-DD'
-        'time_slot': slotStr,
+        'available_date': availableDate.toIso8601String().split('T')[0],
+        'time_slot': timeStr,
         'status': status,
         'recurring_rule': recurringRule,
       });
     }
   }
 
-// ... existing code ...
-
-// In your button's onPressed, call addTimeSlots for each selected day:
-
-// ... existing code ...
-
-  Future<void> deleteAppointment(DateTime date, TimeOfDay startTime) async {
+  Future<void> deleteAppointment(List<String> slotIds) async {
     final supabase = Supabase.instance.client;
     try {
-      final start =
-          '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}:00';
-
-      await supabase
-          .from('time_slots_duplicate')
-          .delete()
-          .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
-          .eq('available_date', date.toIso8601String().split('T')[0])
-          .eq('start_time', start);
+      for (final slotId in slotIds) {
+        await supabase
+            .from('time_slots_duplicate')
+            .delete()
+            .eq('slot_id', slotId);
+      }
 
       // Refresh the appointments list after deletion
       await loadAppointments();
@@ -329,36 +387,55 @@ class _DoctorBookAppointmentScreenState
   }
 
   Future<void> updateAppointment({
-    required DateTime oldDate,
-    required TimeOfDay oldStartTime,
+    required List<String> slotIds,
     required DateTime newDate,
     required TimeOfDay newStartTime,
     required TimeOfDay newEndTime,
   }) async {
     final supabase = Supabase.instance.client;
     try {
-      final oldStart =
-          '${oldStartTime.hour.toString().padLeft(2, '0')}:${oldStartTime.minute.toString().padLeft(2, '0')}:00';
-      final newStart =
-          '${newStartTime.hour.toString().padLeft(2, '0')}:${newStartTime.minute.toString().padLeft(2, '0')}:00';
-      final newEnd =
-          '${newEndTime.hour.toString().padLeft(2, '0')}:${newEndTime.minute.toString().padLeft(2, '0')}:00';
+      // Validate time range
+      int startMinutes = newStartTime.hour * 60 + newStartTime.minute;
+      int endMinutes = newEndTime.hour * 60 + newEndTime.minute;
+      
+      if (endMinutes <= startMinutes) {
+        print('Invalid time range: End time must be after start time');
+        return;
+      }
 
-      await supabase
-          .from('time_slots')
-          .update({
-            'available_date': newDate.toIso8601String().split('T')[0],
-            'start_time': newStart,
-            'end_time': newEnd,
-          })
-          .eq('doctor_id', 'b55f005f-3185-4fa3-9098-2179e0751621')
-          .eq('available_date', oldDate.toIso8601String().split('T')[0])
-          .eq('start_time', oldStart);
+      // Generate new time slots
+      List<TimeOfDay> newSlots = generateTimeSlots(newStartTime, newEndTime);
+      
+      if (newSlots.isEmpty) {
+        print('No valid time slots generated');
+        return;
+      }
+
+      // First, delete all existing slots for the old date
+      for (final slotId in slotIds) {
+        await supabase
+            .from('time_slots_duplicate')
+            .delete()
+            .eq('slot_id', slotId);
+      }
+
+      // Create new slots for the new date
+      for (final slot in newSlots) {
+        final timeStr = '${slot.hour.toString().padLeft(2, '0')}:${slot.minute.toString().padLeft(2, '0')}:00';
+        await supabase.from('time_slots_duplicate').insert({
+          'doctor_id': 'b55f005f-3185-4fa3-9098-2179e0751621',
+          'available_date': newDate.toIso8601String().split('T')[0],
+          'time_slot': timeStr,
+          'status': 'available',
+        });
+      }
 
       // Refresh the appointments list after update
       await loadAppointments();
     } catch (e) {
       print('Error updating appointment: $e');
+      // If there's an error, try to reload the appointments to ensure consistency
+      await loadAppointments();
     }
   }
 
@@ -530,15 +607,7 @@ class _DoctorBookAppointmentScreenState
                       children: [
                         Expanded(
                           child: GestureDetector(
-                            onTap: () async {
-                              final picked = await showTimePicker(
-                                context: context,
-                                initialTime: fromTime ??
-                                    const TimeOfDay(hour: 9, minute: 0),
-                              );
-                              if (picked != null)
-                                setState(() => fromTime = picked);
-                            },
+                            onTap: () => _pickTime(0, 'from'),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 14, horizontal: 16),
@@ -567,15 +636,7 @@ class _DoctorBookAppointmentScreenState
                         const SizedBox(width: 12),
                         Expanded(
                           child: GestureDetector(
-                            onTap: () async {
-                              final picked = await showTimePicker(
-                                context: context,
-                                initialTime: toTime ??
-                                    const TimeOfDay(hour: 17, minute: 0),
-                              );
-                              if (picked != null)
-                                setState(() => toTime = picked);
-                            },
+                            onTap: () => _pickTime(0, 'to'),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 14, horizontal: 16),
@@ -729,8 +790,14 @@ class _DoctorBookAppointmentScreenState
 
                           final appt = confirmedAppointments[idx];
                           final day = appt['day'] as DateTime;
-                          final from = appt['from'] as TimeOfDay?;
-                          final to = appt['to'] as TimeOfDay?;
+                          final startTime = appt['start_time'] as TimeOfDay?;
+                          final endTime = appt['end_time'] as TimeOfDay?;
+                          final slotIds = appt['slot_ids'] as List<String>?;
+
+                          // Skip if we don't have valid time data
+                          if (startTime == null || endTime == null || slotIds == null) {
+                            return const SizedBox.shrink();
+                          }
 
                           return Card(
                             margin: const EdgeInsets.symmetric(vertical: 4),
@@ -748,7 +815,7 @@ class _DoctorBookAppointmentScreenState
                                 style: theme.textTheme.bodyLarge,
                               ),
                               subtitle: Text(
-                                'From: ${from?.format(context) ?? '--:--'}  To: ${to?.format(context) ?? '--:--'}',
+                                'From: ${startTime.format(context)}  To: ${endTime.format(context)}',
                                 style: theme.textTheme.bodyMedium,
                               ),
                               trailing: Row(
@@ -760,7 +827,8 @@ class _DoctorBookAppointmentScreenState
                                     onPressed: () async {
                                       if (idx < confirmedAppointments.length) {
                                         final oldDate = day;
-                                        final oldStartTime = from!;
+                                        final oldStartTime = startTime;
+                                        final oldEndTime = endTime;
 
                                         // Find the closest day in next7Days
                                         final dayIndex = next7Days.indexWhere(
@@ -770,23 +838,20 @@ class _DoctorBookAppointmentScreenState
                                                 d.day == day.day);
 
                                         if (dayIndex != -1) {
+                                          // Set the time range for editing
                                           setState(() {
                                             selectedDayIndices = [dayIndex];
-                                            fromTime = appt['from'];
-                                            toTime = appt['to'];
-                                            if (idx <
-                                                confirmedAppointments.length) {
-                                              confirmedAppointments
-                                                  .removeAt(idx);
-                                            }
+                                            fromTime = oldStartTime;
+                                            toTime = oldEndTime;
                                           });
 
+                                          // Update all slots for the day
                                           await updateAppointment(
-                                              oldDate: oldDate,
-                                              oldStartTime: oldStartTime,
-                                              newDate: next7Days[dayIndex],
-                                              newStartTime: from!,
-                                              newEndTime: to!);
+                                            slotIds: slotIds,
+                                            newDate: next7Days[dayIndex],
+                                            newStartTime: fromTime!,
+                                            newEndTime: toTime!,
+                                          ); print(toTime);
                                         }
                                       }
                                     },
@@ -796,10 +861,9 @@ class _DoctorBookAppointmentScreenState
                                         color: Colors.red),
                                     onPressed: () async {
                                       if (idx < confirmedAppointments.length) {
-                                        await deleteAppointment(day, from!);
+                                        await deleteAppointment(slotIds);
                                         setState(() {
-                                          if (idx <
-                                              confirmedAppointments.length) {
+                                          if (idx < confirmedAppointments.length) {
                                             confirmedAppointments.removeAt(idx);
                                           }
                                         });
