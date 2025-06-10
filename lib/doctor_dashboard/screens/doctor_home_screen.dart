@@ -8,7 +8,7 @@ import 'doctor_appointments_screen.dart';
 import 'doctor_messages_screen.dart';
 import 'doctor_notifications_screen.dart';
 import 'doctor_profile_screen.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DoctorHomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -23,7 +23,45 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   bool _showReviews = false;
   int newDoctorNotifCount = 3;
   List<Map<String, dynamic>> doctorAppointments = [];
+  Map<String, double> _genderStats = {'male': 0, 'female': 0};
 
+  @override
+  void initState() {
+    super.initState();
+    _loadGenderStats();
+  }
+
+  Future<void> _loadGenderStats() async {
+    try {
+      final response =
+          await Supabase.instance.client.from('patients').select('gender');
+
+      int maleCount = 0;
+      int femaleCount = 0;
+      int totalCount = response.length;
+
+      for (var patient in response) {
+        if (patient['gender'] == 'male') {
+          maleCount++;
+        } else if (patient['gender'] == 'female') {
+          femaleCount++;
+        }
+      }
+
+      setState(() {
+        _genderStats = {
+          'male': totalCount > 0
+              ? (maleCount / totalCount * 100).roundToDouble()
+              : 0,
+          'female': totalCount > 0
+              ? (femaleCount / totalCount * 100).roundToDouble()
+              : 0,
+        };
+      });
+    } catch (e) {
+      print('Error loading gender stats: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +75,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -50,7 +89,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                               children: [
                                 const CircleAvatar(
                                   radius: 32,
-                                  backgroundImage: AssetImage('assets/images/doctor_photo.png'),
+                                  backgroundImage: AssetImage(
+                                      'assets/images/doctor_photo.png'),
                                 ),
                                 const SizedBox(width: 12),
                                 Column(
@@ -60,7 +100,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       children: [
                                         Text(
                                           "Welcome Dr.Ahmed, ",
-                                          style: theme.textTheme.titleLarge?.copyWith(
+                                          style: theme.textTheme.titleLarge
+                                              ?.copyWith(
                                             color: theme.colorScheme.primary,
                                           ),
                                         ),
@@ -75,17 +116,25 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       onTap: () {
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
-                                            builder: (_) => const DoctorProfileScreen(),
+                                            builder: (_) =>
+                                                const DoctorProfileScreen(),
                                           ),
                                         );
                                       },
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.account_circle, size: 16, color: AppTheme.primaryColor),
+                                          const Icon(Icons.account_circle,
+                                              size: 16,
+                                              color: AppTheme.primaryColor),
                                           const SizedBox(width: 4),
                                           Text(
                                             "Doctor Profile",
-                                            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                                            style: theme.textTheme.bodyMedium
+                                                ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme.primary,
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -96,24 +145,26 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                final displayAppointments = doctorAppointments.isEmpty
-                                    ? [
-                                        {
-                                          'patient': 'Menna Ahmed',
-                                          'date': '20.04.2023',
-                                          'time': '16:30 - 18:30',
-                                        },
-                                        {
-                                          'patient': 'Rana Mohamed',
-                                          'date': '22.04.2023',
-                                          'time': '11:00-16:00',
-                                        },
-                                      ]
-                                    : doctorAppointments;
+                                final displayAppointments =
+                                    doctorAppointments.isEmpty
+                                        ? [
+                                            {
+                                              'patient': 'Menna Ahmed',
+                                              'date': '20.04.2023',
+                                              'time': '16:30 - 18:30',
+                                            },
+                                            {
+                                              'patient': 'Rana Mohamed',
+                                              'date': '22.04.2023',
+                                              'time': '11:00-16:00',
+                                            },
+                                          ]
+                                        : doctorAppointments;
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => DoctorNotificationsScreen(
-                                      appointmentsCount: displayAppointments.length,
+                                      appointmentsCount:
+                                          displayAppointments.length,
                                     ),
                                   ),
                                 );
@@ -123,7 +174,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    const Icon(Icons.notifications_none, size: 32, color: AppTheme.primaryColor),
+                                    const Icon(Icons.notifications_none,
+                                        size: 32, color: AppTheme.primaryColor),
                                     if (newDoctorNotifCount > 0)
                                       Positioned(
                                         right: 2,
@@ -133,7 +185,10 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                           backgroundColor: Colors.red,
                                           child: Text(
                                             '$newDoctorNotifCount',
-                                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold),
                                           ),
                                         ),
                                       ),
@@ -158,10 +213,14 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 decoration: BoxDecoration(
                                   color: theme.colorScheme.surface,
                                   borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 1),
+                                  border: Border.all(
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.2),
+                                      width: 1),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: theme.colorScheme.primary.withOpacity(0.08),
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.08),
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
                                     ),
@@ -173,19 +232,28 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   children: [
                                     Text(
                                       "Gender",
-                                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 14),
+                                      style: theme.textTheme.bodyLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: theme.colorScheme.primary,
+                                              fontSize: 14),
                                       textAlign: TextAlign.center,
                                     ),
                                     const SizedBox(height: 2),
-                                    const SizedBox(height: 65, width: 40, child: GenderPieChart()),
+                                    const SizedBox(
+                                        height: 65,
+                                        width: 40,
+                                        child: GenderPieChart()),
                                     const SizedBox(height: 2),
-                                    const Column(
+                                    Column(
                                       children: [
-                                        _GenderLegend(color: Color(0xFF3B82F6), label: 'Men'),
-                                        SizedBox(height: 1),
-                                        _GenderLegend(color: Color(0xFFEC4899), label: 'Women'),
-                                        SizedBox(height: 1),
-                                        _GenderLegend(color: Color(0xFF34D399), label: 'Children'),
+                                        _GenderLegend(
+                                            color: const Color(0xFF3B82F6),
+                                            label: 'Men'),
+                                        const SizedBox(height: 1),
+                                        _GenderLegend(
+                                            color: const Color(0xFFEC4899),
+                                            label: 'Women'),
                                       ],
                                     ),
                                   ],
@@ -196,7 +264,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) => const DoctorMessagesScreen(),
+                                      builder: (_) =>
+                                          const DoctorMessagesScreen(),
                                     ),
                                   );
                                 },
@@ -207,10 +276,14 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   decoration: BoxDecoration(
                                     color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 1),
+                                    border: Border.all(
+                                        color: theme.colorScheme.primary
+                                            .withOpacity(0.2),
+                                        width: 1),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: theme.colorScheme.primary.withOpacity(0.08),
+                                        color: theme.colorScheme.primary
+                                            .withOpacity(0.08),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -218,23 +291,40 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Text(
                                         "0",
-                                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 18),
+                                        style: theme.textTheme.headlineMedium
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                                fontSize: 18),
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 2),
-                                      Text("Messages", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 13), textAlign: TextAlign.center),
+                                      Text("Messages",
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                  fontSize: 13),
+                                          textAlign: TextAlign.center),
                                       const SizedBox(height: 6),
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: theme.colorScheme.primary.withOpacity(0.08),
+                                          color: theme.colorScheme.primary
+                                              .withOpacity(0.08),
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
-                                        child: const Icon(Icons.chat_bubble_outline, color: AppTheme.primaryColor, size: 18),
+                                        child: const Icon(
+                                            Icons.chat_bubble_outline,
+                                            color: AppTheme.primaryColor,
+                                            size: 18),
                                       ),
                                     ],
                                   ),
@@ -249,16 +339,19 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                         appBar: AppBar(
                                           leading: IconButton(
                                             icon: const Icon(Icons.arrow_back),
-                                            onPressed: () => Navigator.of(context).pop(),
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
                                           ),
                                           title: const Text('Appointments'),
-                                          backgroundColor: AppTheme.appBarBackgroundColor,
+                                          backgroundColor:
+                                              AppTheme.appBarBackgroundColor,
                                           foregroundColor: Colors.black,
                                           elevation: 0,
                                         ),
                                         body: DoctorAppointmentsScreen(
                                           appointments: const [],
-                                          onBack: () => Navigator.of(context).pop(),
+                                          onBack: () =>
+                                              Navigator.of(context).pop(),
                                         ),
                                       ),
                                     ),
@@ -271,10 +364,14 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   decoration: BoxDecoration(
                                     color: theme.colorScheme.surface,
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2), width: 1),
+                                    border: Border.all(
+                                        color: theme.colorScheme.primary
+                                            .withOpacity(0.2),
+                                        width: 1),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: theme.colorScheme.primary.withOpacity(0.08),
+                                        color: theme.colorScheme.primary
+                                            .withOpacity(0.08),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -282,23 +379,39 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Text(
                                         "0",
-                                        style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 18),
+                                        style: theme.textTheme.headlineMedium
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color:
+                                                    theme.colorScheme.primary,
+                                                fontSize: 18),
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 2),
-                                      Text("Appointments", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontSize: 13), textAlign: TextAlign.center),
+                                      Text("Appointments",
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      theme.colorScheme.primary,
+                                                  fontSize: 13),
+                                          textAlign: TextAlign.center),
                                       const SizedBox(height: 6),
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: theme.colorScheme.primary.withOpacity(0.08),
+                                          color: theme.colorScheme.primary
+                                              .withOpacity(0.08),
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
-                                        child: const Icon(Icons.star_border, color: AppTheme.primaryColor, size: 18),
+                                        child: const Icon(Icons.star_border,
+                                            color: AppTheme.primaryColor,
+                                            size: 18),
                                       ),
                                     ],
                                   ),
@@ -322,7 +435,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   "This Week",
                                   style: AppTheme.bodyMedium,
                                 ),
-                                Icon(Icons.keyboard_arrow_down, size: 18, color: AppTheme.greyColor),
+                                Icon(Icons.keyboard_arrow_down,
+                                    size: 18, color: AppTheme.greyColor),
                               ],
                             ),
                           ],
@@ -361,21 +475,25 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                               },
                               child: Text(
                                 "See All Reviews",
-                                style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary),
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: theme.colorScheme.primary),
                               ),
                             ),
                           ],
                         ),
                         Row(
                           children: [
-                            const Icon(Icons.star, color: Colors.amber, size: 24),
+                            const Icon(Icons.star,
+                                color: Colors.amber, size: 24),
                             const SizedBox(width: 4),
                             Text(
                               "4.8",
-                              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.bodyLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 8),
-                            const Text("Total 0 Reviews", style: AppTheme.bodyMedium),
+                            const Text("Total 0 Reviews",
+                                style: AppTheme.bodyMedium),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -391,11 +509,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                   children: [
                     Container(
                       color: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       child: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_ios, color: AppTheme.textColor),
+                            icon: const Icon(Icons.arrow_back_ios,
+                                color: AppTheme.textColor),
                             onPressed: () {
                               setState(() {
                                 _showReviews = false;
@@ -410,7 +530,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                       ),
                     ),
                     const Expanded(
-                      child: DoctorReviewsScreen(showAppBar: false, showBottomBar: false),
+                      child: DoctorReviewsScreen(
+                          showAppBar: false, showBottomBar: false),
                     ),
                   ],
                 ),
@@ -449,4 +570,4 @@ class _GenderLegend extends StatelessWidget {
       ],
     );
   }
-} 
+}
