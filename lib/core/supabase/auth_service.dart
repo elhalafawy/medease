@@ -63,7 +63,7 @@ class AuthService {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
-        emailRedirectTo: null, // Supabase will send a verification email automatically
+        emailRedirectTo: null, // Supabase will send a verification email automatically via OTP
       );
 
       final user = response.user;
@@ -88,25 +88,18 @@ class AuthService {
       try {
         // Add patient to 'patients' table - using user_id consistently
         await _supabase.from('patients').insert({
-          'user_id': user.id,  // Changed from 'id' to 'user_id' to be consistent
-          'full_name': fullName,
-          'date_of_birth': dateOfBirth,
-          'gender': gender,
-          'contact_info': phone,
-          'email': email, // Add email to patients table
+          'user_id': user.id,
+          'full_name': fullName ?? user.userMetadata?['name'] ?? '',
+          'gender': gender ?? user.userMetadata?['gender'] ?? '',
+          'contact_info': phone ?? '',
+          'email': email ?? user.email,
+          'date_of_birth': (dateOfBirth != null && dateOfBirth.isNotEmpty) ? dateOfBirth : null,
         });
         print("Patient data added successfully to patients table");
       } catch (e) {
-        // Log detailed error information for debugging
         print("PostgreSQL error adding patient data: $e");
-        // Don't show error dialog as it might prevent the verification dialog
-        // Just print to console for debugging
-        return true; // Still return true since user was created
+        return true;
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Registration successful! Please check your email.")),
-      );
       return true;
     } on AuthException catch (e) {
       await showErrorDialog(context, e.message);
@@ -159,7 +152,7 @@ class AuthService {
               print('Email confirmed after session refresh');
             } else {
               print('Email still not confirmed after session refresh');
-              throw AuthException('Email not verified. Please check your email and click the confirmation link.');
+              throw AuthException('Email not verified. Please check your email and enter the OTP.');
             }
           }
         } catch (e) {
@@ -204,6 +197,47 @@ class AuthService {
       return await _supabase.auth.signInWithPassword(email: email, password: password);
     } catch (e) {
       rethrow;
+    }
+  }
+
+  // Verify OTP
+  Future<AuthResponse> verifyOtp(String email, String token) async {
+    try {
+      final AuthResponse response = await _supabase.auth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.email,
+      );
+      return response;
+    } on AuthException catch (e) {
+      rethrow;
+    } catch (e) {
+      throw Exception('Failed to verify OTP: $e');
+    }
+  }
+
+  // Resend OTP
+  Future<void> resendOtp(String email) async {
+    try {
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: email,
+      );
+    } on AuthException catch (e) {
+      rethrow;
+    } catch (e) {
+      throw Exception('Failed to resend OTP: $e');
+    }
+  }
+
+  // Send OTP for login
+  Future<void> sendLoginOtp(String email) async {
+    try {
+      await _supabase.auth.signInWithOtp(email: email, shouldCreateUser: false);
+    } on AuthException catch (e) {
+      rethrow;
+    } catch (e) {
+      throw Exception('Failed to send login OTP: $e');
     }
   }
 
@@ -558,6 +592,37 @@ class AuthService {
     } catch (e) {
       print('Error resending verification email: $e');
       rethrow;
+    }
+  }
+
+  // Ensure patient row exists after OTP verification or login
+  Future<void> ensurePatientRowExists(User user, {String? fullName, String? gender, String? phone, String? email, String? dateOfBirth, String? password}) async {
+    // أولاً: تأكد من وجود المستخدم في جدول users
+    final existsUser = await _supabase.from('users').select('id').eq('id', user.id).maybeSingle();
+    if (existsUser == null) {
+      await _supabase.from('users').insert({
+        'id': user.id,
+        'email': email ?? user.email,
+        'role': 'patient',
+        'full_name': fullName ?? user.userMetadata?['name'] ?? '',
+        'phone': phone ?? '',
+        'gender': gender ?? user.userMetadata?['gender'] ?? '',
+        'password_hash': password ?? '',
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+    }
+    // ثانياً: تأكد من وجود صف المريض في جدول patients
+    final existsPatient = await _supabase.from('patients').select('user_id').eq('user_id', user.id).maybeSingle();
+    if (existsPatient == null) {
+      await _supabase.from('patients').insert({
+        'user_id': user.id,
+        'full_name': fullName ?? user.userMetadata?['name'] ?? '',
+        'gender': gender ?? user.userMetadata?['gender'] ?? '',
+        'contact_info': phone ?? '',
+        'email': email ?? user.email,
+        'date_of_birth': (dateOfBirth != null && dateOfBirth.isNotEmpty) ? dateOfBirth : null,
+      });
     }
   }
 }

@@ -276,6 +276,19 @@ Future<void> addTimeSlots({
             ),
           ),
         );
+
+        // Notification insert is skipped to avoid database errors
+        // final userId = Supabase.instance.client.auth.currentUser?.id;
+        // if (userId != null) {
+        //   await Supabase.instance.client.from('notifications').insert({
+        //     'user_id': userId,
+        //     'message': 'Your appointment has been confirmed.',
+        //     'type': 'appointment',
+        //     'status': 'unread',
+        //     'created_at': DateTime.now().toIso8601String(),
+        //     // Add other fields as needed
+        //   });
+        // }
       } catch (e) {
          if (!mounted) return;
          CustomSnackBar.show(

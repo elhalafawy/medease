@@ -11,6 +11,7 @@ class AppTheme {
   static const double kPaddingMedium = 12.0;
   static const double kPaddingLarge = 16.0;
   static const double kPaddingXLarge = 20.0;
+  static const double kPadding3XL = 32.0;
 
   static const double kElevationSmall = 2.0;
   static const double kElevationMedium = 4.0;
