@@ -25,6 +25,9 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
   String? _error;
   List<Map<String, dynamic>> _appointments = [];
   bool _loading = true;
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -130,15 +133,24 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
 
     final filteredAppointments = _appointments.where((appointment) {
       final status = (appointment['status'] ?? '').toString().toLowerCase();
+      final doctorName = (appointment['doctorName'] ?? '').toString().toLowerCase();
+      final specialty = (appointment['specialty'] ?? '').toString().toLowerCase();
+      final query = _searchQuery.toLowerCase();
+
+      bool matchesSearch = true;
+      if (_isSearching && query.isNotEmpty) {
+        matchesSearch = doctorName.contains(query) || specialty.contains(query);
+      }
+
       switch (selectedTab) {
         case 'Upcoming':
-          return status == 'pending' || status == 'confirmed';
+          return matchesSearch && (status == 'pending' || status == 'confirmed');
         case 'Completed':
-          return status == 'completed';
+          return matchesSearch && status == 'completed';
         case 'Canceled':
-          return status == 'cancelled' || status == 'canceled';
+          return matchesSearch && (status == 'cancelled' || status == 'canceled');
         default:
-          return true;
+          return matchesSearch;
       }
     }).toList();
 
@@ -153,17 +165,45 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
           onPressed: widget.onBack ?? () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: Text(
-          'Appointment Schedule',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search appointments...', 
+                  border: InputBorder.none,
+                  hintStyle: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                ),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+              )
+            : Text(
+                'Appointment Schedule',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
         actions: [
           IconButton(
-            icon: Icon(Icons.search, color: theme.colorScheme.onSurface),
-            onPressed: () {},
+            icon: Icon(_isSearching ? Icons.close : Icons.search, color: theme.colorScheme.onSurface),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  _searchQuery = '';
+                }
+              });
+            },
           ),
           Stack(
             alignment: Alignment.topRight,

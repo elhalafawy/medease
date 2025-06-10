@@ -15,8 +15,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _records = [];
   bool _isLoading = true;
-  int? _selectedYear;
-  List<int> _availableYears = [];
+  int? _selectedMonth;
+  List<int> _availableMonths = [];
 
   @override
   void initState() {
@@ -58,8 +58,8 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
 
       setState(() {
         _records = List<Map<String, dynamic>>.from(response);
-        _availableYears = _records
-            .map((r) => DateTime.parse(r['created_at']).year)
+        _availableMonths = _records
+            .map((r) => DateTime.parse(r['created_at']).month)
             .toSet()
             .toList()
           ..sort((a, b) => b.compareTo(a)); // Descending order
@@ -78,9 +78,9 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    var filteredRecords = _selectedYear == null
+    var filteredRecords = _selectedMonth == null
       ? _records
-      : _records.where((r) => DateTime.parse(r['created_at']).year == _selectedYear).toList();
+      : _records.where((r) => DateTime.parse(r['created_at']).month == _selectedMonth).toList();
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -110,7 +110,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 children: [
                   _buildLabReportsButton(context, theme),
                   const SizedBox(height: 16),
-                  _buildYearFilter(theme),
+                  _buildMonthFilter(theme),
                   const SizedBox(height: 16),
                   if (filteredRecords.isEmpty)
                     Center(
@@ -159,22 +159,30 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     );
   }
 
-  Widget _buildYearFilter(ThemeData theme) {
+  String _getMonthName(int monthNumber) {
+    final List<String> monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return monthNames[monthNumber - 1];
+  }
+
+  Widget _buildMonthFilter(ThemeData theme) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
           ChoiceChip(
             label: Text('All'),
-            selected: _selectedYear == null,
-            onSelected: (_) => setState(() => _selectedYear = null),
+            selected: _selectedMonth == null,
+            onSelected: (_) => setState(() => _selectedMonth = null),
           ),
-          ..._availableYears.map((year) => Padding(
+          ..._availableMonths.map((month) => Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: ChoiceChip(
-              label: Text(year.toString()),
-              selected: _selectedYear == year,
-              onSelected: (_) => setState(() => _selectedYear = year),
+              label: Text(_getMonthName(month)),
+              selected: _selectedMonth == month,
+              onSelected: (_) => setState(() => _selectedMonth = month),
             ),
           )),
         ],
