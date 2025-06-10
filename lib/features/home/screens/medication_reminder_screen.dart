@@ -209,7 +209,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         hintText: 'Enter medication name',
                         hintStyle: TextStyle(color: Colors.grey[500]),
                         prefixIcon: Container(
-                          width: 110,
+                          width: 120,
                           alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
                             border: Border(
@@ -221,11 +221,12 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.medication_outlined, size: 24, color: selectedColor),
                               const SizedBox(width: 8),
-                              Text('Name:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                              Expanded(
+                                child: Text('Name:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                              ),
                             ],
                           ),
                         ),
@@ -243,8 +244,9 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         ),
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         isDense: true,
+                        prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                       validator: (value) {
@@ -261,7 +263,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         hintText: 'e.g. 250mg',
                         hintStyle: TextStyle(color: Colors.grey[500]),
                         prefixIcon: Container(
-                          width: 110,
+                          width: 120,
                           alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
                             border: Border(
@@ -273,11 +275,12 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.medical_services_outlined, size: 24, color: selectedColor),
                               const SizedBox(width: 8),
-                              Text('Dosage:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                              Expanded(
+                                child: Text('Dosage:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                              ),
                             ],
                           ),
                         ),
@@ -295,8 +298,9 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         ),
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         isDense: true,
+                        prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                       validator: (value) {
@@ -317,7 +321,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                       child: Row(
                         children: [
                           Container(
-                            width: 125,
+                            width: 135,
                             alignment: Alignment.centerLeft,
                             decoration: BoxDecoration(
                               border: Border(
@@ -329,17 +333,85 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Row(
-                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.repeat, size: 24, color: selectedColor),
                                 const SizedBox(width: 8),
-                                Text('Frequency:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                Expanded(
+                                  child: Text('Frequency:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                ),
                               ],
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Text(getFrequencyLabel(_selectedFrequency), style: const TextStyle(fontWeight: FontWeight.bold)),
+                            child: GestureDetector(
+                              onTap: () async {
+                                final selectedFreq = await showModalBottomSheet<String>(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => _FrequencySelector(
+                                    currentFrequency: _selectedFrequency,
+                                    frequencies: _frequencies,
+                                    onSelected: (freq) {
+                                      Navigator.pop(context, freq);
+                                    },
+                                  ),
+                                );
+                                if (selectedFreq != null && selectedFreq != _selectedFrequency) {
+                                  setState(() {
+                                    _selectedFrequency = selectedFreq;
+                                    _reminderTimes = getDefaultTimes(_selectedFrequency);
+                                  });
+                                }
+                              },
+                              child: InputDecorator(
+                                decoration: InputDecoration(
+                                  prefixIcon: Container(
+                                    width: 110,
+                                    alignment: Alignment.centerLeft,
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        right: BorderSide(
+                                          color: Colors.grey.withOpacity(0.4),
+                                          width: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.repeat, size: 24, color: selectedColor),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            getFrequencyLabel(_selectedFrequency),
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: unselectedColor),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: unselectedColor),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: selectedColor, width: 1.5),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                                  isDense: true,
+                                  prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -363,11 +435,12 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.sticky_note_2_outlined, size: 24, color: selectedColor),
                               const SizedBox(width: 8),
-                              Text('Notes:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                              Expanded(
+                                child: Text('Notes:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                              ),
                             ],
                           ),
                         ),
@@ -385,10 +458,11 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         ),
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         isDense: true,
+                        prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
-                      maxLines: 2,
+                      maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     // --- Total pills calculation or placeholder ---
@@ -420,7 +494,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           child: Row(
                             children: [
                               Container(
-                                width: 180,
+                                width: 135,
                                 alignment: Alignment.centerLeft,
                                 decoration: BoxDecoration(
                                   border: Border(
@@ -432,11 +506,12 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                                 ),
                                 padding: const EdgeInsets.symmetric(horizontal: 10),
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.calculate_outlined, size: 24, color: selectedColor),
                                     const SizedBox(width: 8),
-                                    Text('Total pills needed:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                    Expanded(
+                                      child: Text('Total pills needed:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -491,8 +566,9 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                       isDense: true,
+                      prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                     ),
                     onTap: () => _selectDate(context, true),
                   ),
@@ -532,8 +608,9 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                       isDense: true,
+                      prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                     ),
                     onTap: () => _selectDate(context, false),
                   ),
@@ -703,6 +780,94 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FrequencySelector extends StatelessWidget {
+  final String? currentFrequency;
+  final List<String> frequencies;
+  final Function(String) onSelected;
+
+  const _FrequencySelector({
+    Key? key,
+    this.currentFrequency,
+    required this.frequencies,
+    required this.onSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selectedColor = theme.primaryColor;
+    final unselectedColor = theme.colorScheme.surfaceVariant;
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
+    String getFrequencyLabel(String? freq) {
+      switch (freq) {
+        case 'Once daily':
+          return 'Once a day';
+        case 'Twice daily':
+          return 'Twice a day';
+        case 'Three times daily':
+          return '3 times a day';
+        case 'Four times daily':
+          return '4 times a day';
+        case 'As needed':
+          return 'As needed';
+        default:
+          return freq ?? '';
+      }
+    }
+
+    return Container(
+      height: 250,
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Select Frequency',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: frequencies.length,
+              itemBuilder: (context, index) {
+                final freq = frequencies[index];
+                final isSelected = freq == currentFrequency;
+                return GestureDetector(
+                  onTap: () => onSelected(freq),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isSelected ? selectedColor : unselectedColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        getFrequencyLabel(freq),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
