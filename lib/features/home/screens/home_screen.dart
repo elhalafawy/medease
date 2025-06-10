@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../profile/screens/notifications_screen.dart';
 import '../../../core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'ocr_article_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -145,10 +146,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                         const SizedBox(height: AppTheme.kPaddingLarge),
                                         _buildArticle(
-                                          title: 'What is the Replication Crisis?',
-                                          subtitle: 'This article will look at this subject, providing a brief overview.',
-                                          image: 'assets/images/article_1.png',
+                                          title: 'Understanding OCR Application in Healthcare',
+                                          subtitle: 'This article explores how OCR technology is used in the MedEase application to digitize medical records and its benefits.',
+                                          image: 'assets/images/ocr_illustration.png',
                                           isDarkMode: isDarkMode,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const OcrArticleScreen()),
+                                            );
+                                          },
                                         ),
                                         _buildArticle(
                                           title: 'Cardiology and pregnancy?',
@@ -388,46 +395,50 @@ class _HomeScreenState extends State<HomeScreen> {
     required String subtitle,
     required String image,
     bool isDarkMode = false,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.kPaddingLarge),
-      padding: const EdgeInsets.all(AppTheme.kPaddingMedium),
-      decoration: BoxDecoration(
-        color: isDarkMode ? AppTheme.nightCard : Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: AppTheme.kElevationMedium,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusMedium),
-            child: Image.asset(image, width: 70, height: 70, fit: BoxFit.cover),
-          ),
-          const SizedBox(width: AppTheme.kPaddingMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: isDarkMode ? AppTheme.nightTitleMedium : AppTheme.titleMedium,
-                ),
-                const SizedBox(height: AppTheme.kPaddingSmall),
-                Text(
-                  subtitle,
-                  style: isDarkMode ? AppTheme.nightBodyMedium : AppTheme.bodyMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                )
-              ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: AppTheme.kPaddingSmall),
+        padding: const EdgeInsets.all(AppTheme.kPaddingLarge),
+        decoration: BoxDecoration(
+          color: isDarkMode ? AppTheme.nightCard : Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusLarge),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: AppTheme.kElevationMedium,
             ),
-          )
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusMedium),
+              child: Image.asset(image, width: 70, height: 70, fit: BoxFit.cover),
+            ),
+            const SizedBox(width: AppTheme.kPaddingMedium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: isDarkMode ? AppTheme.nightTitleMedium : AppTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppTheme.kPaddingSmall),
+                  Text(
+                    subtitle,
+                    style: isDarkMode ? AppTheme.nightBodyMedium : AppTheme.bodyMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
