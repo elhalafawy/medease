@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../appointment/screens/appointment_screen.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DoctorDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> doctor;
@@ -111,19 +113,39 @@ class DoctorDetailsScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Icon(Icons.star, color: Colors.amber[600], size: 22),
-                        const SizedBox(width: 4),
-                        Text(
-                          doctor['rating'],
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          ' (${doctor['reviews']} reviews)',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => RateDoctorDialog(doctorId: doctor['id']),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => RateDoctorDialog(doctorId: doctor['id']),
+                                  );
+                                },
+                                child: Icon(Icons.star, color: Colors.amber[600], size: 22),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                doctor['rating'],
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                ' (${doctor['reviews']} reviews)',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -288,6 +310,92 @@ class _AboutMeSectionState extends State<_AboutMeSection> {
               ),
             ),
           ),
+      ],
+    );
+  }
+}
+
+class RateDoctorDialog extends StatefulWidget {
+  final String doctorId;
+  const RateDoctorDialog({Key? key, required this.doctorId}) : super(key: key);
+
+  @override
+  State<RateDoctorDialog> createState() => _RateDoctorDialogState();
+}
+
+class _RateDoctorDialogState extends State<RateDoctorDialog> {
+  double _rating = 0;
+  final TextEditingController _controller = TextEditingController();
+  bool _loading = false;
+
+  Future<void> _submitReview() async {
+    setState(() => _loading = true);
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in to submit a review.')),
+      );
+      setState(() => _loading = false);
+      return;
+    }
+    final response = await Supabase.instance.client.from('doctor_reviews').insert({
+      'doctor_id': widget.doctorId,
+      'patient_id': user.id,
+      'rating': _rating.round(),
+      'comment': _controller.text,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+    setState(() => _loading = false);
+    if (mounted) Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Review submitted successfully!')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AlertDialog(
+      title: Text('Rate Doctor', style: theme.textTheme.titleLarge),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RatingBar.builder(
+            initialRating: 0,
+            minRating: 1,
+            direction: Axis.horizontal,
+            allowHalfRating: true,
+            itemCount: 5,
+            itemBuilder: (context, _) => const Icon(
+              Icons.star,
+              color: Colors.amber,
+            ),
+            onRatingUpdate: (rating) {
+              setState(() {
+                _rating = rating;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _controller,
+            decoration: const InputDecoration(
+              labelText: 'Write your review',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          child: const Text('Cancel'),
+          onPressed: () => Navigator.pop(context),
+        ),
+        ElevatedButton(
+          child: _loading ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Submit'),
+          onPressed: _loading || _rating == 0 ? null : _submitReview,
+        ),
       ],
     );
   }

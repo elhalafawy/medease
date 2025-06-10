@@ -19,6 +19,7 @@ class DoctorsScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final List<Map<String, dynamic>> doctors = [
       {
+        'id': '1',
         'name': 'Dr. Ahmed',
         'type': 'Neurologist',
         'rating': '4.8',
