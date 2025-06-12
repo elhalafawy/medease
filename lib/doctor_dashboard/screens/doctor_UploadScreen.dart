@@ -27,6 +27,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
   XFile? _imageFile;
   String _ocrText = '';
   bool _busy = false;
+  bool _flashOn = false;
 
   List<Map<String, dynamic>> _patients = [];
   String? _selectedPatientId;
@@ -79,6 +80,13 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
   }
 
   void _showOcrResultScreen(BuildContext context, AnalysisResult analysis) {
+    // Always turn off flash before navigating
+    setState(() {
+      _flashOn = false;
+    });
+    if (_camCtrl != null) {
+      _camCtrl!.setFlashMode(FlashMode.off);
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -580,9 +588,12 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
               else
                 Stack(
                   children: [
-                    Listener(
-                      behavior: HitTestBehavior.opaque,
-                      child: CameraPreview(_camCtrl!),
+                    // Make camera preview fill the whole screen
+                    Positioned.fill(
+                      child: Listener(
+                        behavior: HitTestBehavior.opaque,
+                        child: CameraPreview(_camCtrl!),
+                      ),
                     ),
                     Center(child: _frameOverlay()),
                     if (_busy)
@@ -590,6 +601,30 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                           color: Colors.black26,
                           child:
                               const Center(child: CircularProgressIndicator())),
+                    Positioned(
+                      bottom: 100,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: IconButton(
+                          icon: Icon(
+                            _flashOn ? Icons.flash_on : Icons.flash_off,
+                            size: 32,
+                            color: _flashOn ? Colors.amber : Colors.white,
+                          ),
+                          onPressed: () async {
+                            setState(() {
+                              _flashOn = !_flashOn;
+                            });
+                            if (_camCtrl != null) {
+                              await _camCtrl!.setFlashMode(
+                                _flashOn ? FlashMode.torch : FlashMode.off,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
                     Positioned(
                       bottom: 24,
                       left: 24,
@@ -609,6 +644,11 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
                           FloatingActionButton(
                             onPressed: () async {
                               try {
+                                if (_camCtrl != null) {
+                                  await _camCtrl!.setFlashMode(
+                                    _flashOn ? FlashMode.torch : FlashMode.off,
+                                  );
+                                }
                                 final pic = await _camCtrl!.takePicture();
                                 await _doOCR(pic);
                               } catch (e) {
