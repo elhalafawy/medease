@@ -136,11 +136,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     }
   }
 
-  Future<void> updateAppointment(String appointmentId, String newDate, String newTimeSlotId) async {
+  Future<void> updateAppointment(
+      String appointmentId, String newDate, String newTimeSlotId) async {
     if (appointmentId.isEmpty) {
       throw Exception('Invalid appointment ID');
     }
-    
+
     try {
       // Get the time slot details
       final timeSlotResponse = await Supabase.instance.client
@@ -154,32 +155,28 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       }
 
       // Update the appointment
-      await Supabase.instance.client
-          .from('appointments')
-          .update({
-            'date': newDate,
-            'time': timeSlotResponse['time_slot'],
-            'time_slot_id': newTimeSlotId,
-          })
-          .eq('appointment_id', appointmentId);
+      await Supabase.instance.client.from('appointments').update({
+        'date': newDate,
+        'time': timeSlotResponse['time_slot'],
+        'time_slot_id': newTimeSlotId,
+      }).eq('appointment_id', appointmentId);
 
       // Update the old time slot to available
       final oldTimeSlotId = widget.appointment['time_slot_id'];
       if (oldTimeSlotId != null) {
         await Supabase.instance.client
             .from('time_slots_duplicate')
-            .update({'status': 'available'})
-            .eq('slot_id', oldTimeSlotId);
+            .update({'status': 'available'}).eq('slot_id', oldTimeSlotId);
       }
 
       // Update the new time slot to booked
       await Supabase.instance.client
           .from('time_slots_duplicate')
-          .update({'status': 'booked'})
-          .eq('slot_id', newTimeSlotId);
-      
+          .update({'status': 'booked'}).eq('slot_id', newTimeSlotId);
+
       if (widget.onUpdate != null) {
-        final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
+        final updatedAppointment =
+            Map<String, dynamic>.from(widget.appointment);
         updatedAppointment['date'] = newDate;
         updatedAppointment['time'] = timeSlotResponse['time_slot'];
         updatedAppointment['time_slot_id'] = newTimeSlotId;
@@ -194,15 +191,10 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   void _showUpdateDialog() {
     int selectedDayIndex = 0;
     int selectedTimeIndex = 0;
-    List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    List<String> dates = [];
+    final now = DateTime.now();
+    final List<DateTime> weekDates = List.generate(7, (i) => now.add(Duration(days: i)));
     // Define all possible slots for the day (customize as needed)
     final allPossibleSlots = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM'];
-    final now = DateTime.now();
-    for (int i = 0; i < 7; i++) {
-      final date = now.add(Duration(days: i));
-      dates.add(date.day.toString());
-    }
     final appointmentId = widget.appointment['appointment_id']?.toString();
     if (appointmentId == null || appointmentId.isEmpty) {
       CustomSnackBar.show(
@@ -314,7 +306,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   const SizedBox(height: 12),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -326,51 +319,43 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         ),
                       ],
                     ),
-                    child: Row(
-                      children: List.generate(days.length, (index) {
-                        final isSelected = index == selectedDayIndex;
-                        return Expanded(
-                          child: GestureDetector(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: List.generate(weekDates.length, (index) {
+                          final isSelected = index == selectedDayIndex;
+                          final date = weekDates[index];
+                          final dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.weekday % 7];
+                          final dateNum = date.day;
+                          return GestureDetector(
                             onTap: () {
                               setState(() {
                                 selectedDayIndex = index;
-                                // Calculate the date string for the selected day
-                                final selectedDate = DateTime(
-                                  now.year,
-                                  now.month,
-                                  now.day + index,
-                                ).toIso8601String().split('T')[0];
-                                // Fetch available time slots for the selected date
+                                final selectedDate = date.toIso8601String().split('T')[0];
                                 fetchAvailableTimeSlots(selectedDate);
-                                // Reset selection
                                 selectedTimeIndex = -1;
                                 selectedTimeSlotId = null;
                               });
                             },
                             child: Container(
                               margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                               decoration: BoxDecoration(
                                 color: isSelected ? const Color(0xFF7DDCFF) : Colors.white,
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(24),
                                 border: Border.all(
                                   color: isSelected ? const Color(0xFF7DDCFF) : Colors.grey.shade300,
                                   width: 2,
                                 ),
+                                boxShadow: isSelected
+                                    ? [BoxShadow(color: const Color(0xFF7DDCFF).withOpacity(0.15), blurRadius: 6, offset: const Offset(0, 2))]
+                                    : [],
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Column(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    days[index],
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : const Color(0xFF232B3E),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    dates[index],
+                                    '$dayName $dateNum',
                                     style: TextStyle(
                                       color: isSelected ? Colors.white : const Color(0xFF232B3E),
                                       fontWeight: FontWeight.bold,
@@ -380,9 +365,9 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                 ],
                               ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        }),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -402,66 +387,81 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                   // ... existing code ...
 // if (isLoadingTimeSlots)
 //   const Center(child: CircularProgressIndicator())
-// else 
-if (availableTimeSlots.isEmpty)
-  const Padding(
-    padding: EdgeInsets.all(20),
-    child: Text('No available time slots for this day'),
-  )
-else
-  Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20),
-    child: Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: List.generate(availableTimeSlots.length, (index) {
-        final slotTime = availableTimeSlots[index]['time_slot'];
-        final availableSlotTimes = availableTimeSlots.map((s) => s['time_slot']).toSet();
-        final isAvailable = availableSlotTimes.contains(slotTime);
-        final isSelected = isAvailable && selectedTimeIndex == index;
-        return GestureDetector(
-          onTap: isAvailable
-              ? () => setState(() {
-              isLoadingTimeSlots = false;
-              isLoading = false;
-                    selectedTimeIndex = index;
-                    selectedTimeSlotId = availableTimeSlots.firstWhere((s) => s['time_slot'] == slotTime)['slot_id'];
-                  })
-              : null,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? const Color(0xFFF5B183)
-                  : isAvailable
-                      ? const Color(0xFFF3F3F3)
-                      : Colors.grey[200],
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: isSelected
-                    ? const Color(0xFFF5B183)
-                    : Colors.grey.shade300,
-              ),
-            ),
-            child: Text(
-              slotTime,
-              style: TextStyle(
-                color: isSelected
-                    ? Colors.white
-                    : isAvailable
-                        ? const Color(0xFF9C9C9C)
-                        : Colors.grey,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              ),
-            ),
-          ),
-        );
-      }),
-    ),
-  ),
+// else
+                  if (availableTimeSlots.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text('No available time slots for this day'),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children:
+                            List.generate(availableTimeSlots.length, (index) {
+                          final slotTime =
+                              availableTimeSlots[index]['time_slot'];
+                          final availableSlotTimes = availableTimeSlots
+                              .map((s) => s['time_slot'])
+                              .toSet();
+                          final isAvailable =
+                              availableSlotTimes.contains(slotTime);
+                          final isSelected =
+                              isAvailable && selectedTimeIndex == index;
+                          return GestureDetector(
+                            onTap: isAvailable
+                                ? () => setState(() {
+                                      isLoadingTimeSlots = false;
+                                      isLoading = false;
+                                      selectedTimeIndex = index;
+                                      selectedTimeSlotId =
+                                          availableTimeSlots.firstWhere((s) =>
+                                              s['time_slot'] ==
+                                              slotTime)['slot_id'];
+                                    })
+                                : null,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFF5B183)
+                                    : isAvailable
+                                        ? const Color(0xFFF3F3F3)
+                                        : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFFF5B183)
+                                      : Colors.grey.shade300,
+                                ),
+                              ),
+                              child: Text(
+                                slotTime is String && slotTime.length >= 5
+                                    ? slotTime.substring(0, 5)
+                                    : slotTime,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : isAvailable
+                                          ? const Color(0xFF9C9C9C)
+                                          : Colors.grey,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
                   const SizedBox(height: 24),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -488,10 +488,13 @@ else
                                     if (mounted) {
                                       CustomSnackBar.show(
                                         context: _scaffoldContext,
-                                        message: 'Appointment updated successfully',
+                                        message:
+                                            'Appointment updated successfully',
                                       );
-                                      Navigator.pop(context); // Close the update dialog
-                                      Navigator.pop(context); // Return to schedule screen
+                                      Navigator.pop(
+                                          context); // Close the update dialog
+                                      Navigator.pop(
+                                          context); // Return to schedule screen
                                     }
                                   } catch (e) {
                                     if (mounted) {
@@ -524,43 +527,42 @@ else
   }
 
   Future<void> cancelAppointment(String appointmentId) async {
-  if (appointmentId.isEmpty) {
-    throw Exception('Invalid appointment ID');
-  }
-  
-  try {
-    // Fetch the appointment to get the slot_id
-    final appointment = await Supabase.instance.client
-        .from('appointments')
-        .select('time_slot_id')
-        .eq('appointment_id', appointmentId)
-        .single();
+    if (appointmentId.isEmpty) {
+      throw Exception('Invalid appointment ID');
+    }
 
-    // Cancel the appointment
-    await Supabase.instance.client
-        .from('appointments')
-        .update({'status': 'cancelled'})
-        .eq('appointment_id', appointmentId);
+    try {
+      // Fetch the appointment to get the slot_id
+      final appointment = await Supabase.instance.client
+          .from('appointments')
+          .select('time_slot_id')
+          .eq('appointment_id', appointmentId)
+          .single();
 
-    // If slot_id exists, update the slot status to 'available'
-    if (appointment != null && appointment['time_slot_id'] != null) {
-      final slotId = appointment['time_slot_id'];
+      // Cancel the appointment
       await Supabase.instance.client
-          .from('time_slots_duplicate')
-          .update({'status': 'available'})
-          .eq('slot_id', slotId);
-    }
+          .from('appointments')
+          .update({'status': 'cancelled'}).eq('appointment_id', appointmentId);
 
-    if (widget.onUpdate != null) {
-      final updatedAppointment = Map<String, dynamic>.from(widget.appointment);
-      updatedAppointment['status'] = 'cancelled';
-      widget.onUpdate!(updatedAppointment);
+      // If slot_id exists, update the slot status to 'available'
+      if (appointment != null && appointment['time_slot_id'] != null) {
+        final slotId = appointment['time_slot_id'];
+        await Supabase.instance.client
+            .from('time_slots_duplicate')
+            .update({'status': 'available'}).eq('slot_id', slotId);
+      }
+
+      if (widget.onUpdate != null) {
+        final updatedAppointment =
+            Map<String, dynamic>.from(widget.appointment);
+        updatedAppointment['status'] = 'cancelled';
+        widget.onUpdate!(updatedAppointment);
+      }
+    } catch (e) {
+      print('Failed to cancel appointment: $e');
+      throw e; // Re-throw to handle in the UI
     }
-  } catch (e) {
-    print('Failed to cancel appointment: $e');
-    throw e; // Re-throw to handle in the UI
   }
-}
 
   void _showCancelDialog() {
     final appointmentId = widget.appointment['appointment_id']?.toString();
@@ -577,7 +579,8 @@ else
       context: _scaffoldContext,
       builder: (context) => AlertDialog(
         title: const Text('Cancel Appointment'),
-        content: const Text('Are you sure you want to cancel this appointment?'),
+        content:
+            const Text('Are you sure you want to cancel this appointment?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -742,12 +745,29 @@ else
                         _buildInfoColumn(
                           Icons.access_time,
                           'Time',
-                          widget.appointment['time'] ?? '9:00 AM',
+                          (() {
+                            final t = widget.appointment['time'];
+                            if (t is String && t.length >= 5) {
+                              // If format is HH:mm:00, show HH:mm
+                              return t.endsWith(':00') ? t.substring(0,5) : t;
+                            }
+                            return t ?? '9:00 AM';
+                          })(),
                         ),
                         _buildInfoColumn(
                           Icons.location_on,
                           'Location',
                           widget.appointment['location'] ?? 'Medical Center',
+                        ),
+                        _buildInfoColumn(
+                          Icons.medical_services_outlined,
+                          'Type',
+                          ((widget.appointment['type'] ?? 'consultation')
+                            .toString()
+                            .replaceAll('_', ' ')
+                            .split(' ')
+                            .map((word) => word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '')
+                            .join(' ')),
                         ),
                       ],
                     ),
@@ -857,15 +877,12 @@ else
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildInfoRow(
-                            'Patient Name',
-                            patientData?['full_name'] ?? ' '),
+                            'Patient Name', patientData?['full_name'] ?? ' '),
                         const Divider(),
                         _buildInfoRow('Phone Number',
                             patientData?['contact_info'] ?? ' '),
                         const Divider(),
-                        _buildInfoRow(
-                            'Email',
-                            patientData?['email'] ?? ' '),
+                        _buildInfoRow('Email', patientData?['email'] ?? ' '),
                         const Divider(),
                         _buildInfoRow(
                             'Notes',

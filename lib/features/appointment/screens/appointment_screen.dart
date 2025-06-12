@@ -23,6 +23,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   bool isBooking = false;
   int notesCount = 0;
   String userNote = "";
+  String appointmentType = 'consultation';
 
   final List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
   List<String> dates = []; // Make dates list dynamic
@@ -251,6 +252,7 @@ Future<void> addTimeSlots({
           'patient_confirmed': true,
           'doctor_confirmed': false,
           'notes': userNote,
+          'type': appointmentType,
           'time_slot_id': timeSlot['slot_id'],
         };
         await supabase.from('appointments').insert(newAppointment);
@@ -387,6 +389,8 @@ Future<void> addTimeSlots({
                     ),
                     _buildDoctorInfo(theme),
                     const SizedBox(height: 24),
+                    _buildAppointmentTypeSelector(theme),
+                    const SizedBox(height: 24),
                     _buildDateSelector(theme),
                     const SizedBox(height: 24),
                     _buildTimeSelector(theme),
@@ -436,6 +440,87 @@ Future<void> addTimeSlots({
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAppointmentTypeSelector(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Appointment Type", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    appointmentType = 'consultation';
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: appointmentType == 'consultation' 
+                        ? AppTheme.primaryColor 
+                        : theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: appointmentType == 'consultation'
+                          ? AppTheme.primaryColor
+                          : theme.dividerColor,
+                    ),
+                  ),
+                  child: Text(
+                    'Consultation',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appointmentType == 'consultation'
+                          ? Colors.white
+                          : theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    appointmentType = 'follow_up';
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: appointmentType == 'follow_up'
+                        ? AppTheme.primaryColor
+                        : theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: appointmentType == 'follow_up'
+                          ? AppTheme.primaryColor
+                          : theme.dividerColor,
+                    ),
+                  ),
+                  child: Text(
+                    'Follow Up',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: appointmentType == 'follow_up'
+                          ? Colors.white
+                          : theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

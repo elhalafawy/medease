@@ -308,7 +308,23 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                 const SizedBox(width: 16),
                 const Icon(Icons.access_time, size: 18, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
-                Text(appt['time'] ?? '', style: AppTheme.bodyLarge),
+                Text(
+                  (() {
+                    final t = appt['time'];
+                    if (t is String && t.length >= 5) {
+                      return t.endsWith(':00') ? t.substring(0,5) : t;
+                    }
+                    return t ?? '';
+                  })(),
+                  style: AppTheme.bodyLarge,
+                ),
+                const SizedBox(width: 16),
+                const Icon(Icons.medical_services_outlined, size: 18, color: AppTheme.primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  ((appt['type'] ?? 'consultation').toString().replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1).toLowerCase() : '').join(' ')),
+                  style: AppTheme.bodyLarge,
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -797,22 +813,38 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                           ],
                                         ),
                                         const SizedBox(height: 10),
-                                Row(
-                                  children: [
-                                            const Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
-                                            const SizedBox(width: 4),
-                                    Text(
-                                      appt['date'] ?? '',
-                                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                                    ),
-                                            const SizedBox(width: 12),
-                                            const Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
-                                            const SizedBox(width: 4),
-                                    Text(
-                                      appt['time'] ?? '',
-                                      style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                                    ),
-                                  ],
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        appt['date'] ?? '',
+                                        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        (() {
+                                          final t = appt['time'];
+                                          if (t is String && t.length >= 5) {
+                                            return t.endsWith(':00') ? t.substring(0,5) : t;
+                                          }
+                                          return t ?? '';
+                                        })(),
+                                        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Icon(Icons.medical_services_outlined, size: 16, color: AppTheme.primaryColor),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        ((appt['type'] ?? 'consultation').toString().replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1).toLowerCase() : '').join(' ')),
+                                        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                         if ((appt['notes'] ?? '').isNotEmpty) ...[
                                           const SizedBox(height: 10),

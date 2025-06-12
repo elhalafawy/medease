@@ -416,6 +416,26 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.medical_services_outlined, size: 16, color: theme.colorScheme.onSurface),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Type: ' + ((appointment['type'] ?? 'consultation')
+                            .toString()
+                            .replaceAll('_', ' ')
+                            .split(' ')
+                            .map((word) => word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '')
+                            .join(' ')),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
