@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medease/features/appointment/doctor_Patient_Notes_Screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/utils/navigation_wrapper.dart';
 import '../../../core/theme/app_theme.dart';
@@ -145,6 +146,21 @@ Future<void> addTimeSlots({
     });
   }
 
+  String formatTimeTo12Hour(String time) {
+    try {
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        final dt = DateTime(0, 1, 1, hour, minute);
+        return DateFormat('hh:mm a').format(dt);
+      }
+      return time;
+    } catch (e) {
+      return time;
+    }
+  }
+
   Future<void> _showConfirmationDialog() async {
     if (isBooking) return; // Prevent showing dialog if booking is already in progress
     return showDialog(
@@ -153,7 +169,14 @@ Future<void> addTimeSlots({
         return AlertDialog(
           title: const Text('Confirm Appointment'),
           content: Text(
-            'Are you sure you want to book an appointment for ${days[selectedDayIndex]} at ${times[selectedTimeIndex]}?',
+            'Are you sure you want to book an appointment for ${days[selectedDayIndex]} at ${(() {
+              final t = times[selectedTimeIndex];
+              if (t is String && t.length >= 5) {
+                final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                return formatTimeTo12Hour(timeStr);
+              }
+              return t;
+            })()}?',
           ),
           actions: [
             TextButton(
@@ -611,7 +634,14 @@ Future<void> addTimeSlots({
                   border: Border.all(color: theme.dividerColor),
                 ),
                 child: Text(
-                  times[index],
+                  (() {
+                    final t = times[index];
+                    if (t is String && t.length >= 5) {
+                      final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                      return formatTimeTo12Hour(timeStr);
+                    }
+                    return t;
+                  })(),
                   style: TextStyle(
                     color: isSelected ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.7),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class DoctorAppointmentsScreen extends StatefulWidget {
   final List<Map<String, dynamic>> appointments;
@@ -312,7 +313,8 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                   (() {
                     final t = appt['time'];
                     if (t is String && t.length >= 5) {
-                      return t.endsWith(':00') ? t.substring(0,5) : t;
+                      final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                      return formatTimeTo12Hour(timeStr);
                     }
                     return t ?? '';
                   })(),
@@ -581,7 +583,14 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                   ),
                                 ),
                                 child: Text(
-                                  availableTimes[index]['time_slot'] ?? 'N/A',
+                                  (() {
+                                    final t = availableTimes[index]['time_slot'];
+                                    if (t is String && t.length >= 5) {
+                                      final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                                      return formatTimeTo12Hour(timeStr);
+                                    }
+                                    return t ?? 'N/A';
+                                  })(),
                                   style: TextStyle(
                                     color: isSelected ? Colors.white : Colors.black,
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -679,6 +688,23 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
       final dateStr = getDateStrForSelectedDay(index);
       fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", dateStr);
     });
+  }
+
+  // Helper to format time to 12-hour with AM/PM
+  String formatTimeTo12Hour(String time) {
+    try {
+      // Accepts 'HH:mm' or 'HH:mm:00'
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        final dt = DateTime(0, 1, 1, hour, minute);
+        return DateFormat('hh:mm a').format(dt);
+      }
+      return time;
+    } catch (e) {
+      return time;
+    }
   }
 
   @override
@@ -830,7 +856,8 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                         (() {
                                           final t = appt['time'];
                                           if (t is String && t.length >= 5) {
-                                            return t.endsWith(':00') ? t.substring(0,5) : t;
+                                            final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                                            return formatTimeTo12Hour(timeStr);
                                           }
                                           return t ?? '';
                                         })(),

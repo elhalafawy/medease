@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'appointment_details_screen.dart';
 import '../../profile/screens/notifications_screen.dart';
+import 'package:intl/intl.dart';
 
 class AppointmentScheduleScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -124,6 +125,21 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
         return Colors.red;
       default:
         return Colors.grey;
+    }
+  }
+
+  String formatTimeTo12Hour(String time) {
+    try {
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        final dt = DateTime(0, 1, 1, hour, minute);
+        return DateFormat('hh:mm a').format(dt);
+      }
+      return time;
+    } catch (e) {
+      return time;
     }
   }
 
@@ -411,7 +427,14 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                         Icon(Icons.access_time, size: 16, color: theme.colorScheme.onSurface),
                         const SizedBox(width: 6),
                         Text(
-                          appointment['time'] ?? '9:00 AM',
+                          (() {
+                            final t = appointment['time'];
+                            if (t is String && t.length >= 5) {
+                              final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                              return formatTimeTo12Hour(timeStr);
+                            }
+                            return t ?? '9:00 AM';
+                          })(),
                           style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurface),
                         ),
                       ],

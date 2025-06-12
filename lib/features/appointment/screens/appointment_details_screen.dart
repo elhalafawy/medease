@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/custom_snackbar.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 //TODO: Add patient data to the appointment details screen
 
@@ -439,9 +440,13 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                 ),
                               ),
                               child: Text(
-                                slotTime is String && slotTime.length >= 5
-                                    ? slotTime.substring(0, 5)
-                                    : slotTime,
+                                (() {
+                                  if (slotTime is String && slotTime.length >= 5) {
+                                    final timeStr = slotTime.endsWith(':00') ? slotTime.substring(0,5) : slotTime;
+                                    return formatTimeTo12Hour(timeStr);
+                                  }
+                                  return slotTime;
+                                })(),
                                 style: TextStyle(
                                   color: isSelected
                                       ? Colors.white
@@ -748,8 +753,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                           (() {
                             final t = widget.appointment['time'];
                             if (t is String && t.length >= 5) {
-                              // If format is HH:mm:00, show HH:mm
-                              return t.endsWith(':00') ? t.substring(0,5) : t;
+                              final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                              return formatTimeTo12Hour(timeStr);
                             }
                             return t ?? '9:00 AM';
                           })(),
@@ -970,6 +975,21 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
         return Colors.red;
       default:
         return Colors.grey;
+    }
+  }
+
+  String formatTimeTo12Hour(String time) {
+    try {
+      final parts = time.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        final dt = DateTime(0, 1, 1, hour, minute);
+        return DateFormat('hh:mm a').format(dt);
+      }
+      return time;
+    } catch (e) {
+      return time;
     }
   }
 }
