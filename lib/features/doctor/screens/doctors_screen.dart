@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'doctor_details_screen.dart';
 import '../../../core/theme/app_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DoctorsScreen extends StatelessWidget {
+class DoctorsScreen extends StatefulWidget {
   final String category;
   final VoidCallback? onBack;
   final Function(Map<String, dynamic>)? onDoctorTap;
-  
+
   const DoctorsScreen({
     super.key,
     required this.category,
@@ -15,33 +16,40 @@ class DoctorsScreen extends StatelessWidget {
   });
 
   @override
+  State<DoctorsScreen> createState() => _DoctorsScreenState();
+}
+
+class _DoctorsScreenState extends State<DoctorsScreen> {
+  List<Map<String, dynamic>> doctors = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDoctors();
+    print(doctors);
+  }
+
+  Future<void> fetchDoctors() async {
+    final response = await Supabase.instance.client
+        .from('doctors')
+        .select('*');
+    setState(() {
+      doctors = List<Map<String, dynamic>>.from(response);
+      loading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final List<Map<String, dynamic>> doctors = [
-      {
-        'id': '1',
-        'name': 'Dr. Ahmed',
-        'type': 'Neurologist',
-        'rating': '4.8',
-        'patients': '116+',
-        'experience': '3+ Years',
-        'reviews': '90+',
-        'image': 'assets/images/doctor_photo.png',
-        'hospital': 'Al Shifa Hospital',
-        'price': '300 EGP',
-        'availability': 'Available Today',
-        'nextSlot': '10:00 AM',
-        'about': 'Dr. Ahmed is the top most Neurologist specialist in Crist Hospital in London, UK. He achived several awards for his wonderful contribution.',
-      },
-    ];
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-          onPressed: onBack ?? () => Navigator.pop(context),
+          onPressed: widget.onBack ?? () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: Text(
@@ -53,14 +61,16 @@ class DoctorsScreen extends StatelessWidget {
         ),
       ),
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: doctors.length,
-        itemBuilder: (context, index) {
-          final doctor = doctors[index];
-          return _buildDoctorCard(context, doctor);
-        },
-      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: doctors.length,
+              itemBuilder: (context, index) {
+                final doctor = doctors[index];
+                return _buildDoctorCard(context, doctor);
+              },
+            ),
     );
   }
 
@@ -68,8 +78,8 @@ class DoctorsScreen extends StatelessWidget {
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
-        if (onDoctorTap != null) {
-          onDoctorTap!(doctor);
+        if (widget.onDoctorTap != null) {
+          widget.onDoctorTap!(doctor);
         } else {
           Navigator.push(
             context,
@@ -108,7 +118,7 @@ class DoctorsScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
                 image: DecorationImage(
-                  image: AssetImage(doctor['image']),
+                  image: AssetImage('${doctor['image']}'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -127,7 +137,7 @@ class DoctorsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                doctor['name'],
+                                '${doctor['name']}',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w600,
@@ -135,7 +145,7 @@ class DoctorsScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                doctor['type'],
+                                '${doctor['type']}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                                 ),
@@ -154,7 +164,7 @@ class DoctorsScreen extends StatelessWidget {
                               Icon(Icons.star, color: Colors.amber[600], size: 14),
                               const SizedBox(width: 2),
                               Text(
-                                doctor['rating'],
+                                '${doctor['rating']}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
@@ -172,7 +182,7 @@ class DoctorsScreen extends StatelessWidget {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            doctor['hospital'],
+                            '${doctor['hospital']}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurface,
                             ),
@@ -196,7 +206,7 @@ class DoctorsScreen extends StatelessWidget {
                               const Icon(Icons.attach_money, size: 14, color: Colors.green),
                               const SizedBox(width: 2),
                               Text(
-                                doctor['price'],
+                                '${doctor['price']}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: Colors.green,
                                 ),
@@ -216,7 +226,7 @@ class DoctorsScreen extends StatelessWidget {
                               Icon(Icons.access_time, size: 14, color: theme.colorScheme.onSurface),
                               const SizedBox(width: 2),
                               Text(
-                                doctor['availability'],
+                                '${doctor['available']}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
@@ -236,4 +246,13 @@ class DoctorsScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<Map<String, dynamic>?> fetchDoctorDetails(String doctorId) async {
+  final response = await Supabase.instance.client
+      .from('doctors')
+      .select('*')
+      // .eq('doctor_id', doctorId)
+      .single();
+  return response;
 }

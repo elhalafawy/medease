@@ -4,24 +4,58 @@ import '../../features/profile/screens/settings_screen.dart';
 import 'doctor_messages_screen.dart';
 import 'doctor_notifications_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class DoctorProfileScreen extends StatelessWidget {
+class DoctorProfileScreen extends StatefulWidget {
   const DoctorProfileScreen({super.key});
 
   static final ValueNotifier<bool> deletionPending = ValueNotifier(false);
+
+  @override
+  State<DoctorProfileScreen> createState() => _DoctorProfileScreenState();
+}
+
+class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
+  Map<String, dynamic>? doctor;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDoctor();
+  }
+
+  Future<void> fetchDoctor() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    final response = await Supabase.instance.client
+        .from('doctors')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+    setState(() {
+      doctor = response;
+      loading = false;
+    });
+  }
 
   void _showEditProfile(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const _EditDoctorProfileSheet(),
+      builder: (context) => _EditDoctorProfileSheet(doctor: doctor),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    if (loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -45,23 +79,27 @@ class DoctorProfileScreen extends StatelessWidget {
               child: GestureDetector(
                 onTap: () => _showEditProfile(context),
                 behavior: HitTestBehavior.opaque,
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 32,
-                    backgroundImage: AssetImage('assets/images/doctor_photo.png'),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Dr.Ahmed', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
-                        const SizedBox(height: 2),
-                        Text('Ahmedmo@gmail.com', style: theme.textTheme.bodyMedium),
-                      ],
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 32,
+                      backgroundImage: const AssetImage('assets/images/doctor_photo.png') as ImageProvider,
+                      // doctor?['image'] != null
+                      //     ? NetworkImage(doctor!['image'])
+                          // :
+                           // const AssetImage('assets/images/doctor_photo.png') as ImageProvider,
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(doctor?['name'] ?? '', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
+                          const SizedBox(height: 2),
+                          Text(doctor?['email'] ?? '', style: theme.textTheme.bodyMedium),
+                        ],
+                      ),
+                    ),
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
@@ -71,7 +109,7 @@ class DoctorProfileScreen extends StatelessWidget {
                       ),
                       child: const Icon(Icons.edit, size: 20, color: AppTheme.primaryColor),
                     ),
-                ],
+                  ],
                 ),
               ),
             ),
@@ -129,7 +167,7 @@ class DoctorProfileScreen extends StatelessWidget {
                     icon: Icons.delete_outline,
                     title: 'Request Account Deletion',
                     onTap: () async {
-                      if (!deletionPending.value) {
+                      if (!DoctorProfileScreen.deletionPending.value) {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -153,8 +191,8 @@ class DoctorProfileScreen extends StatelessWidget {
                             context: context,
                             barrierDismissible: false,
                             builder: (context) => const _RequestSuccessDialog(),
-                      );
-                          deletionPending.value = true;
+                          );
+                          DoctorProfileScreen.deletionPending.value = true;
                         }
                       }
                     },
@@ -232,7 +270,8 @@ class _ProfileListTile extends StatelessWidget {
 }
 
 class _EditDoctorProfileSheet extends StatefulWidget {
-  const _EditDoctorProfileSheet();
+  final Map<String, dynamic>? doctor;
+  const _EditDoctorProfileSheet({this.doctor});
 
   @override
   State<_EditDoctorProfileSheet> createState() => _EditDoctorProfileSheetState();
@@ -240,12 +279,24 @@ class _EditDoctorProfileSheet extends StatefulWidget {
 
 class _EditDoctorProfileSheetState extends State<_EditDoctorProfileSheet> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController(text: 'Dr.Ahmed');
-  final TextEditingController _expController = TextEditingController(text: '15yr');
-  final TextEditingController _specController = TextEditingController(text: 'Neurologist');
-  final TextEditingController _emailController = TextEditingController(text: 'Ahmed mo@gmail.com');
-  final TextEditingController _phoneController = TextEditingController(text: '+201027206804');
-  final TextEditingController _hospitalController = TextEditingController(text: 'Al Shifa Hospital');
+  late TextEditingController _nameController;
+  late TextEditingController _expController;
+  late TextEditingController _specController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+  late TextEditingController _hospitalController;
+
+  @override
+  void initState() {
+    super.initState();
+    final d = widget.doctor ?? {};
+    _nameController = TextEditingController(text: d['name'] ?? '');
+    _expController = TextEditingController(text: d['experience']?.toString() ?? '');
+    _specController = TextEditingController(text: d['type'] ?? '');
+    _emailController = TextEditingController(text: d['email'] ?? '');
+    _phoneController = TextEditingController(text: d['phone'] ?? '');
+    _hospitalController = TextEditingController(text: d['hospital'] ?? '');
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -50,7 +50,7 @@ class DoctorDetailsScreen extends StatelessWidget {
             height: 260,
             color: theme.scaffoldBackgroundColor,
             child: Image.asset(
-              doctor['image'],
+              '${doctor['image']}',
               fit: BoxFit.cover,
               alignment: Alignment.topCenter,
             ),
@@ -97,7 +97,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                doctor['name'],
+                               '${doctor['name']}',
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: theme.colorScheme.onSurface,
@@ -105,7 +105,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                doctor['type'],
+                                '${doctor['type']}',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurface.withOpacity(0.7),
                                 ),
@@ -117,7 +117,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                           onTap: () {
                             showDialog(
                               context: context,
-                              builder: (context) => RateDoctorDialog(doctorId: doctor['id']),
+                              builder: (context) => RateDoctorDialog(doctorId: doctor['id'] ?? "b55f005f-3185-4fa3-9098-2179e0751621"),
                             );
                           },
                           child: Row(
@@ -126,21 +126,21 @@ class DoctorDetailsScreen extends StatelessWidget {
                                 onTap: () {
                                   showDialog(
                                     context: context,
-                                    builder: (context) => RateDoctorDialog(doctorId: doctor['id']),
+                                    builder: (context) => RateDoctorDialog(doctorId: doctor['id'] ?? "b55f005f-3185-4fa3-9098-2179e0751621"),
                                   );
                                 },
                                 child: Icon(Icons.star, color: Colors.amber[600], size: 22),
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                doctor['rating'],
+                                '${doctor['rating']}',
                                 style: theme.textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: theme.colorScheme.onSurface,
                                 ),
                               ),
                               Text(
-                                ' (${doctor['reviews']} reviews)',
+                                ' (${doctor['reviews']} reviews)',  
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurface.withOpacity(0.6),
                                 ),
@@ -152,7 +152,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      doctor['hospital'],
+                      '${doctor['hospital']}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurface.withOpacity(0.7),
                       ),
@@ -161,10 +161,10 @@ class DoctorDetailsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _StatCircle(icon: Icons.person, value: doctor['patients'], label: 'Patients'),
-                        _StatCircle(icon: Icons.verified_user, value: doctor['experience'], label: 'Years'),
-                        _StatCircle(icon: Icons.star_border, value: doctor['rating'], label: 'Rating'),
-                        _StatCircle(icon: Icons.chat, value: doctor['reviews'], label: 'Reviews'),
+                        _StatCircle(icon: Icons.person, value: '${doctor['patients']}', label: 'Patients'),
+                        _StatCircle(icon: Icons.verified_user, value: '${doctor['experience']}', label: 'Years'),
+                        _StatCircle(icon: Icons.star_border, value: '${doctor['rating']}', label: 'Rating'),
+                        _StatCircle(icon: Icons.chat, value: '${doctor['reviews']}', label: 'Reviews'),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -175,7 +175,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _AboutMeSection(about: doctor['about'] ?? 'No information.'),
+                    _AboutMeSection(about: '${doctor['bio']}' ?? 'No information.'),
                     const SizedBox(height: 32),
                     SizedBox(
                       width: double.infinity,
@@ -330,6 +330,7 @@ class _RateDoctorDialogState extends State<RateDoctorDialog> {
 
   Future<void> _submitReview() async {
     setState(() => _loading = true);
+    print(widget.doctorId);
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
