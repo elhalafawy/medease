@@ -106,8 +106,8 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
     });
   }
 
-  Future<void> fetchAvailableTimeSlots(String date) async {
-    setState(() {
+  Future<void> fetchAvailableTimeSlots(String date, StateSetter dialogSetState) async {
+    dialogSetState(() {
       isLoadingTimeSlots = true;
       isLoading = true;
     });
@@ -122,7 +122,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           .order('time_slot', ascending: true);
 
       if (response != null) {
-        setState(() {
+        dialogSetState(() {
           availableTimeSlots = List<Map<String, dynamic>>.from(response);
           isLoadingTimeSlots = false;
           isLoading = false;
@@ -130,7 +130,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       }
     } catch (e) {
       print('Error fetching time slots: $e');
-      setState(() {
+      dialogSetState(() {
         isLoadingTimeSlots = false;
         availableTimeSlots = [];
       });
@@ -333,7 +333,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                               setState(() {
                                 selectedDayIndex = index;
                                 final selectedDate = date.toIso8601String().split('T')[0];
-                                fetchAvailableTimeSlots(selectedDate);
+                                fetchAvailableTimeSlots(selectedDate, setState);
                                 selectedTimeIndex = -1;
                                 selectedTimeSlotId = null;
                               });
@@ -739,40 +739,86 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                         ),
                       ],
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    child: Column(
                       children: [
-                        _buildInfoColumn(
-                          Icons.calendar_today,
-                          'Date',
-                          widget.appointment['date']?.toString() ?? 'Mon 4',
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12.withOpacity(0.07),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.calendar_today,
+                                  'Date',
+                                  widget.appointment['date']?.toString() ?? 'Mon 4',
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.access_time,
+                                  'Time',
+                                  (() {
+                                    final t = widget.appointment['time'];
+                                    if (t is String && t.length >= 5) {
+                                      final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                                      return formatTimeTo12Hour(timeStr);
+                                    }
+                                    return t ?? '9:00 AM';
+                                  })(),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        _buildInfoColumn(
-                          Icons.access_time,
-                          'Time',
-                          (() {
-                            final t = widget.appointment['time'];
-                            if (t is String && t.length >= 5) {
-                              final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
-                              return formatTimeTo12Hour(timeStr);
-                            }
-                            return t ?? '9:00 AM';
-                          })(),
-                        ),
-                        _buildInfoColumn(
-                          Icons.location_on,
-                          'Location',
-                          widget.appointment['location'] ?? 'Medical Center',
-                        ),
-                        _buildInfoColumn(
-                          Icons.medical_services_outlined,
-                          'Type',
-                          ((widget.appointment['type'] ?? 'consultation')
-                            .toString()
-                            .replaceAll('_', ' ')
-                            .split(' ')
-                            .map((word) => word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '')
-                            .join(' ')),
+                        const SizedBox(height: 10), // Space between the two cards
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12.withOpacity(0.07),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.location_on,
+                                  'Location',
+                                  widget.appointment['location'] ?? 'Medical Center',
+                                ),
+                              ),
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.medical_services_outlined,
+                                  'Type',
+                                  ((widget.appointment['type'] ?? 'consultation')
+                                    .toString()
+                                    .replaceAll('_', ' ')
+                                    .split(' ')
+                                    .map((word) => word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '')
+                                    .join(' ')),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

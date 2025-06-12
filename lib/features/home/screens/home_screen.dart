@@ -369,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDarkMode ? AppTheme.nightPrimary : AppTheme.secondaryColor,
+                    backgroundColor: isDarkMode ? AppTheme.nightPrimary : AppTheme.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusMedium),
                     ),
@@ -377,7 +377,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Text(
                     'Learn more',
-                    style: isDarkMode ? AppTheme.nightLabelLarge : AppTheme.labelLarge,
+                    style: (isDarkMode ? AppTheme.nightLabelLarge : AppTheme.labelLarge).copyWith(color: Colors.white),
                   ),
                 )
               ],
