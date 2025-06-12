@@ -12,6 +12,7 @@ import 'ocr_result.dart'; // Import the OCR result screen
 import '../models/analysis_result.dart'; // Import the analysis result model
 import 'analysis_result_screen.dart'; // Import the analysis result screen
 import '../../../core/providers/analysis_result_provider.dart'; // Import the analysis result provider
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
@@ -28,6 +29,12 @@ class _UploadScreenState extends State<UploadScreen> {
   XFile? _imageFile;
   String _ocrText = '';
   bool _busy = false;
+
+  List<Map<String, dynamic>> _labReportsWithoutImage = [];
+  Map<String, dynamic>? _selectedLabReport;
+
+  List<Map<String, dynamic>> _radiologyReportsWithoutImage = [];
+  Map<String, dynamic>? _selectedRadiologyReport;
 
   @override
   void initState() {
@@ -51,6 +58,174 @@ class _UploadScreenState extends State<UploadScreen> {
     }
   }
 
+  Future<void> _fetchLabReportsWithoutImage() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return;
+      // Get patient_id for this user
+      final patient = await Supabase.instance.client
+          .from('patients')
+          .select('patient_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+      if (patient == null) return;
+      final patientId = patient['patient_id'];
+      final response = await Supabase.instance.client
+          .from('lab_reports')
+          .select('*')
+          .eq('patient_id', patientId)
+          .or('report_url.is.null,report_url.eq.""');
+      setState(() {
+        _labReportsWithoutImage = List<Map<String, dynamic>>.from(response);
+      });
+    } catch (e) {
+      print('Error fetching lab reports without image: $e');
+      setState(() {
+        _labReportsWithoutImage = [];
+      });
+    }
+  }
+
+  Future<void> _fetchRadiologyReportsWithoutImage() async {
+    try {
+      final user = Supabase.instance.client.auth.currentUser;
+      if (user == null) return;
+      // Get patient_id for this user
+      final patient = await Supabase.instance.client
+          .from('patients')
+          .select('patient_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+      if (patient == null) return;
+      final patientId = patient['patient_id'];
+      final response = await Supabase.instance.client
+          .from('Radiology')
+          .select('*')
+          .eq('patient_id', patientId)
+          .or('report_url.is.null,report_url.eq.""');
+      setState(() {
+        _radiologyReportsWithoutImage = List<Map<String, dynamic>>.from(response);
+      });
+    } catch (e) {
+      print('Error fetching radiology reports without image: $e');
+      setState(() {
+        _radiologyReportsWithoutImage = [];
+      });
+    }
+  }
+
+  Future<void> _showLabReportSelectionDialog() async {
+    await _fetchLabReportsWithoutImage();
+    if (_labReportsWithoutImage.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('No Lab Reports'),
+          content: const Text('No lab reports available for upload.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Lab Report'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: _labReportsWithoutImage.length,
+            itemBuilder: (context, index) {
+              final report = _labReportsWithoutImage[index];
+              return ListTile(
+                title: Text(report['Title'] ?? 'Untitled'),
+                subtitle: Text(report['created_at']?.toString() ?? ''),
+                onTap: () {
+                  setState(() {
+                    _selectedLabReport = report;
+                  });
+                  Navigator.pop(context);
+                  // Proceed to OCR flow (camera page)
+                  setState(() {
+                    _imageFile = null;
+                    _ocrText = '';
+                  });
+                  _pageController.animateToPage(
+                    1,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showRadiologyReportSelectionDialog() async {
+    await _fetchRadiologyReportsWithoutImage();
+    if (_radiologyReportsWithoutImage.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('No Radiology Reports'),
+          content: const Text('No radiology reports available for upload.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Radiology Report'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: _radiologyReportsWithoutImage.length,
+            itemBuilder: (context, index) {
+              final report = _radiologyReportsWithoutImage[index];
+              return ListTile(
+                title: Text(report['Title'] ?? 'Untitled'),
+                subtitle: Text(report['created_at']?.toString() ?? ''),
+                onTap: () {
+                  setState(() {
+                    _selectedRadiologyReport = report;
+                  });
+                  Navigator.pop(context);
+                  // Proceed to OCR flow (camera page)
+                  setState(() {
+                    _imageFile = null;
+                    _ocrText = '';
+                  });
+                  _pageController.animateToPage(
+                    1,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _doOCR(XFile img) async {
     try {
       setState(() => _busy = true);
@@ -58,32 +233,105 @@ class _UploadScreenState extends State<UploadScreen> {
       final rec = TextRecognizer();
       final res = await rec.processImage(input);
       await rec.close();
-
-      // Update state with image and text, then navigate to the result page
       setState(() {
         _imageFile = img;
         _ocrText = res.text;
         _busy = false;
       });
+
+      if (_selectedLabReport != null) {
+        // --- Upload image to Supabase Storage and update lab report ---
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user == null) return;
+        final patient = await Supabase.instance.client
+            .from('patients')
+            .select('patient_id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+        if (patient == null) return;
+        final patientId = patient['patient_id'];
+        final reportId = _selectedLabReport!['report_id'].toString();
+        final fileExt = img.path.split('.').last;
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+        final filePath = '$patientId/$fileName';
+        final bytes = await img.readAsBytes();
+        final supabase = Supabase.instance.client;
+        await supabase.storage.from('labreports').uploadBinary(
+          filePath,
+          bytes,
+          fileOptions: FileOptions(
+            contentType: 'image/$fileExt',
+            upsert: true,
+          ),
+        );
+        await supabase
+            .from('lab_reports')
+            .update({'report_url': filePath})
+            .eq('report_id', reportId);
+        setState(() {
+          _selectedLabReport = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Lab report image uploaded and saved!')),
+        );
+        _pageController.animateToPage(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        return;
+      } else if (_selectedRadiologyReport != null) {
+        // --- Upload image to Supabase Storage and update radiology report ---
+        final user = Supabase.instance.client.auth.currentUser;
+        if (user == null) return;
+        final patient = await Supabase.instance.client
+            .from('patients')
+            .select('patient_id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+        if (patient == null) return;
+        final patientId = patient['patient_id'];
+        final reportId = _selectedRadiologyReport!['Radiology_id'].toString();
+        final fileExt = img.path.split('.').last;
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+        final filePath = '$patientId/$fileName';
+        final bytes = await img.readAsBytes();
+        final supabase = Supabase.instance.client;
+        await supabase.storage.from('radiology').uploadBinary(
+          filePath,
+          bytes,
+          fileOptions: FileOptions(
+            contentType: 'image/$fileExt',
+            upsert: true,
+          ),
+        );
+        await supabase
+            .from('Radiology')
+            .update({'report_url': filePath})
+            .eq('Radiology_id', reportId);
+        setState(() {
+          _selectedRadiologyReport = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Radiology image uploaded and saved!')),
+        );
+        _pageController.animateToPage(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+        return;
+      }
+
+      // Default OCR flow for other tiles
       _pageController.animateToPage(
         4, // Index of the OCR result page
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-
     } catch (e, st) {
       print('OCR failed: $e\n$st');
-      // Show error message if OCR fails
-      if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('OCR failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-       setState(() => _busy = false); // Ensure busy is false
+      setState(() => _busy = false);
     }
   }
 
@@ -211,7 +459,11 @@ class _UploadScreenState extends State<UploadScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: theme.colorScheme.surface,
       child: InkWell(
-        onTap: () {
+        onTap: () async {
+          if (label == 'Lab reports') {
+            await _showLabReportSelectionDialog();
+            return;
+          }
           setState(() {
             _imageFile = null;
             _ocrText = '';
@@ -239,7 +491,11 @@ class _UploadScreenState extends State<UploadScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: theme.colorScheme.surface,
       child: InkWell(
-        onTap: () {
+        onTap: () async {
+          if (label == 'Radiology') {
+            await _showRadiologyReportSelectionDialog();
+            return;
+          }
           setState(() {
             _imageFile = null;
             _ocrText = '';
