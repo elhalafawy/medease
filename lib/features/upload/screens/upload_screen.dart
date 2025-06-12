@@ -29,6 +29,7 @@ class _UploadScreenState extends State<UploadScreen> {
   XFile? _imageFile;
   String _ocrText = '';
   bool _busy = false;
+  bool _flashOn = false;
 
   List<Map<String, dynamic>> _labReportsWithoutImage = [];
   Map<String, dynamic>? _selectedLabReport;
@@ -155,6 +156,10 @@ class _UploadScreenState extends State<UploadScreen> {
                   setState(() {
                     _imageFile = null;
                     _ocrText = '';
+                    _flashOn = false;
+                    if (_camCtrl != null) {
+                      _camCtrl!.setFlashMode(FlashMode.off);
+                    }
                   });
                   _pageController.animateToPage(
                     1,
@@ -211,6 +216,10 @@ class _UploadScreenState extends State<UploadScreen> {
                   setState(() {
                     _imageFile = null;
                     _ocrText = '';
+                    _flashOn = false;
+                    if (_camCtrl != null) {
+                      _camCtrl!.setFlashMode(FlashMode.off);
+                    }
                   });
                   _pageController.animateToPage(
                     1,
@@ -329,6 +338,10 @@ class _UploadScreenState extends State<UploadScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+      _flashOn = false;
+      if (_camCtrl != null) {
+        _camCtrl!.setFlashMode(FlashMode.off);
+      }
     } catch (e, st) {
       print('OCR failed: $e\n$st');
       setState(() => _busy = false);
@@ -467,6 +480,10 @@ class _UploadScreenState extends State<UploadScreen> {
           setState(() {
             _imageFile = null;
             _ocrText = '';
+            _flashOn = false;
+            if (_camCtrl != null) {
+              _camCtrl!.setFlashMode(FlashMode.off);
+            }
           });
           _pageController.animateToPage(1,
             duration: const Duration(milliseconds: 300),
@@ -499,6 +516,10 @@ class _UploadScreenState extends State<UploadScreen> {
           setState(() {
             _imageFile = null;
             _ocrText = '';
+            _flashOn = false;
+            if (_camCtrl != null) {
+              _camCtrl!.setFlashMode(FlashMode.off);
+            }
           });
           _pageController.animateToPage(1,
             duration: const Duration(milliseconds: 300),
@@ -596,6 +617,25 @@ class _UploadScreenState extends State<UploadScreen> {
                 Center(child: _frameOverlay()),
                 if (_busy)
                   Container(color: Colors.black26, child: const Center(child: CircularProgressIndicator())),
+                // Flash icon above the camera button
+                Positioned(
+                  bottom: 100, // Adjust as needed to be above the camera button
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: IconButton(
+                      icon: Icon(_flashOn ? Icons.flash_on : Icons.flash_off, size: 32, color: _flashOn ? Colors.amber : theme.colorScheme.primary),
+                      onPressed: () async {
+                        setState(() {
+                          _flashOn = !_flashOn;
+                        });
+                        if (_camCtrl != null) {
+                          await _camCtrl!.setFlashMode(_flashOn ? FlashMode.torch : FlashMode.off);
+                        }
+                      },
+                    ),
+                  ),
+                ),
                 Positioned(
                   bottom: 24, left: 24, right: 24,
                   child: Row(
@@ -611,6 +651,9 @@ class _UploadScreenState extends State<UploadScreen> {
                       FloatingActionButton(
                         onPressed: () async {
                           try {
+                            if (_camCtrl != null) {
+                              await _camCtrl!.setFlashMode(_flashOn ? FlashMode.torch : FlashMode.off);
+                            }
                             final pic = await _camCtrl!.takePicture();
                             await _doOCR(pic);
                           } catch (e) {
