@@ -233,6 +233,34 @@ class _UploadScreenState extends State<UploadScreen> {
     );
   }
 
+  Widget _buildTileWithImage(String label, String assetPath) {
+    final theme = Theme.of(context);
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: theme.colorScheme.surface,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _imageFile = null;
+            _ocrText = '';
+          });
+          _pageController.animateToPage(1,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(assetPath, width: 48, height: 48, color: theme.colorScheme.primary),
+            const SizedBox(height: 8),
+            Text(label, textAlign: TextAlign.center, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface)),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -259,15 +287,40 @@ class _UploadScreenState extends State<UploadScreen> {
                   Text('Upload Documents', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.primary)),
                   const SizedBox(height: 24),
                   Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        _buildTile('Prescriptions', Icons.medical_services),
-                        _buildTile('Lab reports', Icons.science),
-                        _buildTile('Medication', Icons.local_pharmacy),
-                        _buildTile('X-Ray', Icons.medical_information),
+                        // First row: Prescriptions centered
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 160,
+                                child: _buildTile('Prescriptions', Icons.medical_services),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Second row: Lab reports and Radiology side by side
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 160,
+                                child: _buildTile('Lab reports', Icons.science),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: SizedBox(
+                                height: 160,
+                                child: _buildTileWithImage('Radiology', 'assets/icons/Radiology.png'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
