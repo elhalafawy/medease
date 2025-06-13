@@ -263,7 +263,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                 ),
               )).toList(),
             ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
           _buildInfoRow('Medications', medications),
           const SizedBox(height: 16),
@@ -405,6 +405,20 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                     label: 'Medications', icon: Icons.medical_services_outlined),
                 style: AppTheme.bodyLarge,
               ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _labTestsController,
+                decoration: themedInputDecoration(
+                    label: 'Lab Tests', icon: Icons.science),
+                style: AppTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _radiologyTestsController,
+                decoration: themedInputDecoration(
+                    label: 'Radiology Tests', icon: Icons.medical_information),
+                style: AppTheme.bodyLarge,
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -420,11 +434,15 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                         final symptoms = _symptomsController.text.trim();
                         final notes = _notesController.text.trim();
                         final medications = _medicationsController.text.trim();
+                        final labTests = _labTestsController.text.trim();
+                        final radiologyTests = _radiologyTestsController.text.trim();
                         await _addManualMedicalRecord(
                           medicalCondition: medicalCondition,
                           symptoms: symptoms,
                           notes: notes,
                           medications: medications,
+                          labTests: labTests,
+                          radiologyTests: radiologyTests,
                         );
                         if (mounted) {
                           Navigator.pop(context);
@@ -503,6 +521,20 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                     label: 'Medications', icon: Icons.medical_services_outlined),
                 style: AppTheme.bodyLarge,
               ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _labTestsController,
+                decoration: themedInputDecoration(
+                    label: 'Lab Tests', icon: Icons.science),
+                style: AppTheme.bodyLarge,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _radiologyTestsController,
+                decoration: themedInputDecoration(
+                    label: 'Radiology Tests', icon: Icons.medical_information),
+                style: AppTheme.bodyLarge,
+              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -522,17 +554,25 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                             _notesController.text.trim();
                         final String updatedMedications =
                             _medicationsController.text.trim();
+                        final String updatedLabTests =
+                            _labTestsController.text.trim();
+                        final String updatedRadiologyTests =
+                            _radiologyTestsController.text.trim();
                         await _updateMedicalRecord(
                           record['record_id'],
                           updatedCondition,
                           updatedSymptoms,
                           updatedNotes,
                           updatedMedications,
+                          updatedLabTests,
+                          updatedRadiologyTests,
                         );
                         _conditionController.clear();
                         _symptomsController.clear();
                         _notesController.clear();
                         _medicationsController.clear();
+                        _labTestsController.clear();
+                        _radiologyTestsController.clear();
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -561,6 +601,8 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
     required String symptoms,
     required String notes,
     required String medications,
+    required String labTests,
+    required String radiologyTests,
   }) async {
     try {
       final currentUser = _supabase.auth.currentUser;
@@ -588,14 +630,41 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
         return;
       }
       final doctorId = doctorResponse['doctor_id'];
-      await _supabase.from('medical_records').insert({
+      final newMedicalRecord = await _supabase.from('medical_records').insert({
         'patient_id': widget.patientId,
         'doctor_id': doctorId,
         'medical_condition': medicalCondition,
         'symptoms': symptoms,
         'notes': notes,
         'medications': medications,
-      });
+      }).select('record_id').single(); // Get the record_id of the newly inserted medical record
+
+      final String newRecordId = newMedicalRecord['record_id'].toString();
+
+      // Insert into lab_reports if labTests is provided
+      if (labTests.isNotEmpty) {
+        await _supabase.from('lab_reports').insert({
+          'medical_record_id': newRecordId,
+          'patient_id': widget.patientId,
+          'doctor_id': doctorId,
+          'Title': labTests,
+          'created_at': DateTime.now().toIso8601String(),
+          'status': 'Normal Results',
+        });
+      }
+
+      // Insert into Radiology if radiologyTests is provided
+      if (radiologyTests.isNotEmpty) {
+        await _supabase.from('Radiology').insert({
+          'medical_record_id': newRecordId,
+          'patient_id': widget.patientId,
+          'doctor_id': doctorId,
+          'Title': radiologyTests,
+          'created_at': DateTime.now().toIso8601String(),
+          'status': 'Normal Results',
+        });
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Medical record added successfully!')));
@@ -617,8 +686,36 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
     String symptoms,
     String notes,
     String medications,
+    String labTests,
+    String radiologyTests,
   ) async {
     try {
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User not authenticated')),
+          );
+        }
+        return;
+      }
+      final doctorResponse = await _supabase
+          .from('doctors')
+          .select('doctor_id')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+      if (doctorResponse == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text(
+                    'Doctor profile not found. Cannot update medical record.')),
+          );
+        }
+        return;
+      }
+      final doctorId = doctorResponse['doctor_id'];
+
       final response = await _supabase
           .from('medical_records')
           .update({
@@ -629,6 +726,33 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
           })
           .eq('record_id', recordId)
           .select();
+
+      // Handle updates for lab_reports
+      if (labTests.isNotEmpty) {
+        // For simplicity, we'll always insert a new report on update if the field is not empty.
+        // A more complex logic might involve checking for existing reports and updating them.
+        await _supabase.from('lab_reports').insert({
+          'medical_record_id': recordId,
+          'patient_id': widget.patientId,
+          'doctor_id': doctorId,
+          'Title': labTests,
+          'created_at': DateTime.now().toIso8601String(),
+          'status': 'Normal Results',
+        });
+      }
+
+      // Handle updates for Radiology reports
+      if (radiologyTests.isNotEmpty) {
+        await _supabase.from('Radiology').insert({
+          'medical_record_id': recordId,
+          'patient_id': widget.patientId,
+          'doctor_id': doctorId,
+          'Title': radiologyTests,
+          'created_at': DateTime.now().toIso8601String(),
+          'status': 'Normal Results',
+        });
+      }
+
       if (response.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
