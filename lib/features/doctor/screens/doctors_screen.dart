@@ -59,6 +59,40 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: Icon(Icons.notifications_none, color: theme.colorScheme.onSurface),
+                onPressed: () {},
+              ),
+              Positioned(
+                right: 10,
+                top: 10,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: const Text(
+                    '3',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: loading
@@ -99,72 +133,71 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.borderColor),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: theme.colorScheme.shadow.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 100,
-              height: 120,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
-                image: DecorationImage(
-                  image: AssetImage('${doctor['image']}'),
-                  fit: BoxFit.cover,
-                ),
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                bottomLeft: Radius.circular(20),
+              ),
+              child: Image.asset(
+                doctor['image'] ?? 'assets/images/doctor_photo.png',
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
               ),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${doctor['name']}',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: theme.colorScheme.onSurface,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              doctor['name'] ?? '-',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w600,
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${doctor['type']}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
-                                ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              doctor['type'] ?? '-',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurface.withOpacity(0.6),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.onSurface.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                            color: Colors.amber.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.star, color: Colors.amber[600], size: 14),
+                              Icon(Icons.star, color: Colors.amber[600], size: 16),
                               const SizedBox(width: 2),
                               Text(
-                                '${doctor['rating']}',
+                                '${(doctor['rating'] as num?)?.toDouble().toStringAsFixed(1) ?? '-'}',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
@@ -175,16 +208,16 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.location_on, size: 14, color: theme.colorScheme.onSurface),
+                        Icon(Icons.location_on, size: 16, color: theme.colorScheme.onSurface.withOpacity(0.7)),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            '${doctor['hospital']}',
+                            doctor['hospital'] ?? '-',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface,
+                              color: theme.colorScheme.onSurface.withOpacity(0.7),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -192,23 +225,24 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.green.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.attach_money, size: 14, color: Colors.green),
+                              const Icon(Icons.attach_money, size: 16, color: Colors.green),
                               const SizedBox(width: 2),
                               Text(
-                                '${doctor['price']}',
+                                doctor['price'] ?? '-',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: Colors.green,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -216,19 +250,19 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.onSurface.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                            color: theme.colorScheme.onSurface.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.access_time, size: 14, color: theme.colorScheme.onSurface),
-                              const SizedBox(width: 2),
+                              Icon(Icons.check_circle, size: 16, color: Colors.grey[700]),
+                              const SizedBox(width: 4),
                               Text(
-                                '${doctor['available']}',
+                                doctor['available'] ?? doctor['availability'] ?? 'available',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurface,
+                                  color: theme.colorScheme.onSurface.withOpacity(0.8),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
