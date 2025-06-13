@@ -86,13 +86,8 @@ To set up and run MedEase locally, follow these steps:
 ```
 medease/
 ├── lib/
-│   ├── core/
-│   │   ├── config/         # API Keys and other configuration constants
-│   │   ├── firebase/       # Firebase service implementations (Authentication, Storage)
-│   │   ├── providers/      # State management providers (Auth, Analysis Result, etc.)
-│   │   ├── routes/         # Application routing setup
-│   │   └── supabase/       # Supabase service implementations (Database interactions)
-│   ├── features/
+│   ├── core/                 # Core utilities, providers, routes, theme, and services
+│   ├── features/             # Feature-specific modules (e.g., auth, home, upload)
 │   │   ├── auth/           # Authentication related screens and logic
 │   │   ├── doctor/         # Doctor specific features (existing/planned)
 │   │   ├── home/           # Home screen and related features (Medical Records, Medications)
@@ -102,6 +97,7 @@ medease/
 │   │   └── upload/         # OCR and Document Analysis feature
 │   │       ├── models/     # Data models for analysis results, etc.
 │   │       └── screens/    # UI screens for the upload and analysis flow
+│   ├── doctor_dashboard/     # Doctor dashboard specific features, screens, and navigation
 │   └── main.dart           # Application entry point and initial setup
 ├── test/
 ├── ... (other project files)
