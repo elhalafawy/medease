@@ -50,8 +50,8 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
       _symptomsController.text = widget.preFilledData!['symptoms'] ?? '';
       _notesController.text = '';
       _medicationsController.text = widget.preFilledData!['medications'] ?? '';
-      _labTestsController.text = widget.preFilledData!['lab_tests'] ?? '';
-      _radiologyTestsController.text = widget.preFilledData!['radiology_tests'] ?? '';
+      _labTestsController.text = widget.preFilledData!['tests'] ?? '';
+      _radiologyTestsController.text = widget.preFilledData!['scans'] ?? '';
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showNewMedicalRecordDialog(context);
       });
@@ -343,8 +343,8 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
       _symptomsController.text = widget.preFilledData!['symptoms'] ?? '';
       _notesController.text = '';
       _medicationsController.text = widget.preFilledData!['medications'] ?? '';
-      _labTestsController.text = widget.preFilledData!['lab_tests'] ?? '';
-      _radiologyTestsController.text = widget.preFilledData!['radiology_tests'] ?? '';
+      _labTestsController.text = widget.preFilledData!['tests'] ?? '';
+      _radiologyTestsController.text = widget.preFilledData!['scans'] ?? '';
     } else {
       _conditionController.text = '';
       _symptomsController.text = '';
@@ -448,8 +448,8 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
     _symptomsController.text = record['symptoms'] ?? '';
     _notesController.text = record['notes'] ?? '';
     _medicationsController.text = record['medications'] ?? '';
-    _labTestsController.text = record['lab_tests'] ?? '';
-    _radiologyTestsController.text = record['radiology_tests'] ?? '';
+    _labTestsController.text = record['tests'] ?? '';
+    _radiologyTestsController.text = record['scans'] ?? '';
 
     showDialog(
       context: context,

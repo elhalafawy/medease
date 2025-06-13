@@ -303,31 +303,47 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 18, color: AppTheme.primaryColor),
-                const SizedBox(width: 8),
-                Text(appt['date'] ?? '', style: AppTheme.bodyLarge),
-                const SizedBox(width: 16),
-                const Icon(Icons.access_time, size: 18, color: AppTheme.primaryColor),
-                const SizedBox(width: 8),
-                Text(
-                  (() {
-                    final t = appt['time'];
-                    if (t is String && t.length >= 5) {
-                      final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
-                      return formatTimeTo12Hour(timeStr);
-                    }
-                    return t ?? '';
-                  })(),
-                  style: AppTheme.bodyLarge,
-                ),
-                const SizedBox(width: 16),
                 const Icon(Icons.medical_services_outlined, size: 18, color: AppTheme.primaryColor),
                 const SizedBox(width: 8),
                 Text(
                   ((appt['type'] ?? 'consultation').toString().replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1).toLowerCase() : '').join(' ')),
-                  style: AppTheme.bodyLarge,
+                  style: AppTheme.bodyLarge.copyWith(
+                    letterSpacing: 0.3,
+                    height: 1.4,
+                    leadingDistribution: TextLeadingDistribution.even,
+                    decoration: TextDecoration.none,
+                    decorationColor: const Color(0xFF3C4A59),
+                  ),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    appt['date'] ?? '',
+                    style: AppTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(width: 12),
+                  const Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    (() {
+                      final t = appt['time'];
+                      if (t is String && t.length >= 5) {
+                        final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                        return formatTimeTo12Hour(timeStr);
+                      }
+                      return t ?? '';
+                    })(),
+                    style: AppTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             if ((appt['notes']).isNotEmpty) ...[
@@ -452,217 +468,242 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          alignment: Alignment.bottomCenter,
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundImage: const AssetImage('assets/images/profile_picture.png'),
-                      backgroundColor: AppTheme.primaryColor.withOpacity(0.08),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            appt['patients']?['full_name'] ?? 'Unknown',
-                            style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 18),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
+                          backgroundImage: const AssetImage('assets/images/profile_picture.png'),
+                          backgroundColor: AppTheme.primaryColor.withOpacity(0.08),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(
-                                appt['status'] == 'confirmed'
-                                    ? Icons.check_circle
-                                    : appt['status'] == 'pending'
-                                        ? Icons.hourglass_top
-                                        : Icons.cancel,
-                                color: statusColor(appt['status']),
-                                size: 18,
+                              Text(
+                                appt['patients']?['full_name'] ?? 'Unknown',
+                                style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 18),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(width: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: statusColor(appt['status']).withOpacity(0.13),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  statusText(appt['status']),
-                                  style: AppTheme.bodyMedium.copyWith(color: statusColor(appt['status']), fontWeight: FontWeight.bold),
-                                ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.medical_services_outlined, size: 18, color: AppTheme.primaryColor),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    ((appt['type'] ?? 'consultation').toString().replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1).toLowerCase() : '').join(' ')),
+                                    style: AppTheme.bodyLarge.copyWith(
+                                      letterSpacing: 0.3,
+                                      height: 1.4,
+                                      leadingDistribution: TextLeadingDistribution.even,
+                                      decoration: TextDecoration.none,
+                                      decorationColor: const Color(0xFF3C4A59),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    appt['status'] == 'confirmed'
+                                        ? Icons.check_circle
+                                        : appt['status'] == 'pending'
+                                            ? Icons.hourglass_top
+                                            : Icons.cancel,
+                                    color: statusColor(appt['status']),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: statusColor(appt['status']).withOpacity(0.13),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      statusText(appt['status']),
+                                      style: AppTheme.bodyMedium.copyWith(color: statusColor(appt['status']), fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Text('Select Day', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 38,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: daysShort.length,
-                    separatorBuilder: (context, i) => const SizedBox(width: 6),
-                    itemBuilder: (context, i) => GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedDay = i;
-                          // Calculate the date string for the selected day
-                          DateTime today = DateTime.now();
-                          int currentWeekday = today.weekday; // 1 (Mon) - 7 (Sun)
-                          int targetWeekday = selectedDay == 0 ? 7 : selectedDay; // 1 (Mon) - 7 (Sun)
-                          int daysToAdd = (targetWeekday - currentWeekday) % 7;
-                          if (daysToAdd < 0) daysToAdd += 7;
-                          DateTime newDate = today.add(Duration(days: daysToAdd));
-                          String dateStr = "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
-                          fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", dateStr);
-                          loadingSlots = false;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: selectedDay == i ? AppTheme.primaryColor : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppTheme.primaryColor),
-                        ),
-                        child: Text(
-                          daysShort[i],
-                          style: AppTheme.bodyLarge.copyWith(
-                            color: selectedDay == i ? Colors.white : AppTheme.primaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text('Time', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                loadingSlots
-                  ? const Center(child: CircularProgressIndicator())
-                  : availableTimes.isEmpty
-                    ? const Text('No available slots for this day.')
-                    : SizedBox(
-                        height: 220, // Adjust height as needed
-                        child: GridView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3, // Three columns
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 2.5, // Adjust for pill shape
-                          ),
-                          itemCount: availableTimes.length,
-                          itemBuilder: (context, index) {
-                            final isSelected = index == selectedTimeIndex;
-                            return GestureDetector(
-                              onTap: () => setState(() => selectedTimeIndex = index),
-                              child: Container(
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppTheme.primaryColor : Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(
-                                    color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
-                                  ),
-                                ),
-                                child: Text(
-                                  (() {
-                                    final t = availableTimes[index]['time_slot'];
-                                    if (t is String && t.length >= 5) {
-                                      final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
-                                      return formatTimeTo12Hour(timeStr);
-                                    }
-                                    return t ?? 'N/A';
-                                  })(),
-                                  style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          textStyle: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
-                        ),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            appt['day'] = days[selectedDay];
-                            // Calculate the proper date string for the selected day
+                    const SizedBox(height: 18),
+                    Text('Select Day', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 38,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: daysShort.length,
+                        separatorBuilder: (context, i) => const SizedBox(width: 6),
+                        itemBuilder: (context, i) => GestureDetector(
+                          onTap: () async {
+                            setState(() {
+                              selectedDay = i;
+                              loadingSlots = true;
+                            });
                             DateTime today = DateTime.now();
                             int currentWeekday = today.weekday; // 1 (Mon) - 7 (Sun)
                             int targetWeekday = selectedDay == 0 ? 7 : selectedDay; // 1 (Mon) - 7 (Sun)
                             int daysToAdd = (targetWeekday - currentWeekday) % 7;
                             if (daysToAdd < 0) daysToAdd += 7;
                             DateTime newDate = today.add(Duration(days: daysToAdd));
-                            String formattedDate = "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
-                            
-                            // Ensure all values are strings
-                            String appointmentId = appt['appointment_id'].toString();
-                            String newTimeSlotId = availableTimes[selectedTimeIndex]['slot_id'].toString();
-                            String oldTimeSlotId = appt['time_slot_id'].toString();
-                            String newTime = availableTimes[selectedTimeIndex]['time_slot'].toString();
-                            
-                            updateAppointmentTimeSlot(
-                              appointmentId: appointmentId,
-                              newTimeSlotId: newTimeSlotId,
-                              oldTimeSlotId: oldTimeSlotId,
-                              newTime: newTime,
-                              newDate: formattedDate
-                            );
-                          });
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            String dateStr = "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
+                            await fetchtimeSlots("b55f005f-3185-4fa3-9098-2179e0751621", dateStr);
+                            setState(() {
+                              loadingSlots = false;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: selectedDay == i ? AppTheme.primaryColor : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppTheme.primaryColor),
+                            ),
+                            child: Text(
+                              daysShort[i],
+                              style: AppTheme.bodyLarge.copyWith(
+                                color: selectedDay == i ? Colors.white : AppTheme.primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
-                          textStyle: AppTheme.bodyLarge,
                         ),
-                        child: const Text('Save'),
                       ),
+                    ),
+                    const SizedBox(height: 18),
+                    Text('Time', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    loadingSlots
+                      ? const Center(child: CircularProgressIndicator())
+                      : availableTimes.isEmpty
+                        ? const Text('No available slots for this day.')
+                        : SizedBox(
+                            height: 220, // Adjust height as needed
+                            child: GridView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3, // Three columns
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 2.5, // Adjust for pill shape
+                              ),
+                              itemCount: availableTimes.length,
+                              itemBuilder: (context, index) {
+                                final isSelected = index == selectedTimeIndex;
+                                return GestureDetector(
+                                  onTap: () => setState(() => selectedTimeIndex = index),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? AppTheme.primaryColor : Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(
+                                        color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      (() {
+                                        final t = availableTimes[index]['time_slot'];
+                                        if (t is String && t.length >= 5) {
+                                          final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                                          return formatTimeTo12Hour(timeStr);
+                                        }
+                                        return t ?? 'N/A';
+                                      })(),
+                                      style: TextStyle(
+                                        color: isSelected ? Colors.white : Colors.black,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              textStyle: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                appt['day'] = days[selectedDay];
+                                // Calculate the proper date string for the selected day
+                                DateTime today = DateTime.now();
+                                int currentWeekday = today.weekday; // 1 (Mon) - 7 (Sun)
+                                int targetWeekday = selectedDay == 0 ? 7 : selectedDay; // 1 (Mon) - 7 (Sun)
+                                int daysToAdd = (targetWeekday - currentWeekday) % 7;
+                                if (daysToAdd < 0) daysToAdd += 7;
+                                DateTime newDate = today.add(Duration(days: daysToAdd));
+                                String formattedDate = "${newDate.year}-${newDate.month.toString().padLeft(2, '0')}-${newDate.day.toString().padLeft(2, '0')}";
+                                
+                                // Ensure all values are strings
+                                String appointmentId = appt['appointment_id'].toString();
+                                String newTimeSlotId = availableTimes[selectedTimeIndex]['slot_id'].toString();
+                                String oldTimeSlotId = appt['time_slot_id'].toString();
+                                String newTime = availableTimes[selectedTimeIndex]['time_slot'].toString();
+                                
+                                updateAppointmentTimeSlot(
+                                  appointmentId: appointmentId,
+                                  newTimeSlotId: newTimeSlotId,
+                                  oldTimeSlotId: oldTimeSlotId,
+                                  newTime: newTime,
+                                  newDate: formattedDate
+                                );
+                              });
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              textStyle: AppTheme.bodyLarge,
+                            ),
+                            child: const Text('Save'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -887,6 +928,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                                   maxLines: 2,
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
+                                                 
                                               ),
                                             ],
                                           ),

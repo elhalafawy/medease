@@ -59,21 +59,30 @@ class DoctorOcrResultScreen extends StatelessWidget {
           return;
         }
 
+        // Prepare medications for saving
+        final String medicationsString = analysis.medications.map((med) {
+          String medText = med.name;
+          if (med.dosage.isNotEmpty) medText += ' (${med.dosage})';
+          if (med.frequency.isNotEmpty) medText += ' - ${med.frequency}';
+          return medText;
+        }).join(', ');
+
         // Navigate directly to new medical record screen with pre-filled data
         if (context.mounted) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => PatientMedicalRecordScreen(
-                patientName: patientName,
+                patientName: analysis.patientName ?? patientName, // Use analysis patient name if available
                 patientAge: patientDOB,
                 patientId: patientId,
                 preFilledData: {
-                  'medical_condition': analysis.diagnosis,
+                  'medical_condition': analysis.diagnosis.join(', '), // Diagnosis is now a List<String>
                   'symptoms': analysis.symptoms.join(', '),
                   'notes': '', // Keep notes empty for doctor to fill
-                  'medications': analysis.medications.join(', '),
-                  'tests': analysis.requiredTests.join(', '),
+                  'medications': medicationsString,
+                  'tests': analysis.labTests.join(', '), // Updated field name
+                  'scans': analysis.radiologyScans.join(', '), // Updated field name
                 },
               ),
             ),
@@ -89,7 +98,7 @@ class DoctorOcrResultScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildSection(String title, List<String> items) {
+  Widget _buildSection(String title, List<dynamic> items, {bool isMedications = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,11 +106,24 @@ class DoctorOcrResultScreen extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 4),
         if (items.isEmpty)
-          const Text('No data', style: TextStyle(color: Colors.grey)),
-        ...items.map((e) => Padding(
+          const Text('No data', style: TextStyle(color: Colors.grey))
+        else if (isMedications)
+          ...items.map((item) {
+            final medication = item as Medication;
+            return Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Text(e),
-            )),
+              child: Text(
+                '${medication.name}' +
+                (medication.dosage.isNotEmpty ? ' (${medication.dosage})' : '') +
+                (medication.frequency.isNotEmpty ? ' - ${medication.frequency}' : ''),
+              ),
+            );
+          }).toList()
+        else
+          ...items.map((item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(item.toString()), // Ensure it can handle general types if not explicitly Medication
+              )),
         const SizedBox(height: 12),
       ],
     );
@@ -117,16 +139,13 @@ class DoctorOcrResultScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Diagnosis:',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(analysis.diagnosis.isNotEmpty
-                  ? analysis.diagnosis
-                  : 'No diagnosis'),
-              const SizedBox(height: 12),
+              if (analysis.patientName != null && analysis.patientName!.isNotEmpty)
+                _buildSection('Patient Name', [analysis.patientName!]),
+              _buildSection('Diagnosis', analysis.diagnosis),
               _buildSection('Symptoms', analysis.symptoms),
-              _buildSection('Medications', analysis.medications),
-              _buildSection('Required Tests', analysis.requiredTests),
-              _buildSection('Required Scans', analysis.requiredScans),
+              _buildSection('Medications', analysis.medications, isMedications: true),
+              _buildSection('Required Tests', analysis.labTests),
+              _buildSection('Required Scans', analysis.radiologyScans),
               const Divider(),
               const Text('Raw Text:',
                   style: TextStyle(fontWeight: FontWeight.bold)),

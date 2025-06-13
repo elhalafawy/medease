@@ -47,10 +47,58 @@ class MedicationService {
         'created_at': DateTime.now().toIso8601String(),
         'updated_at': DateTime.now().toIso8601String(),
       });
+
+      // Commenting out notification creation as requested
+      // for (var time in reminderTimes) {
+      //   await _createMedicationReminderNotification(
+      //     patientId: patientId,
+      //     medicationName: name,
+      //     reminderTime: time,
+      //   );
+      // }
+
     } catch (e) {
       throw Exception('Failed to add medication: $e');
     }
   }
+
+  // Commenting out the notification creation function as requested
+  // Future<void> _createMedicationReminderNotification({
+  //   required String patientId,
+  //   required String medicationName,
+  //   required TimeOfDay reminderTime,
+  // }) async {
+  //   try {
+  //     final now = DateTime.now();
+  //     final notificationTime = DateTime(
+  //       now.year,
+  //       now.month,
+  //       now.day,
+  //       reminderTime.hour,
+  //       reminderTime.minute,
+  //     );
+
+  //     DateTime scheduledTime = notificationTime;
+  //     if (scheduledTime.isBefore(now)) {
+  //       scheduledTime = scheduledTime.add(const Duration(days: 1));
+  //     }
+
+  //     print('DEBUG: Attempting to insert notification with receiver_id: $patientId, message: It\'s time to take your medication: $medicationName at ${reminderTime.hour.toString().padLeft(2, '0')}:${reminderTime.minute.toString().padLeft(2, '0')}.');
+
+  //     await _supabase.from('notifications').insert({
+  //       'receiver_id': patientId,
+  //       'message': 'It\'s time to take your medication: $medicationName at ${reminderTime.hour.toString().padLeft(2, '0')}:${reminderTime.minute.toString().padLeft(2, '0')}.',
+  //       'type': 'medication_reminder',
+  //       'status': 'unread',
+  //       'created_at': DateTime.now().toIso8601String(),
+  //       'scheduled_at': scheduledTime.toIso8601String(),
+  //     });
+  //     print('Medication reminder notification created for patient $patientId for $medicationName at ${reminderTime.hour.toString().padLeft(2, '0')}:${reminderTime.minute.toString().padLeft(2, '0')}');
+  //   } catch (e) {
+  //     print('Failed to create medication reminder notification: $e');
+  //     throw Exception('Failed to create medication reminder notification: $e');
+  //   }
+  // }
 
   // Update an existing medication
   Future<void> updateMedication({

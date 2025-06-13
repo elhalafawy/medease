@@ -12,7 +12,7 @@ class MedicationScreen extends StatefulWidget {
   State<MedicationScreen> createState() => _MedicationScreenState();
 }
 
-class _MedicationScreenState extends State<MedicationScreen> {
+class _MedicationScreenState extends State<MedicationScreen> with WidgetsBindingObserver {
   final MedicationService _medicationService = MedicationService();
   List<Map<String, dynamic>> _activeMedications = [];
   List<Map<String, dynamic>> _historyMedications = [];
@@ -23,7 +23,21 @@ class _MedicationScreenState extends State<MedicationScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadMedications();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadMedications();
+    }
   }
 
   Future<void> _loadMedications() async {

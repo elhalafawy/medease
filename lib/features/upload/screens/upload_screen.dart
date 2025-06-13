@@ -610,9 +610,11 @@ class _UploadScreenState extends State<UploadScreen> {
             else
             Stack(
               children: [
-                Listener(
-                  behavior: HitTestBehavior.opaque,
-                  child: CameraPreview(_camCtrl!),
+                Positioned.fill(
+                  child: Listener(
+                    behavior: HitTestBehavior.opaque,
+                    child: CameraPreview(_camCtrl!),
+                  ),
                 ),
                 Center(child: _frameOverlay()),
                 if (_busy)
