@@ -263,7 +263,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                 ),
               )).toList(),
             ),
-            const SizedBox(height: 8),
+          const SizedBox(height: 8),
           ],
           _buildInfoRow('Medications', medications),
           const SizedBox(height: 16),

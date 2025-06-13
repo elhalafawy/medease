@@ -11,6 +11,7 @@ import '../../profile/screens/notifications_screen.dart';
 import '../../../core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'ocr_article_screen.dart';
+import 'medical_record_article_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -146,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                         const SizedBox(height: AppTheme.kPaddingLarge),
                                         _buildArticle(
-                                          title: 'Understanding OCR Application in Healthcare',
+                                          title: 'Unlocking Health Data: The Power of OCR in MedEase',
                                           subtitle: 'This article explores how OCR technology is used in the MedEase application to digitize medical records and its benefits.',
                                           image: 'assets/images/ocr_illustration.png',
                                           isDarkMode: isDarkMode,
@@ -158,10 +159,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                           },
                                         ),
                                         _buildArticle(
-                                          title: 'Cardiology and pregnancy?',
-                                          subtitle: 'Although approximately 86% of practicing cardiologists surveyed...',
-                                          image: 'assets/images/article_2.png',
+                                          title: 'Unlock Better Health with Digital Records',
+                                          subtitle: 'Explore how MedEase helps you manage and access your medical records efficiently, ensuring better health outcomes.',
+                                          image: 'assets/images/Medical_record.jpg',
                                           isDarkMode: isDarkMode,
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const MedicalRecordArticleScreen()),
+                                            );
+                                          },
                                         ),
                                       ],
                                     ),
@@ -426,6 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     title,
                     style: isDarkMode ? AppTheme.nightTitleMedium : AppTheme.titleMedium,
+                    textAlign: TextAlign.start,
                   ),
                   const SizedBox(height: AppTheme.kPaddingSmall),
                   Text(
