@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart' as app_theme;
 import '../widgets/doctor_bottom_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../widgets/review_card.dart';
 
 class DoctorReviewsScreen extends StatefulWidget {
   final bool showAppBar;
@@ -136,72 +137,15 @@ class _DoctorReviewsScreenState extends State<DoctorReviewsScreen> {
                         final review = _reviews[index];
                         final patientName = review['profiles']?['full_name'] ?? 'Anonymous';
                         final date = DateTime.parse(review['created_at']).toLocal();
-                        final formattedDate = '${date.day}/${date.month}/${date.year}';
+                        final formattedDate = date.toLocal().toString().split(' ')[0];
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: app_theme.AppTheme.primaryColor.withOpacity(0.10),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: app_theme.AppTheme.primaryColor,
-                                radius: 24,
-                                child: Text(
-                                  patientName[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      formattedDate,
-                                      style: app_theme.AppTheme.bodyMedium.copyWith(color: app_theme.AppTheme.greyColor),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      patientName,
-                                      style: app_theme.AppTheme.bodyLarge.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: app_theme.AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: List.generate(
-                                        review['rating'].round(),
-                                        (i) => Icon(Icons.star, size: 16, color: Colors.amber.shade700),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      review['message'] ?? '',
-                                      style: app_theme.AppTheme.bodyLarge.copyWith(
-                                        color: app_theme.AppTheme.textColor,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: ReviewCard(
+                            patientName: patientName,
+                            rating: (review['rating'] as num?)?.toDouble() ?? 0.0,
+                            reviewText: review['message'] as String?,
+                            reviewDate: formattedDate,
                           ),
                         );
                       },

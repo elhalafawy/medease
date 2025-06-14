@@ -24,11 +24,15 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   int newDoctorNotifCount = 3;
   List<Map<String, dynamic>> doctorAppointments = [];
   Map<String, double> _genderStats = {'male': 0, 'female': 0};
+  List<Map<String, dynamic>> _doctorReviews = [];
+  List<Map<String, dynamic>> _allDoctorReviews = [];
 
   @override
   void initState() {
     super.initState();
     _loadGenderStats();
+    _loadDoctorReviews();
+    _loadAllDoctorReviewsForAverage();
   }
 
   Future<void> _loadGenderStats() async {
@@ -61,6 +65,51 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     } catch (e) {
       print('Error loading gender stats: $e');
     }
+  }
+
+  Future<void> _loadDoctorReviews() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('doctor_reviews')
+          .select('*')
+          .order('created_at', ascending: false)
+          .limit(3);
+      print('Supabase response (limited): $response');
+
+      setState(() {
+        _doctorReviews = List<Map<String, dynamic>>.from(response);
+        print('Doctor reviews (limited) after setState: $_doctorReviews');
+      });
+    } catch (e) {
+      print('Error loading limited doctor reviews: $e');
+    }
+  }
+
+  Future<void> _loadAllDoctorReviewsForAverage() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('doctor_reviews')
+          .select('*');
+      print('Supabase response (all reviews): $response');
+
+      setState(() {
+        _allDoctorReviews = List<Map<String, dynamic>>.from(response);
+        print('All doctor reviews after setState: $_allDoctorReviews');
+      });
+    } catch (e) {
+      print('Error loading all doctor reviews for average: $e');
+    }
+  }
+
+  double _getAverageRating() {
+    if (_allDoctorReviews.isEmpty) {
+      return 0.0;
+    }
+    double totalRating = 0;
+    for (var review in _allDoctorReviews) {
+      totalRating += (review['rating'] as num?)?.toDouble() ?? 0.0;
+    }
+    return totalRating / _allDoctorReviews.length;
   }
 
   @override
@@ -487,17 +536,34 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 color: Colors.amber, size: 24),
                             const SizedBox(width: 4),
                             Text(
-                              "4.8",
+                              _getAverageRating().toStringAsFixed(1),
                               style: theme.textTheme.bodyLarge
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(width: 8),
-                            const Text("Total 0 Reviews",
+                            Text("Total ${_allDoctorReviews.length} Reviews",
                                 style: AppTheme.bodyMedium),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        const ReviewCard(),
+                        if (_doctorReviews.isNotEmpty)
+                          ..._doctorReviews.map((review) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: ReviewCard(
+                                patientName: review['patient_name'] as String?,
+                                rating: (review['rating'] as num?)?.toDouble(),
+                                reviewText: review['message'] as String?,
+                                reviewDate: review['created_at'] != null
+                                    ? DateTime.parse(review['created_at']).toLocal().toString().split(' ')[0]
+                                    : null,
+                              ),
+                            );
+                          }).toList()
+                        else
+                          const Center(
+                            child: Text('No reviews yet.'),
+                          ),
                       ],
                     ),
                   ),

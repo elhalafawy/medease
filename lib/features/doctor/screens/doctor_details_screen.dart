@@ -125,7 +125,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                               Icon(Icons.star, color: Colors.amber[600], size: 22),
                               const SizedBox(width: 4),
                               Text(
-                                '${(doctor['rating'] as num).toDouble().toStringAsFixed(1)}',
+                                '${(doctor['rating'] as num?)?.toDouble().toStringAsFixed(1)}',
                                 style: theme.textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: theme.colorScheme.onSurface,
@@ -155,7 +155,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                       children: [
                         _StatCircle(icon: Icons.person, value: '${doctor['patients']}', label: 'Patients'),
                         _StatCircle(icon: Icons.verified_user, value: '${doctor['experience']}', label: 'Years'),
-                        _StatCircle(icon: Icons.star_border, value: '${(doctor['rating'] as num).toDouble().toStringAsFixed(1)}', label: 'Rating'),
+                        _StatCircle(icon: Icons.star_border, value: '${(doctor['rating'] as num?)?.toDouble().toStringAsFixed(1)}', label: 'Rating'),
                         GestureDetector(
                           onTap: () {
                             print('Tapped reviews. Doctor ID: ${doctor['doctor_id']}');
@@ -365,11 +365,11 @@ class _RateDoctorDialogState extends State<RateDoctorDialog> {
       // Now attempt to insert the review into doctor_reviews
       await Supabase.instance.client.from('doctor_reviews').insert({
         'doctor_id': widget.doctorId,
-        'patient_id': patientId, // Use the fetched patientId
-        'rating': _rating.round(),
+        'patient_id': patientId,
+        'rating': _rating,
         'message': _controller.text,
         'created_at': DateTime.now().toIso8601String(),
-        'patient_name': patientName, // Add patient_name to the insert data
+        'patient_name': patientName,
       });
 
       // If the insert operation completes without throwing an exception, it is considered successful.
@@ -387,12 +387,14 @@ class _RateDoctorDialogState extends State<RateDoctorDialog> {
       final List<Map<String, dynamic>> reviews = List<Map<String, dynamic>>.from(doctorReviews);
       double totalRating = 0;
       for (var review in reviews) {
-        totalRating += (review['rating'] as int).toDouble();
+        print('Type of review[\'rating\']: ${review['rating'].runtimeType}');
+        totalRating += (review['rating'] as num).toDouble();
       }
       final newReviewCount = reviews.length;
       final newAverageRating = newReviewCount > 0 ? totalRating / newReviewCount : 0.0;
 
       print('New review count: $newReviewCount, New average rating: $newAverageRating');
+      print('Type of newAverageRating: ${newAverageRating.runtimeType}');
 
       // 2. Update the doctors table
       await Supabase.instance.client
@@ -581,10 +583,22 @@ class _DoctorReviewsDialogState extends State<DoctorReviewsDialog> {
                                   ),
                                   Row(
                                     children: [
-                                      Icon(Icons.star, color: Colors.amber[600], size: 18),
+                                      ...List.generate(
+                                        5,
+                                        (index) {
+                                          final reviewRating = (review['rating'] as num?)?.toDouble() ?? 0.0;
+                                          if (index < reviewRating.floor()) {
+                                            return Icon(Icons.star, color: Colors.amber[600], size: 18);
+                                          } else if (index < reviewRating && reviewRating % 1 != 0) {
+                                            return Icon(Icons.star_half, color: Colors.amber[600], size: 18);
+                                          } else {
+                                            return Icon(Icons.star_border, color: Colors.amber[600], size: 18);
+                                          }
+                                        },
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        '${(review['rating'] as int).toDouble().toStringAsFixed(1)}',
+                                        '${(review['rating'] as num?)?.toDouble().toStringAsFixed(1)}',
                                         style: theme.textTheme.bodyMedium,
                                       ),
                                     ],
