@@ -36,6 +36,24 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
         _patients = List<Map<String, dynamic>>.from(response);
         _isLoading = false;
       });
+
+      // Update doctor's patient count
+      final currentUser = _supabase.auth.currentUser;
+      if (currentUser != null) {
+        final doctorResponse = await _supabase
+            .from('doctors')
+            .select('doctor_id')
+            .eq('user_id', currentUser.id)
+            .single();
+
+        if (doctorResponse != null) {
+          final doctorId = doctorResponse['doctor_id'];
+          await _supabase
+              .from('doctors')
+              .update({'patients': _patients.length})
+              .eq('doctor_id', doctorId);
+        }
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
