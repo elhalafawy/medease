@@ -21,6 +21,7 @@ class _DoctorBookAppointmentScreenState
   TimeOfDay? toTime;
   Set<int> unavailableTimes = {};
   List<Map<String, dynamic>> confirmedAppointments = [];
+  List<Map<String, dynamic>> _allDoctorReviews = [];
 
   @override
   void initState() {
@@ -28,6 +29,31 @@ class _DoctorBookAppointmentScreenState
     final now = DateTime.now();
     next7Days = List.generate(7, (i) => now.add(Duration(days: i)));
     loadAppointments(); // Load appointments when screen initializes
+    _loadAllDoctorReviewsForAverage(); // Load all doctor reviews for average
+  }
+
+  Future<void> _loadAllDoctorReviewsForAverage() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('doctor_reviews')
+          .select('*');
+      setState(() {
+        _allDoctorReviews = List<Map<String, dynamic>>.from(response);
+      });
+    } catch (e) {
+      print('Error loading all doctor reviews for average: $e');
+    }
+  }
+
+  double _getAverageRating() {
+    if (_allDoctorReviews.isEmpty) {
+      return 0.0;
+    }
+    double totalRating = 0;
+    for (var review in _allDoctorReviews) {
+      totalRating += (review['rating'] as num?)?.toDouble() ?? 0.0;
+    }
+    return totalRating / _allDoctorReviews.length;
   }
 
   Future<void> loadAppointments() async {
@@ -532,12 +558,27 @@ class _DoctorBookAppointmentScreenState
                             style: theme.textTheme.titleLarge
                                 ?.copyWith(color: theme.colorScheme.primary)),
                         const Spacer(),
-                        const Icon(Icons.star,
-                            color: Color(0xFFF5B100), size: 20),
-                        const SizedBox(width: 4),
-                        Text('4.8',
-                            style: theme.textTheme.bodyLarge
-                                ?.copyWith(color: theme.colorScheme.primary)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF5B100).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.star, color: Color(0xFFF5B100), size: 20),
+                              const SizedBox(width: 6),
+                              Text(
+                                _getAverageRating().toStringAsFixed(1),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),

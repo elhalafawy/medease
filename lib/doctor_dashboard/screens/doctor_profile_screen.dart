@@ -197,32 +197,21 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       }
                     },
                   ),
+                  _ProfileListTile(
+                    icon: Icons.logout,
+                    title: 'Logout',
+                    onTap: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (route) => false,
+                      );
+                    },
+                    iconColor: Colors.red,
+                  ),
                 ],
               ),
             ),
             const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                  ),
-                  child: Text('Sign Out', style: AppTheme.titleLarge.copyWith(color: Colors.white)),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -234,7 +223,14 @@ class _ProfileListTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
-  const _ProfileListTile({required this.icon, required this.title, required this.onTap});
+  final Color? iconColor;
+
+  const _ProfileListTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.iconColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -249,21 +245,24 @@ class _ProfileListTile extends StatelessWidget {
               ? Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
+                    color: AppTheme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Text('Pending', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Pending',
+                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor),
+                  ),
                 )
-              : const Icon(Icons.chevron_right, color: AppTheme.greyColor),
-          onTap: pending ? null : onTap,
+              : const Icon(Icons.arrow_forward_ios, size: 20, color: AppTheme.greyColor),
+          onTap: onTap,
         ),
       );
     }
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: AppTheme.primaryColor),
+      leading: Icon(icon, color: iconColor ?? AppTheme.primaryColor),
       title: Text(title, style: AppTheme.bodyLarge),
-      trailing: const Icon(Icons.chevron_right, color: AppTheme.greyColor),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 20, color: AppTheme.greyColor),
       onTap: onTap,
     );
   }

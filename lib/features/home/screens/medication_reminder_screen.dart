@@ -133,6 +133,26 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     final unselectedColor = theme.colorScheme.surfaceVariant;
     final textColor = isDark ? Colors.white : Colors.black87;
     
+    // Calculate total pills needed
+    String totalPillsText = 'N/A';
+    if (_startDate != null && _endDate != null && _selectedFrequency != 'As needed') {
+      final int durationInDays = _endDate!.difference(_startDate!).inDays + 1;
+      int dosesPerDay = 0;
+      if (_selectedFrequency == 'Once daily') {
+        dosesPerDay = 1;
+      } else if (_selectedFrequency == 'Twice daily') {
+        dosesPerDay = 2;
+      } else if (_selectedFrequency == 'Three times daily') {
+        dosesPerDay = 3;
+      } else if (_selectedFrequency == 'Four times daily') {
+        dosesPerDay = 4;
+      }
+      final int totalPills = durationInDays * dosesPerDay;
+      totalPillsText = '$totalPills pills over $durationInDays days';
+    } else if (_selectedFrequency == 'As needed') {
+      totalPillsText = 'As needed';
+    }
+
     // Helper for frequency display
     String getFrequencyLabel(String? freq) {
       switch (freq) {
@@ -180,12 +200,19 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
     ];
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Medication reminder'),
+        title: Text(
+          'Medication reminder',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: textColor),
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       ),
       body: Form(
         key: _formKey,
@@ -195,9 +222,9 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
             // --- Card with summary info and input fields ---
             Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              elevation: 6,
-              shadowColor: selectedColor.withOpacity(0.13),
-              color: theme.cardColor,
+              elevation: 4,
+              shadowColor: theme.colorScheme.shadow.withOpacity(0.1),
+              color: theme.colorScheme.surface,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
                 child: Column(
@@ -207,14 +234,16 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                       controller: _nameController,
                       decoration: InputDecoration(
                         hintText: 'Enter medication name',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        ),
                         prefixIcon: Container(
                           width: 120,
                           alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
                             border: Border(
                               right: BorderSide(
-                                color: Colors.grey.withOpacity(0.4),
+                                color: theme.colorScheme.outline.withOpacity(0.4),
                                 width: 1,
                               ),
                             ),
@@ -222,53 +251,57 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
                             children: [
-                              Icon(Icons.medication_outlined, size: 24, color: selectedColor),
+                              Icon(Icons.medication_outlined, size: 24, color: theme.colorScheme.primary),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text('Name:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                child: Text(
+                                  'Name:',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: unselectedColor),
+                          borderSide: BorderSide(color: theme.colorScheme.outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: unselectedColor),
+                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: selectedColor, width: 1.5),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         isDense: true,
                         prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter medication name';
-                        }
-                        return null;
-                      },
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _dosageController,
                       decoration: InputDecoration(
                         hintText: 'e.g. 250mg',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        ),
                         prefixIcon: Container(
                           width: 120,
                           alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
                             border: Border(
                               right: BorderSide(
-                                color: Colors.grey.withOpacity(0.4),
+                                color: theme.colorScheme.outline.withOpacity(0.4),
                                 width: 1,
                               ),
                             ),
@@ -276,33 +309,41 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
                             children: [
-                              Icon(Icons.medical_services_outlined, size: 24, color: selectedColor),
+                              Icon(Icons.cases_outlined, size: 24, color: theme.colorScheme.primary),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text('Dosage:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                child: Text(
+                                  'Dosage:',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: unselectedColor),
+                          borderSide: BorderSide(color: theme.colorScheme.outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: unselectedColor),
+                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: selectedColor, width: 1.5),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         isDense: true,
                         prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter dosage';
@@ -310,12 +351,12 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: unselectedColor),
-                        color: Colors.white,
+                        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+                        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                       child: Row(
@@ -326,7 +367,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                             decoration: BoxDecoration(
                               border: Border(
                                 right: BorderSide(
-                                  color: Colors.grey.withOpacity(0.4),
+                                  color: theme.colorScheme.outline.withOpacity(0.4),
                                   width: 1,
                                 ),
                               ),
@@ -334,10 +375,67 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Row(
                               children: [
-                                Icon(Icons.repeat, size: 24, color: selectedColor),
+                                Icon(Icons.calculate_outlined, size: 24, color: theme.colorScheme.primary),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text('Frequency:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                  child: Text(
+                                    'Total pills needed:',
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              totalPillsText,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+                        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 135,
+                            alignment: Alignment.centerLeft,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                right: BorderSide(
+                                  color: theme.colorScheme.outline.withOpacity(0.4),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              children: [
+                                Icon(Icons.repeat, size: 24, color: theme.colorScheme.primary),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Frequency:',
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -349,7 +447,8 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                                 final selectedFreq = await showModalBottomSheet<String>(
                                   context: context,
                                   isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
+                                  backgroundColor: theme.colorScheme.surface,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
                                   builder: (context) => _FrequencySelector(
                                     currentFrequency: _selectedFrequency,
                                     frequencies: _frequencies,
@@ -373,7 +472,7 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         right: BorderSide(
-                                          color: Colors.grey.withOpacity(0.4),
+                                          color: theme.colorScheme.outline.withOpacity(0.4),
                                           width: 1,
                                         ),
                                       ),
@@ -381,12 +480,15 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                                     padding: const EdgeInsets.symmetric(horizontal: 10),
                                     child: Row(
                                       children: [
-                                        Icon(Icons.repeat, size: 24, color: selectedColor),
+                                        Icon(Icons.repeat, size: 24, color: theme.colorScheme.primary),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             getFrequencyLabel(_selectedFrequency),
-                                            style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+                                            style: theme.textTheme.bodyLarge?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                              color: theme.colorScheme.onSurface,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -394,18 +496,18 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: unselectedColor),
+                                    borderSide: BorderSide(color: theme.colorScheme.outline),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: unselectedColor),
+                                    borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: selectedColor, width: 1.5),
+                                    borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                                   ),
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor: Colors.transparent,
                                   contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                                   isDense: true,
                                   prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
@@ -416,19 +518,21 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _notesController,
                       decoration: InputDecoration(
                         hintText: 'Any notes...',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        ),
                         prefixIcon: Container(
                           width: 110,
                           alignment: Alignment.centerLeft,
                           decoration: BoxDecoration(
                             border: Border(
                               right: BorderSide(
-                                color: Colors.grey.withOpacity(0.4),
+                                color: theme.colorScheme.outline.withOpacity(0.4),
                                 width: 1,
                               ),
                             ),
@@ -436,94 +540,44 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Row(
                             children: [
-                              Icon(Icons.sticky_note_2_outlined, size: 24, color: selectedColor),
+                              Icon(Icons.sticky_note_2_outlined, size: 24, color: theme.colorScheme.primary),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text('Notes:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
+                                child: Text(
+                                  'Notes:',
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: unselectedColor),
+                          borderSide: BorderSide(color: theme.colorScheme.outline),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: unselectedColor),
+                          borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: selectedColor, width: 1.5),
+                          borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                         isDense: true,
                         prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                       ),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
-                    // --- Total pills calculation or placeholder ---
-                    Builder(
-                      builder: (context) {
-                        String totalPillsText;
-                        if (_selectedFrequency == 'As needed') {
-                          totalPillsText = '--';
-                        } else {
-                          int days = 1;
-                          if (_startDate != null && _endDate != null) {
-                            days = _endDate!.difference(_startDate!).inDays + 1;
-                          }
-                          int timesPerDay = 1;
-                          if (_selectedFrequency == 'Once daily') timesPerDay = 1;
-                          else if (_selectedFrequency == 'Twice daily') timesPerDay = 2;
-                          else if (_selectedFrequency == 'Three times daily') timesPerDay = 3;
-                          else if (_selectedFrequency == 'Four times daily') timesPerDay = 4;
-                          int total = days * timesPerDay;
-                          totalPillsText = '$total';
-                        }
-                        return Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: unselectedColor),
-                            color: Colors.white,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 135,
-                                alignment: Alignment.centerLeft,
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    right: BorderSide(
-                                      color: Colors.grey.withOpacity(0.4),
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.calculate_outlined, size: 24, color: selectedColor),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text('Total pills needed:', style: TextStyle(fontWeight: FontWeight.w500, color: textColor)),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(totalPillsText, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
                   ],
                 ),
               ),
@@ -538,39 +592,44 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                     controller: TextEditingController(text: _startDate != null ? DateFormat('dd/MM/yyyy').format(_startDate!) : 'Select date'),
                     decoration: InputDecoration(
                       labelText: 'Start Date',
-                      labelStyle: TextStyle(color: textColor.withOpacity(0.7)),
+                      labelStyle: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      ),
                       prefixIcon: Container(
                         width: 60,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border(
                             right: BorderSide(
-                              color: Colors.grey.withOpacity(0.4),
+                              color: theme.colorScheme.outline.withOpacity(0.4),
                               width: 1,
                             ),
                           ),
                         ),
-                        child: Icon(Icons.calendar_today, size: 24, color: selectedColor),
+                        child: Icon(Icons.calendar_today, size: 24, color: theme.colorScheme.primary),
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: unselectedColor),
+                        borderSide: BorderSide(color: theme.colorScheme.outline),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: unselectedColor),
+                        borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: selectedColor, width: 1.5),
+                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                       isDense: true,
                       prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                     ),
                     onTap: () => _selectDate(context, true),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -580,52 +639,63 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                     controller: TextEditingController(text: _endDate != null ? DateFormat('dd/MM/yyyy').format(_endDate!) : 'Select date'),
                     decoration: InputDecoration(
                       labelText: 'End Date',
-                      labelStyle: TextStyle(color: textColor.withOpacity(0.7)),
+                      labelStyle: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      ),
                       prefixIcon: Container(
                         width: 60,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border(
                             right: BorderSide(
-                              color: Colors.grey.withOpacity(0.4),
+                              color: theme.colorScheme.outline.withOpacity(0.4),
                               width: 1,
                             ),
                           ),
                         ),
-                        child: Icon(Icons.calendar_today, size: 24, color: selectedColor),
+                        child: Icon(Icons.calendar_today, size: 24, color: theme.colorScheme.primary),
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: unselectedColor),
+                        borderSide: BorderSide(color: theme.colorScheme.outline),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: unselectedColor),
+                        borderSide: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: selectedColor, width: 1.5),
+                        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                       isDense: true,
                       prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                     ),
                     onTap: () => _selectDate(context, false),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
             // --- Frequency segmented buttons ---
-            const Text('Frequency', style: TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              'Frequency',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: unselectedColor),
+                border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -647,17 +717,15 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: selected ? selectedColor : Colors.transparent,
+                            color: selected ? theme.colorScheme.primary : Colors.transparent,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(
                             child: Text(
                               getFrequencyLabel(freq),
-                              style: TextStyle(
-                                color: selected ? Colors.white : textColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                letterSpacing: 0.2,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: selected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -671,7 +739,13 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
             const SizedBox(height: 24),
             // --- Reminder Times (time slots) ---
             if (_selectedFrequency != 'As needed') ...[
-              const Text('Reminder Times', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                'Reminder Times',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 10),
               Column(
                 children: List.generate(_reminderTimes.length, (index) {
@@ -683,6 +757,20 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                         final picked = await showTimePicker(
                           context: context,
                           initialTime: time,
+                          builder: (context, child) {
+                            return Theme(
+                              data: theme.copyWith(
+                                colorScheme: theme.colorScheme.copyWith(
+                                  primary: theme.colorScheme.primary,
+                                  onSurface: theme.colorScheme.onSurface,
+                                  surface: theme.colorScheme.surface,
+                                  onPrimary: theme.colorScheme.onPrimary,
+                                ),
+                                textTheme: theme.textTheme,
+                              ),
+                              child: child!,
+                            );
+                          },
                         );
                         if (picked != null) {
                           setState(() {
@@ -692,22 +780,35 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
                           borderRadius: borderRadius,
-                          border: Border.all(color: unselectedColor),
+                          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Time ${index + 1}', style: const TextStyle(fontWeight: FontWeight.w500)),
                             Row(
                               children: [
-                                Icon(Icons.access_time, color: selectedColor),
-                                const SizedBox(width: 8),
-                                Text(time.format(context), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                Icon(Icons.access_time_outlined, size: 22, color: theme.colorScheme.primary),
+                                const SizedBox(width: 12),
+                                Text(
+                                  time.format(context),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
                               ],
                             ),
+                            if (_reminderTimes.length > 1)
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  color: theme.colorScheme.error,
+                                ),
+                                onPressed: () => _removeReminderTime(index),
+                              ),
                           ],
                         ),
                       ),
@@ -715,46 +816,28 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                   );
                 }),
               ),
-              const SizedBox(height: 24),
-            ]
-            else ...[
-              const SizedBox(height: 18),
-              Center(
-                child: Text(
-                  'Take the medication as needed according to your doctors instructions.',
-                  style: TextStyle(color: Colors.grey, fontSize: 15, fontStyle: FontStyle.italic),
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: _addReminderTime,
+                icon: Icon(Icons.add, color: theme.colorScheme.primary),
+                label: Text(
+                  'Add another time',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 24),
             ],
-            const SizedBox(height: 30),
-            // --- Confirm button ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+            SizedBox(
+              width: double.infinity,
               child: ElevatedButton(
-                onPressed: () async {
+                onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    final user = Supabase.instance.client.auth.currentUser;
-                    if (user == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('User not authenticated')),
-                      );
-                      return;
-                    }
-                    final patient = await Supabase.instance.client
-                        .from('patients')
-                        .select('patient_id')
-                        .eq('user_id', user.id)
-                        .maybeSingle();
-
-                    if (patient == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Patient not found')),
-                      );
-                      return;
-                    }
-                    final patientId = patient['patient_id'];
-
                     widget.onConfirm(
                       _nameController.text,
                       _dosageController.text,
@@ -763,19 +846,27 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
                       _selectedFrequency!,
                       _reminderTimes,
                       _notesController.text.isEmpty ? null : _notesController.text,
-                      patientId,
+                      'reminderId', // Placeholder, will be generated server-side
                     );
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: selectedColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
                 ),
-                child: const Text('Confirm Reminder'),
+                child: Text(
+                  'Save Reminder',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
@@ -788,83 +879,76 @@ class _MedicationReminderScreenState extends State<MedicationReminderScreen> {
 class _FrequencySelector extends StatelessWidget {
   final String? currentFrequency;
   final List<String> frequencies;
-  final Function(String) onSelected;
+  final ValueChanged<String> onSelected;
 
   const _FrequencySelector({
-    Key? key,
-    this.currentFrequency,
+    required this.currentFrequency,
     required this.frequencies,
     required this.onSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selectedColor = theme.primaryColor;
-    final unselectedColor = theme.colorScheme.surfaceVariant;
-    final isDark = theme.brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black87;
-
-    String getFrequencyLabel(String? freq) {
-      switch (freq) {
-        case 'Once daily':
-          return 'Once a day';
-        case 'Twice daily':
-          return 'Twice a day';
-        case 'Three times daily':
-          return '3 times a day';
-        case 'Four times daily':
-          return '4 times a day';
-        case 'As needed':
-          return 'As needed';
-        default:
-          return freq ?? '';
-      }
-    }
-
     return Container(
-      height: 250,
       decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      padding: const EdgeInsets.all(24),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Select Frequency',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
+          Text(
+            'Select Frequency',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
-          Expanded(
+          const SizedBox(height: 20),
+          Flexible( // Use Flexible to constrain the height of the ListView
             child: ListView.builder(
+              shrinkWrap: true,
               itemCount: frequencies.length,
               itemBuilder: (context, index) {
                 final freq = frequencies[index];
                 final isSelected = freq == currentFrequency;
-                return GestureDetector(
-                  onTap: () => onSelected(freq),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? selectedColor : unselectedColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Text(
-                        getFrequencyLabel(freq),
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                return ListTile(
+                  title: Text(
+                    freq,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
+                  trailing: isSelected ? Icon(Icons.check, color: theme.colorScheme.primary) : null,
+                  onTap: () => onSelected(freq),
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primaryContainer,
+                foregroundColor: theme.colorScheme.onPrimaryContainer,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                'Done',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],

@@ -27,6 +27,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   List<Map<String, dynamic>> _doctorReviews = [];
   List<Map<String, dynamic>> _allDoctorReviews = [];
   String _selectedAnalyticsPeriod = 'This Week';
+  int _pendingAppointmentsCount = 0;
 
   @override
   void initState() {
@@ -34,6 +35,25 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
     _loadGenderStats();
     _loadDoctorReviews();
     _loadAllDoctorReviewsForAverage();
+    _loadPendingAppointmentsCount();
+  }
+
+  Future<void> _loadPendingAppointmentsCount() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('appointments')
+          .select('count')
+          .eq('status', 'pending')
+          .single();
+      
+      if (response != null && response is Map && response['count'] != null) {
+        setState(() {
+          _pendingAppointmentsCount = response['count'] as int;
+        });
+      }
+    } catch (e) {
+      print('Error loading pending appointments count: $e');
+    }
   }
 
   Future<void> _loadGenderStats() async {
@@ -433,7 +453,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "0",
+                                        "$_pendingAppointmentsCount",
                                         style: theme.textTheme.headlineMedium
                                             ?.copyWith(
                                                 fontWeight: FontWeight.bold,

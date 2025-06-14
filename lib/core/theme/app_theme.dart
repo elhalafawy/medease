@@ -17,30 +17,30 @@ class AppTheme {
   static const double kElevationMedium = 4.0;
   static const double kElevationLarge = 8.0;
 
-  // Brand Colors (Consistent for both modes where applicable, or defined per mode)
-  static const Color primaryColor = Color(0xFF022E5B);
-  static const Color secondaryColor = Color(0xFF00264D);
+  // Brand Colors (Updated for better contrast)
+  static const Color primaryColor = Color(0xFF022E5B); // Original primary color
+  static const Color secondaryColor = Color(0xFF00264D); // Original secondary color
 
-  // Background Colors
-  static const Color backgroundColor = Color(0xFFF3F4F6);
-  static const Color appBarBackgroundColor = Color(0xFFF8F9FB);
-  static const Color darkBackground = Color(0xFF181A20);
-  static const Color darkSurface = Color(0xFF23262F);
+  // Background Colors (Updated for better contrast)
+  static const Color backgroundColor = Color(0xFFF8F9FA); // Slightly darker for better contrast
+  static const Color appBarBackgroundColor = Color(0xFFFFFFFF); // Pure white for better contrast
+  static const Color darkBackground = Color(0xFF121212); // Material dark background
+  static const Color darkSurface = Color(0xFF1E1E1E); // Slightly lighter than background
 
-  // Text Colors
-  static const Color textColor = Color(0xFF3C4A59);
-  static const Color greyColor = Color(0xFFADADAD);
-  static const Color darkText = Color(0xFFE5E7EB);
-  static const Color darkGrey = Color(0xFF7B7F87);
+  // Text Colors (Updated for better readability)
+  static const Color textColor = Color(0xFF1A1A1A); // Darker for better contrast
+  static const Color greyColor = Color(0xFF757575); // Material grey
+  static const Color darkText = Color(0xFFF5F5F5); // Brighter for better readability
+  static const Color darkGrey = Color(0xFF9E9E9E); // Material grey for dark mode
 
-  // Border Colors
-  static const Color borderColor = Color(0xFFE8F3F1);
-  static const Color darkBorder = Color(0xFF35383F);
+  // Border Colors (Updated for better visibility)
+  static const Color borderColor = Color(0xFFE0E0E0); // Material grey 300
+  static const Color darkBorder = Color(0xFF424242); // Material grey 800
 
-  // Status Colors
-  static const Color errorColor = Color(0xFFE53935);
-  static const Color successColor = Color(0xFF43A047);
-  static const Color warningColor = Color(0xFFFFA000);
+  // Status Colors (Updated for better visibility in both modes)
+  static const Color errorColor = Color(0xFFD32F2F); // Material red 700
+  static const Color successColor = Color(0xFF2E7D32); // Material green 800
+  static const Color warningColor = Color(0xFFF57C00); // Material orange 700
 
   // Booking colors
   static const Color bookingDayColor = Color(0xFF73D0ED);
@@ -63,24 +63,20 @@ class AppTheme {
   static const Color darkDialog = Color(0xFF23262F);
   static const Color darkInput = Color(0xFF23262F);
 
-  // Night mode colors (Standardized)
-  static const Color nightBackground = Color(0xFF18191A);
-  static const Color nightSurface =
-      Color(0xFF242526); // Used for cards, dialogs, inputs
-  static const Color nightCard = nightSurface; // Standardized
-  static const Color nightDialog = nightSurface; // Standardized
-  static const Color nightInput = nightSurface; // Standardized
-  static const Color nightBorder = Color(0xFF3A3B3C);
-  static const Color nightText = Color(0xFFE4E6EB);
-  static const Color nightGrey = Color(0xFFB0B3B8);
-  static const Color nightPrimary = Color.fromARGB(255, 2, 50, 104);
-  static const Color nightSecondary = Color.fromARGB(255, 0, 47, 93);
-  static const Color nightError =
-      Color(0xFFEF9A9A); // Adjusted for dark mode visibility
-  static const Color nightSuccess =
-      Color(0xFFA5D6A7); // Adjusted for dark mode visibility
-  static const Color nightWarning =
-      Color(0xFFFFCC80); // Adjusted for dark mode visibility
+  // Night mode colors (Updated for better contrast and visibility)
+  static const Color nightBackground = Color(0xFF121212); // Material dark background
+  static const Color nightSurface = Color(0xFF1E1E1E); // Slightly lighter than background
+  static const Color nightCard = Color(0xFF2C2C2C); // Slightly lighter than surface
+  static const Color nightDialog = Color(0xFF2C2C2C); // Same as card for consistency
+  static const Color nightInput = Color(0xFF2C2C2C); // Same as card for consistency
+  static const Color nightBorder = Color(0xFF424242); // Material grey 800
+  static const Color nightText = Color(0xFFF5F5F5); // Material grey 100
+  static const Color nightGrey = Color(0xFF9E9E9E); // Material grey 500
+  static const Color nightPrimary = Color(0xFF2196F3); // Material blue 500
+  static const Color nightSecondary = Color(0xFF1976D2); // Material blue 700
+  static const Color nightError = Color(0xFFEF5350); // Material red 400
+  static const Color nightSuccess = Color(0xFF66BB6A); // Material green 400
+  static const Color nightWarning = Color(0xFFFFB74D); // Material orange 300
 
   // Night mode notification colors
   static const Color nightNotifCalendarIcon =
@@ -231,7 +227,7 @@ class AppTheme {
     height: 1.4,
   );
 
-  // Text Styles (Night Mode)
+  // Text Styles (Light Mode)
   // Using get accessors for potential future dynamic adjustments, but primarily copying with color changes.
   static TextStyle get nightDisplayLarge =>
       displayLarge.copyWith(color: nightText);
@@ -262,91 +258,167 @@ class AppTheme {
 
   // Light Theme
   static ThemeData get lightTheme {
-    // Define the color scheme for light mode
     const ColorScheme lightColorScheme = ColorScheme.light(
       primary: primaryColor,
-      onPrimary: Colors.white, // Text/icons on primary color
-      primaryContainer: secondaryColor, // A shade lighter than primary
-      onPrimaryContainer: Colors.white, // Text/icons on primary container
+      onPrimary: Colors.white,
+      primaryContainer: Color(0xFFE3F2FD), // Light blue 50
+      onPrimaryContainer: Color(0xFF022E5B), // Original primary color
       secondary: secondaryColor,
-      onSecondary: Colors.white, // Text/icons on secondary color
-      secondaryContainer:
-          Color(0xFFE0E0E0), // Example secondary container color
-      onSecondaryContainer: textColor, // Text/icons on secondary container
-      tertiary: bookingTimeColor, // Example tertiary color
-      onTertiary: Colors.white, // Text/icons on tertiary color
-      tertiaryContainer: Color(0xFFFFECB3), // Example tertiary container color
-      onTertiaryContainer: textColor, // Text/icons on tertiary container
+      onSecondary: Colors.white,
+      secondaryContainer: Color(0xFFE8EAF6), // Indigo 50
+      onSecondaryContainer: Color(0xFF00264D), // Original secondary color
+      tertiary: Color(0xFF00BCD4), // Cyan 500
+      onTertiary: Colors.white,
+      tertiaryContainer: Color(0xFFE0F7FA), // Cyan 50
+      onTertiaryContainer: Color(0xFF006064), // Cyan 900
       error: errorColor,
-      onError: Colors.white, // Text/icons on error color
-      errorContainer: Color(0xFFFFCDD2), // Example error container color
-      onErrorContainer: textColor, // Text/icons on error container
-      background: backgroundColor, // Main background color
-      onBackground: textColor, // Text/icons on background
-      surface: Colors.white, // Card, dialog, sheet backgrounds
-      onSurface: textColor, // Text/icons on surface
-      surfaceVariant: Color(0xFFE0E0E0), // Less prominent surface
-      onSurfaceVariant: greyColor, // Text/icons on surface variant
-      outline: borderColor, // Borders and dividers
-      outlineVariant: greyColor, // Less prominent borders
-      shadow: Colors.black54, // Shadows
-      scrim: Colors.black54, // Scrim for modals
-      inverseSurface:
-          darkBackground, // For elements on dark background in light theme
-      onInverseSurface: darkText, // Text/icons on inverse surface
-      inversePrimary: nightPrimary, // Primary color for inverse theme
-      surfaceTint: primaryColor, // Surface tint color
+      onError: Colors.white,
+      errorContainer: Color(0xFFFFEBEE), // Red 50
+      onErrorContainer: Color(0xFFB71C1C), // Red 900
+      background: backgroundColor,
+      onBackground: textColor,
+      surface: Colors.white,
+      onSurface: textColor,
+      surfaceVariant: Color(0xFFF5F5F5), // Grey 100
+      onSurfaceVariant: Color(0xFF616161), // Grey 700
+      outline: borderColor,
+      outlineVariant: Color(0xFFE0E0E0), // Grey 300
+      shadow: Color(0x1A000000), // 10% black
+      scrim: Color(0x52000000), // 32% black
+      inverseSurface: darkBackground,
+      onInverseSurface: darkText,
+      inversePrimary: nightPrimary,
+      surfaceTint: primaryColor,
     );
 
     return ThemeData(
       useMaterial3: true,
-      colorScheme: lightColorScheme, // Use the defined light color scheme
-      primaryColor: primaryColor, // Keep primaryColor for older widgets
+      colorScheme: lightColorScheme,
+      primaryColor: primaryColor,
       scaffoldBackgroundColor: lightColorScheme.background,
-
-      // Define Text Themes using the defined text styles
-      textTheme: const TextTheme(
-        displayLarge: displayLarge,
-        displayMedium: displayMedium,
-        displaySmall: displaySmall,
-        headlineLarge: headlineLarge,
-        headlineMedium: headlineMedium,
-        headlineSmall: headlineSmall,
-        titleLarge: titleLarge,
-        titleMedium: titleMedium,
-        titleSmall: titleSmall,
-        bodyLarge: bodyLarge,
-        bodyMedium: bodyMedium,
-        bodySmall: bodySmall,
-        labelLarge: labelLarge,
-        labelMedium: labelMedium,
-        labelSmall: labelSmall,
+      
+      // Updated text theme with better contrast
+      textTheme: TextTheme(
+        displayLarge: displayLarge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -1.5,
+        ),
+        displayMedium: displayMedium.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+        ),
+        displaySmall: displaySmall.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        headlineLarge: headlineLarge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+        ),
+        headlineMedium: headlineMedium.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        headlineSmall: headlineSmall.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.15,
+        ),
+        titleLarge: titleLarge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        titleMedium: titleMedium.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.15,
+        ),
+        titleSmall: titleSmall.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
+        bodyLarge: bodyLarge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.15,
+        ),
+        bodyMedium: bodyMedium.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.25,
+        ),
+        bodySmall: bodySmall.copyWith(
+          color: greyColor,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.4,
+        ),
+        labelLarge: labelLarge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
+        labelMedium: labelMedium.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+        labelSmall: labelSmall.copyWith(
+          color: greyColor,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5,
+        ),
       ),
 
-      // AppBar Theme
+      // Updated AppBar theme
       appBarTheme: AppBarTheme(
         backgroundColor: appBarBackgroundColor,
-        foregroundColor: textColor, // Color of icons and text in AppBar
-        elevation: kElevationSmall,
-        titleTextStyle: titleLarge.copyWith(color: textColor),
-        iconTheme: const IconThemeData(color: textColor),
-        actionsIconTheme: const IconThemeData(color: textColor),
+        foregroundColor: textColor,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: titleLarge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
+        iconTheme: IconThemeData(
+          color: textColor,
+          size: 24,
+        ),
+        actionsIconTheme: IconThemeData(
+          color: textColor,
+          size: 24,
+        ),
       ),
 
-      // Button Themes
+      // Updated Button themes with consistent styling
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: lightColorScheme.onPrimary,
           backgroundColor: lightColorScheme.primary,
+          elevation: kElevationSmall,
+          shadowColor: lightColorScheme.shadow,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(
-              horizontal: kPaddingLarge, vertical: kPaddingMedium),
-          textStyle: labelLarge.copyWith(color: lightColorScheme.onPrimary),
-          elevation: kElevationMedium,
+            horizontal: kPaddingLarge,
+            vertical: kPaddingMedium,
+          ),
+          textStyle: labelLarge.copyWith(
+            color: lightColorScheme.onPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          minimumSize: const Size(88, 48),
         ),
       ),
+
+      // Updated TextButton theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: lightColorScheme.primary,
@@ -354,212 +426,367 @@ class AppTheme {
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(
-              horizontal: kPaddingMedium, vertical: kPaddingSmall),
-          textStyle: labelLarge.copyWith(color: lightColorScheme.primary),
+            horizontal: kPaddingMedium,
+            vertical: kPaddingSmall,
+          ),
+          textStyle: labelLarge.copyWith(
+            color: lightColorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+          minimumSize: const Size(88, 48),
         ),
       ),
+
+      // Updated OutlinedButton theme
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: lightColorScheme.primary,
-          side: BorderSide(color: lightColorScheme.primary, width: 1),
+          side: BorderSide(
+            color: lightColorScheme.primary,
+            width: 1.5,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(
-              horizontal: kPaddingLarge, vertical: kPaddingMedium),
-          textStyle: labelLarge.copyWith(color: lightColorScheme.primary),
+            horizontal: kPaddingLarge,
+            vertical: kPaddingMedium,
+          ),
+          textStyle: labelLarge.copyWith(
+            color: lightColorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+          minimumSize: const Size(88, 48),
         ),
       ),
+
+      // Updated IconButton theme
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           foregroundColor: textColor,
+          backgroundColor: Colors.transparent,
+          padding: const EdgeInsets.all(kPaddingSmall),
+          minimumSize: const Size(48, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          ),
         ),
       ),
+
+      // Updated FloatingActionButton theme
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: lightColorScheme.secondary,
-        foregroundColor: lightColorScheme.onSecondary,
-        elevation: kElevationLarge,
+        backgroundColor: lightColorScheme.primary,
+        foregroundColor: lightColorScheme.onPrimary,
+        elevation: kElevationMedium,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+        ),
       ),
 
-      // Card Theme
-      cardTheme: CardThemeData(
+      // Updated Card theme
+      cardTheme: CardTheme(
         color: lightColorScheme.surface,
         elevation: kElevationSmall,
+        shadowColor: lightColorScheme.shadow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          side: BorderSide(color: lightColorScheme.outlineVariant, width: 0.5),
+          side: BorderSide(
+            color: lightColorScheme.outlineVariant,
+            width: 0.5,
+          ),
         ),
-        margin:
-            EdgeInsets.zero, // Cards usually have margin from parent padding
+        margin: EdgeInsets.zero,
       ),
 
-      // Input Decoration Theme (for TextFields, TextFormFields)
+      // Updated Input Decoration theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: lightColorScheme.surface,
-        hintStyle: bodyMedium.copyWith(color: greyColor),
-        labelStyle: bodyMedium.copyWith(color: textColor),
+        hintStyle: bodyMedium.copyWith(
+          color: greyColor,
+          fontWeight: FontWeight.w400,
+        ),
+        labelStyle: bodyMedium.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w500,
+        ),
         prefixIconColor: greyColor,
         suffixIconColor: greyColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: lightColorScheme.outline, width: 1),
+          borderSide: BorderSide(
+            color: lightColorScheme.outline,
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: lightColorScheme.outline, width: 1),
+          borderSide: BorderSide(
+            color: lightColorScheme.outline,
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: lightColorScheme.primary, width: 2),
+          borderSide: BorderSide(
+            color: lightColorScheme.primary,
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: lightColorScheme.error, width: 1),
+          borderSide: BorderSide(
+            color: lightColorScheme.error,
+            width: 1,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          borderSide: BorderSide(color: lightColorScheme.error, width: 2),
+          borderSide: BorderSide(
+            color: lightColorScheme.error,
+            width: 2,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
-            horizontal: kPaddingMedium, vertical: kPaddingMedium),
+          horizontal: kPaddingMedium,
+          vertical: kPaddingMedium,
+        ),
+        errorStyle: bodySmall.copyWith(
+          color: lightColorScheme.error,
+          fontWeight: FontWeight.w400,
+        ),
       ),
 
-      // Dialog Theme
-      dialogTheme: DialogThemeData(
+      // Updated Dialog theme
+      dialogTheme: DialogTheme(
         backgroundColor: lightColorScheme.surface,
+        elevation: kElevationLarge,
+        shadowColor: lightColorScheme.shadow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         ),
-        titleTextStyle: titleLarge.copyWith(color: textColor),
-        contentTextStyle: bodyMedium.copyWith(color: textColor),
-      ),
-
-      // Bottom Sheet Theme
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: lightColorScheme.surface,
-        shape: const RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(kBorderRadiusLarge)),
+        titleTextStyle: titleLarge.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
+        contentTextStyle: bodyMedium.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w400,
         ),
       ),
 
-      // Divider Theme
+      // Updated BottomSheet theme
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: lightColorScheme.surface,
+        elevation: kElevationLarge,
+        shadowColor: lightColorScheme.shadow,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(kBorderRadiusLarge),
+          ),
+        ),
+      ),
+
+      // Updated Divider theme
       dividerTheme: DividerThemeData(
         color: lightColorScheme.outlineVariant,
         thickness: 1,
         space: 1,
       ),
 
-      // Add more widget themes as needed (e.g., TabBarTheme, SliderTheme, etc.)
-      // You can continue adding more specific widget themes here following the same pattern.
+      // Add SnackBar theme
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: lightColorScheme.surface,
+        contentTextStyle: bodyMedium.copyWith(
+          color: lightColorScheme.onSurface,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
 
-      // Example: ToggleButtonsThemeData
-      // toggleButtonsTheme: ToggleButtonsThemeData(
-      //   selectedColor: lightColorScheme.onPrimary,
-      //   color: lightColorScheme.primary,
-      //   fillColor: lightColorScheme.primary,
-      //   // ... other properties
-      // ),
-
-      // Example: SliderThemeData
-      // sliderTheme: SliderThemeData(
-      //   activeTrackColor: lightColorScheme.primary,
-      //   inactiveTrackColor: lightColorScheme.primary.withOpacity(0.24),
-      //   thumbColor: lightColorScheme.primary,
-      //   // ... other properties
-      // ),
+      // Add Chip theme
+      chipTheme: ChipThemeData(
+        backgroundColor: lightColorScheme.surfaceVariant,
+        labelStyle: labelMedium.copyWith(
+          color: lightColorScheme.onSurfaceVariant,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kPaddingSmall,
+          vertical: kPaddingSmall / 2,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        ),
+      ),
     );
   }
 
-  // Night Theme
+  // Night Theme (Updated with better contrast and visibility)
   static ThemeData get nightTheme {
-    // Define the color scheme for dark mode
     const ColorScheme darkColorScheme = ColorScheme.dark(
       primary: nightPrimary,
       onPrimary: Colors.white,
-      primaryContainer: nightSecondary,
-      onPrimaryContainer: Colors.white,
+      primaryContainer: Color(0xFF1565C0), // Blue 800
+      onPrimaryContainer: Color(0xFFE3F2FD), // Blue 50
       secondary: nightSecondary,
       onSecondary: Colors.white,
-      secondaryContainer: Color(0xFF3A3B3C), // Example dark secondary container
-      onSecondaryContainer: nightText,
-      tertiary: bookingDayColor, // Example tertiary color for dark mode
-      onTertiary: Colors.black,
-      tertiaryContainer: Color(0xFF5C403F), // Example dark tertiary container
-      onTertiaryContainer: nightText,
-      error: nightError, // Using adjusted dark error color
-      onError: Colors.black, // Text/icons on error color in dark mode
-      errorContainer: Color(0xFF451919), // Example dark error container
-      onErrorContainer: nightText,
-      background: nightBackground, // Main dark background color
-      onBackground: nightText, // Text/icons on dark background
-      surface: nightSurface, // Card, dialog, sheet backgrounds in dark mode
-      onSurface: nightText, // Text/icons on dark surface
-      surfaceVariant: Color(0xFF3A3B3C), // Less prominent dark surface
-      onSurfaceVariant: nightGrey, // Text/icons on dark surface variant
-      outline: nightBorder, // Dark borders and dividers
-      outlineVariant: nightGrey, // Less prominent dark borders
-      shadow: Colors.black87, // Darker shadows
-      scrim: Colors.black87, // Scrim for modals in dark mode
-      inverseSurface:
-          backgroundColor, // For elements on light background in dark theme
-      onInverseSurface: textColor, // Text/icons on inverse surface
-      inversePrimary: primaryColor, // Primary color for inverse theme
-      surfaceTint: nightPrimary, // Surface tint color in dark mode
+      secondaryContainer: Color(0xFF1A237E), // Indigo 900
+      onSecondaryContainer: Color(0xFFE8EAF6), // Indigo 50
+      tertiary: Color(0xFF00BCD4), // Cyan 500
+      onTertiary: Colors.white,
+      tertiaryContainer: Color(0xFF006064), // Cyan 900
+      onTertiaryContainer: Color(0xFFE0F7FA), // Cyan 50
+      error: nightError,
+      onError: Colors.white,
+      errorContainer: Color(0xFFB71C1C), // Red 900
+      onErrorContainer: Color(0xFFFFEBEE), // Red 50
+      background: nightBackground,
+      onBackground: nightText,
+      surface: nightSurface,
+      onSurface: nightText,
+      surfaceVariant: Color(0xFF2C2C2C),
+      onSurfaceVariant: Color(0xFFBDBDBD), // Grey 400
+      outline: nightBorder,
+      outlineVariant: Color(0xFF616161), // Grey 700
+      shadow: Color(0x40000000), // 25% black
+      scrim: Color(0x80000000), // 50% black
+      inverseSurface: backgroundColor,
+      onInverseSurface: textColor,
+      inversePrimary: primaryColor,
+      surfaceTint: nightPrimary,
     );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark, // Indicate this is a dark theme
-      colorScheme: darkColorScheme, // Use the defined dark color scheme
-      primaryColor: nightPrimary, // Keep primaryColor for older widgets
+      brightness: Brightness.dark,
+      colorScheme: darkColorScheme,
+      primaryColor: nightPrimary,
       scaffoldBackgroundColor: darkColorScheme.background,
 
-      // Define Text Themes using the defined night text styles
+      // Updated text theme for dark mode
       textTheme: TextTheme(
-        displayLarge: nightDisplayLarge,
-        displayMedium: nightDisplayMedium,
-        displaySmall: nightDisplaySmall,
-        headlineLarge: nightHeadlineLarge,
-        headlineMedium: nightHeadlineMedium,
-        headlineSmall: nightHeadlineSmall,
-        titleLarge: nightTitleLarge,
-        titleMedium: nightTitleMedium,
-        titleSmall: nightTitleSmall,
-        bodyLarge: nightBodyLarge,
-        bodyMedium: nightBodyMedium,
-        bodySmall: nightBodySmall,
-        labelLarge: nightLabelLarge,
-        labelMedium: nightLabelMedium,
-        labelSmall: nightLabelSmall,
+        displayLarge: nightDisplayLarge.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -1.5,
+        ),
+        displayMedium: nightDisplayMedium.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+        ),
+        displaySmall: nightDisplaySmall.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        headlineLarge: nightHeadlineLarge.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+        ),
+        headlineMedium: nightHeadlineMedium.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        headlineSmall: nightHeadlineSmall.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.15,
+        ),
+        titleLarge: nightTitleLarge.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+        ),
+        titleMedium: nightTitleMedium.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.15,
+        ),
+        titleSmall: nightTitleSmall.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
+        bodyLarge: nightBodyLarge.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.15,
+        ),
+        bodyMedium: nightBodyMedium.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.25,
+        ),
+        bodySmall: nightBodySmall.copyWith(
+          color: nightGrey,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0.4,
+        ),
+        labelLarge: nightLabelLarge.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
+        labelMedium: nightLabelMedium.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+        labelSmall: nightLabelSmall.copyWith(
+          color: nightGrey,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5,
+        ),
       ),
 
-      // AppBar Theme (Dark Mode)
+      // Updated AppBar theme for dark mode
       appBarTheme: AppBarTheme(
-        backgroundColor:
-            darkColorScheme.surface, // Use surface color for consistency
-        foregroundColor: nightText, // Color of icons and text in AppBar
-        elevation: kElevationSmall,
-        titleTextStyle: nightTitleLarge.copyWith(color: nightText),
-        iconTheme: const IconThemeData(color: nightText),
-        actionsIconTheme: const IconThemeData(color: nightText),
+        backgroundColor: darkColorScheme.surface,
+        foregroundColor: nightText,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: nightTitleLarge.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+        ),
+        iconTheme: IconThemeData(
+          color: nightText,
+          size: 24,
+        ),
+        actionsIconTheme: IconThemeData(
+          color: nightText,
+          size: 24,
+        ),
       ),
 
-      // Button Themes (Dark Mode)
+      // Updated Button themes for dark mode
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           foregroundColor: darkColorScheme.onPrimary,
           backgroundColor: darkColorScheme.primary,
+          elevation: kElevationSmall,
+          shadowColor: darkColorScheme.shadow,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(
-              horizontal: kPaddingLarge, vertical: kPaddingMedium),
-          textStyle: nightLabelLarge.copyWith(color: darkColorScheme.onPrimary),
-          elevation: kElevationMedium,
+            horizontal: kPaddingLarge,
+            vertical: kPaddingMedium,
+          ),
+          textStyle: nightLabelLarge.copyWith(
+            color: darkColorScheme.onPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+          minimumSize: const Size(88, 48),
         ),
       ),
+
+      // Updated TextButton theme for dark mode
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: darkColorScheme.primary,
@@ -567,129 +794,200 @@ class AppTheme {
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(
-              horizontal: kPaddingMedium, vertical: kPaddingSmall),
-          textStyle: nightLabelLarge.copyWith(color: darkColorScheme.primary),
+            horizontal: kPaddingMedium,
+            vertical: kPaddingSmall,
+          ),
+          textStyle: nightLabelLarge.copyWith(
+            color: darkColorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+          minimumSize: const Size(88, 48),
         ),
       ),
+
+      // Updated OutlinedButton theme for dark mode
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: darkColorScheme.primary,
-          side: BorderSide(color: darkColorScheme.primary, width: 1),
+          side: BorderSide(
+            color: darkColorScheme.primary,
+            width: 1.5,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(
-              horizontal: kPaddingLarge, vertical: kPaddingMedium),
-          textStyle: nightLabelLarge.copyWith(color: darkColorScheme.primary),
+            horizontal: kPaddingLarge,
+            vertical: kPaddingMedium,
+          ),
+          textStyle: nightLabelLarge.copyWith(
+            color: darkColorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+          minimumSize: const Size(88, 48),
         ),
       ),
+
+      // Updated IconButton theme for dark mode
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           foregroundColor: nightText,
+          backgroundColor: Colors.transparent,
+          padding: const EdgeInsets.all(kPaddingSmall),
+          minimumSize: const Size(48, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+          ),
         ),
       ),
+
+      // Updated FloatingActionButton theme for dark mode
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: darkColorScheme.secondary,
-        foregroundColor: darkColorScheme.onSecondary,
-        elevation: kElevationLarge,
+        backgroundColor: darkColorScheme.primary,
+        foregroundColor: darkColorScheme.onPrimary,
+        elevation: kElevationMedium,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kBorderRadiusLarge),
+        ),
       ),
 
-      // Card Theme (Dark Mode)
-      cardTheme: CardThemeData(
+      // Updated Card theme for dark mode
+      cardTheme: CardTheme(
         color: darkColorScheme.surface,
         elevation: kElevationSmall,
+        shadowColor: darkColorScheme.shadow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          side: BorderSide(color: darkColorScheme.outlineVariant, width: 0.5),
+          side: BorderSide(
+            color: darkColorScheme.outlineVariant,
+            width: 0.5,
+          ),
         ),
-        margin:
-            EdgeInsets.zero, // Cards usually have margin from parent padding
+        margin: EdgeInsets.zero,
       ),
 
-      // Input Decoration Theme (Dark Mode)
+      // Updated Input Decoration theme for dark mode
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: darkColorScheme.surface, // Use color from color scheme
-        hintStyle: nightBodyMedium.copyWith(color: nightGrey),
-        labelStyle: nightBodyMedium.copyWith(color: nightText),
+        fillColor: darkColorScheme.surface,
+        hintStyle: nightBodyMedium.copyWith(
+          color: nightGrey,
+          fontWeight: FontWeight.w400,
+        ),
+        labelStyle: nightBodyMedium.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w500,
+        ),
         prefixIconColor: nightGrey,
         suffixIconColor: nightGrey,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-              color: darkColorScheme.outline,
-              width: 1), // Use color from color scheme
+            color: darkColorScheme.outline,
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-              color: darkColorScheme.outline,
-              width: 1), // Use color from color scheme
+            color: darkColorScheme.outline,
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-              color: darkColorScheme.primary,
-              width: 2), // Use color from color scheme
+            color: darkColorScheme.primary,
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-              color: darkColorScheme.error,
-              width: 1), // Use color from color scheme
+            color: darkColorScheme.error,
+            width: 1,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-              color: darkColorScheme.error,
-              width: 2), // Use color from color scheme
+            color: darkColorScheme.error,
+            width: 2,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
-            horizontal: kPaddingMedium, vertical: kPaddingMedium),
+          horizontal: kPaddingMedium,
+          vertical: kPaddingMedium,
+        ),
+        errorStyle: nightBodySmall.copyWith(
+          color: darkColorScheme.error,
+          fontWeight: FontWeight.w400,
+        ),
       ),
 
-      // Dialog Theme (Dark Mode)
-      dialogTheme: DialogThemeData(
+      // Updated Dialog theme for dark mode
+      dialogTheme: DialogTheme(
         backgroundColor: darkColorScheme.surface,
+        elevation: kElevationLarge,
+        shadowColor: darkColorScheme.shadow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusLarge),
         ),
-        titleTextStyle: nightTitleLarge.copyWith(color: nightText),
-        contentTextStyle: nightBodyMedium.copyWith(color: nightText),
-      ),
-
-      // Bottom Sheet Theme (Dark Mode)
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: darkColorScheme.surface,
-        shape: const RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(kBorderRadiusLarge)),
+        titleTextStyle: nightTitleLarge.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w600,
+        ),
+        contentTextStyle: nightBodyMedium.copyWith(
+          color: nightText,
+          fontWeight: FontWeight.w400,
         ),
       ),
 
-      // Divider Theme (Dark Mode)
+      // Updated BottomSheet theme for dark mode
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: darkColorScheme.surface,
+        elevation: kElevationLarge,
+        shadowColor: darkColorScheme.shadow,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(kBorderRadiusLarge),
+          ),
+        ),
+      ),
+
+      // Updated Divider theme for dark mode
       dividerTheme: DividerThemeData(
-        color: darkColorScheme.outlineVariant, // Use color from color scheme
+        color: darkColorScheme.outlineVariant,
         thickness: 1,
         space: 1,
       ),
 
-      // Add more widget themes as needed
-      // Example: ToggleButtonsThemeData
-      // toggleButtonsTheme: ToggleButtonsThemeData(
-      //   selectedColor: darkColorScheme.onPrimary,
-      //   color: darkColorScheme.primary,
-      //   fillColor: darkColorScheme.primary,
-      //   // ... other properties
-      // ),
+      // Add SnackBar theme for dark mode
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: darkColorScheme.surface,
+        contentTextStyle: nightBodyMedium.copyWith(
+          color: darkColorScheme.onSurface,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
 
-      // Example: SliderThemeData
-      // sliderTheme: SliderThemeData(
-      //   activeTrackColor: darkColorScheme.primary,
-      //   inactiveTrackColor: darkColorScheme.primary.withOpacity(0.24),
-      //   thumbColor: darkColorScheme.primary,
-      //   // ... other properties
-      // ),
+      // Add Chip theme for dark mode
+      chipTheme: ChipThemeData(
+        backgroundColor: darkColorScheme.surfaceVariant,
+        labelStyle: nightLabelMedium.copyWith(
+          color: darkColorScheme.onSurfaceVariant,
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: kPaddingSmall,
+          vertical: kPaddingSmall / 2,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(kBorderRadiusMedium),
+        ),
+      ),
     );
   }
 

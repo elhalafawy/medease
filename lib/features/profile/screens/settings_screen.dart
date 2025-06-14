@@ -12,20 +12,23 @@ class SettingsScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final notifier = themeModeNotifier ?? themeModeNotifierGlobal;
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
         title: Text(
           'Settings',
           style: theme.textTheme.titleLarge?.copyWith(
             color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: theme.colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -34,109 +37,212 @@ class SettingsScreen extends StatelessWidget {
         children: [
           Text(
             'PROFILE',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withAlpha(153),
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
             ),
           ),
-          SwitchListTile(
-            value: notifier.value == ThemeMode.dark,
-            onChanged: (val) {
-              notifier.value = val ? ThemeMode.dark : ThemeMode.light;
-            },
-            title: Text(
-              'Night Mode',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: theme.colorScheme.outline.withOpacity(0.2),
               ),
             ),
-            activeColor: theme.colorScheme.primary,
-            activeTrackColor: theme.colorScheme.primary.withAlpha(127),
-            inactiveTrackColor: theme.colorScheme.onSurface.withAlpha(51),
-            inactiveThumbColor: theme.colorScheme.onSurface.withAlpha(127),
+            child: Column(
+              children: [
+                SwitchListTile(
+                  value: notifier.value == ThemeMode.dark,
+                  onChanged: (val) {
+                    notifier.value = val ? ThemeMode.dark : ThemeMode.light;
+                  },
+                  title: Text(
+                    'Night Mode',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Enable dark mode',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  activeColor: theme.colorScheme.primary,
+                  activeTrackColor: theme.colorScheme.primaryContainer,
+                  inactiveTrackColor: theme.colorScheme.surfaceVariant,
+                  inactiveThumbColor: theme.colorScheme.outline,
+                ),
+                Divider(
+                  height: 1,
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                ),
+                SwitchListTile(
+                  value: true,
+                  onChanged: (_) {},
+                  title: Text(
+                    'Push Notifications',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Receive notifications about appointments and updates',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  activeColor: theme.colorScheme.primary,
+                  activeTrackColor: theme.colorScheme.primaryContainer,
+                  inactiveTrackColor: theme.colorScheme.surfaceVariant,
+                  inactiveThumbColor: theme.colorScheme.outline,
+                ),
+                Divider(
+                  height: 1,
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                ),
+                SwitchListTile(
+                  value: false,
+                  onChanged: (_) {},
+                  title: Text(
+                    'Location Services',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Allow app to access your location',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  activeColor: theme.colorScheme.primary,
+                  activeTrackColor: theme.colorScheme.primaryContainer,
+                  inactiveTrackColor: theme.colorScheme.surfaceVariant,
+                  inactiveThumbColor: theme.colorScheme.outline,
+                ),
+                Divider(
+                  height: 1,
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                ),
+                ListTile(
+                  title: Text(
+                    'Language',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Change app language',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'English',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.chevron_right,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                  onTap: () {},
+                ),
+              ],
+            ),
           ),
-          SwitchListTile(
-            value: true,
-            onChanged: (_) {},
-            title: Text(
-              'Push Notification',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            activeColor: theme.colorScheme.primary,
-            activeTrackColor: theme.colorScheme.primary.withAlpha(127),
-            inactiveTrackColor: theme.colorScheme.onSurface.withAlpha(51),
-            inactiveThumbColor: theme.colorScheme.onSurface.withAlpha(127),
-          ),
-          SwitchListTile(
-            value: false,
-            onChanged: (_) {},
-            title: Text(
-              'Location',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            activeColor: theme.colorScheme.primary,
-            activeTrackColor: theme.colorScheme.primary.withAlpha(127),
-            inactiveTrackColor: theme.colorScheme.onSurface.withAlpha(51),
-            inactiveThumbColor: theme.colorScheme.onSurface.withAlpha(127),
-          ),
-          ListTile(
-            title: Text(
-              'Language',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            trailing: Text(
-              'English',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withAlpha(178),
-              ),
-            ),
-            onTap: () {},
-          ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           Text(
             'OTHER',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.onSurface.withAlpha(153),
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
             ),
           ),
-          ListTile(
-            title: Text(
-              'Privacy Policy',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
+          const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: theme.colorScheme.outline.withOpacity(0.2),
               ),
             ),
-            trailing: Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: theme.colorScheme.onSurface.withAlpha(85),
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text(
+                    'Privacy Policy',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Read our privacy policy',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                    );
+                  },
+                ),
+                Divider(
+                  height: 1,
+                  color: theme.colorScheme.outline.withOpacity(0.2),
+                ),
+                ListTile(
+                  title: Text(
+                    'Terms and Conditions',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Read our terms and conditions',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const TermsConditionsScreen()),
+                    );
+                  },
+                ),
+              ],
             ),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()));
-            },
-          ),
-          ListTile(
-            title: Text(
-              'Terms and Conditions',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            trailing: Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: theme.colorScheme.onSurface.withAlpha(85),
-            ),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const TermsConditionsScreen()));
-            },
           ),
         ],
       ),

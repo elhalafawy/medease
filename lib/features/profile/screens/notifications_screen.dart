@@ -36,8 +36,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final notifications = [
       {
         'icon': Icons.calendar_month,
-        'iconColor': AppTheme.notifCalendarIcon,
-        'iconBg': AppTheme.notifCalendarBg,
+        'iconColor': theme.colorScheme.primary,
+        'iconBg': theme.colorScheme.primaryContainer,
         'title': 'Schedules!',
         'subtitle': 'Check your schedule Today',
         'onTap': (BuildContext context) {
@@ -52,8 +52,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
       {
         'icon': Icons.favorite,
-        'iconColor': AppTheme.notifChatIcon,
-        'iconBg': AppTheme.notifChatBg,
+        'iconColor': theme.colorScheme.error,
+        'iconBg': theme.colorScheme.errorContainer,
         'title': 'Favorites',
         'subtitle': 'See your favorite doctors',
         'onTap': (BuildContext context) {
@@ -80,8 +80,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
       {
         'icon': Icons.medication,
-        'iconColor': AppTheme.notifMedicineIcon,
-        'iconBg': AppTheme.notifMedicineBg,
+        'iconColor': theme.colorScheme.tertiary,
+        'iconBg': theme.colorScheme.tertiaryContainer,
         'title': 'Medicine',
         'subtitle': 'Check your schedule Today',
         'onTap': (BuildContext context) {
@@ -97,8 +97,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
       {
         'icon': Icons.folder,
-        'iconColor': AppTheme.notifVaccineIcon,
-        'iconBg': AppTheme.notifVaccineBg,
+        'iconColor': theme.colorScheme.secondary,
+        'iconBg': theme.colorScheme.secondaryContainer,
         'title': 'Medical Record',
         'subtitle': 'View your medical records',
         'onTap': (BuildContext context) {
@@ -114,8 +114,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       },
       {
         'icon': Icons.refresh,
-        'iconColor': AppTheme.notifUpdateIcon,
-        'iconBg': AppTheme.notifUpdateBg,
+        'iconColor': theme.colorScheme.primary,
+        'iconBg': theme.colorScheme.primaryContainer,
         'title': 'App Update',
         'subtitle': 'Check your schedule Today',
         'onTap': (BuildContext context) {
@@ -123,16 +123,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             context: context,
             builder: (context) => AlertDialog(
               backgroundColor: theme.colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               title: Text(
                 'App Update',
                 style: theme.textTheme.titleLarge?.copyWith(
                   color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               content: Text(
                 'You are already on the latest update.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               actions: [
@@ -142,6 +146,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     'OK',
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -152,16 +157,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         'badge': 0,
       },
     ];
+
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         title: Text(
           'Notifications',
-          style: theme.textTheme.headlineMedium?.copyWith(
+          style: theme.textTheme.headlineSmall?.copyWith(
             color: theme.colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: false,
@@ -187,20 +193,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: theme.colorScheme.outline.withOpacity(0.2),
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: theme.colorScheme.shadow.withOpacity(0.05),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   leading: Stack(
                     children: [
                       Container(
@@ -208,20 +214,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         height: 48,
                         decoration: BoxDecoration(
                           color: n['iconBg'] as Color,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(n['icon'] as IconData, color: n['iconColor'] as Color, size: 28),
+                        child: Icon(
+                          n['icon'] as IconData,
+                          color: n['iconColor'] as Color,
+                          size: 24,
+                        ),
                       ),
                       if ((n['badge'] as int) > 0)
                         Positioned(
                           right: 0,
                           top: 0,
-                          child: CircleAvatar(
-                            radius: 10,
-                            backgroundColor: theme.colorScheme.error,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.error,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.surface,
+                                width: 2,
+                              ),
+                            ),
                             child: Text(
                               '${n['badge']}',
-                              style: theme.textTheme.bodySmall?.copyWith(
+                              style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onError,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -232,8 +249,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   title: Text(
                     n['title'] as String,
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   subtitle: Padding(
@@ -241,9 +259,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     child: Text(
                       n['subtitle'] as String,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),

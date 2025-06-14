@@ -26,9 +26,8 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   String userNote = "";
   String appointmentType = 'consultation';
 
-  final List<String> days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
   List<String> dates = []; // Make dates list dynamic
-  final List<dynamic> times = ["9:30" , "10:30" , "11:30" , "12:30" , "13:30"];
+  List<dynamic> times = [];
 
   final supabase = Supabase.instance.client;
 
@@ -51,33 +50,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
       dates.add("${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}");
     }
   }
-
-  // // Helper to generate 30-minute slots between start and end time
-  // List<String> generateTimeSlots(String startTime, String endTime) {
-  //   List<String> slots = [];
-  //   TimeOfDay start = TimeOfDay(
-  //     hour: int.parse(startTime.split(":")[0]),
-  //     minute: int.parse(startTime.split(":")[1]),
-  //   );
-  //   TimeOfDay end = TimeOfDay(
-  //     hour: int.parse(endTime.split(":")[0]),
-  //     minute: int.parse(endTime.split(":")[1]),
-  //   );
-  //   TimeOfDay current = start;
-  //   while (current.hour < end.hour || (current.hour == end.hour && current.minute < end.minute)) {
-  //     final hourStr = current.hour.toString().padLeft(2, '0');
-  //     final minStr = current.minute.toString().padLeft(2, '0');
-  //     slots.add("$hourStr:$minStr");
-  //     int newMinute = current.minute + 30;
-  //     int newHour = current.hour;
-  //     if (newMinute >= 60) {
-  //       newHour += 1;
-  //       newMinute -= 60;
-  //     }
-  //     current = TimeOfDay(hour: newHour, minute: newMinute);
-  //   }
-  //   return slots;
-  // }
 
   // Helper to generate 30-minute slots between start and end time
 List<TimeOfDay> generateTimeSlots(TimeOfDay start, TimeOfDay end) {
@@ -169,7 +141,7 @@ Future<void> addTimeSlots({
         return AlertDialog(
           title: const Text('Confirm Appointment'),
           content: Text(
-            'Are you sure you want to book an appointment for ${days[selectedDayIndex]} at ${(() {
+            'Are you sure you want to book an appointment for ${DateFormat('EEE').format(DateTime.parse(dates[selectedDayIndex]))} at ${(() {
               final t = times[selectedTimeIndex];
               if (t is String && t.length >= 5) {
                 final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
@@ -470,7 +442,13 @@ Future<void> addTimeSlots({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Appointment Type", style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+        Text(
+          "Appointment Type",
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -485,21 +463,21 @@ Future<void> addTimeSlots({
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   decoration: BoxDecoration(
                     color: appointmentType == 'consultation' 
-                        ? AppTheme.primaryColor 
+                        ? theme.colorScheme.primary 
                         : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: appointmentType == 'consultation'
-                          ? AppTheme.primaryColor
-                          : theme.dividerColor,
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline,
                     ),
                   ),
                   child: Text(
                     'Consultation',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: theme.textTheme.labelLarge?.copyWith(
                       color: appointmentType == 'consultation'
-                          ? Colors.white
+                          ? theme.colorScheme.onPrimary
                           : theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
@@ -519,21 +497,21 @@ Future<void> addTimeSlots({
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   decoration: BoxDecoration(
                     color: appointmentType == 'follow_up'
-                        ? AppTheme.primaryColor
+                        ? theme.colorScheme.primary
                         : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: appointmentType == 'follow_up'
-                          ? AppTheme.primaryColor
-                          : theme.dividerColor,
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline,
                     ),
                   ),
                   child: Text(
                     'Follow Up',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: theme.textTheme.labelLarge?.copyWith(
                       color: appointmentType == 'follow_up'
-                          ? Colors.white
+                          ? theme.colorScheme.onPrimary
                           : theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
@@ -612,7 +590,13 @@ Future<void> addTimeSlots({
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Available Times", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+        Text(
+          "Available Times",
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 12,
@@ -621,17 +605,23 @@ Future<void> addTimeSlots({
             final isSelected = index == selectedTimeIndex;
             return GestureDetector(
               onTap: () {
-                    setState(() {
-                      selectedTimeIndex = index;
-                    });
-                    fetchAvailableTimeSlots();
-                  },
+                setState(() {
+                  selectedTimeIndex = index;
+                });
+                fetchAvailableTimeSlots();
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.bookingTimeColor : theme.colorScheme.surface,
+                  color: isSelected 
+                      ? theme.colorScheme.primary 
+                      : theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: theme.dividerColor),
+                  border: Border.all(
+                    color: isSelected 
+                        ? theme.colorScheme.primary 
+                        : theme.colorScheme.outline,
+                  ),
                 ),
                 child: Text(
                   (() {
@@ -642,8 +632,10 @@ Future<void> addTimeSlots({
                     }
                     return t;
                   })(),
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : theme.colorScheme.onSurface.withOpacity(0.7),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: isSelected 
+                        ? theme.colorScheme.onPrimary 
+                        : theme.colorScheme.onSurface.withOpacity(0.7),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   ),
                 ),
@@ -686,7 +678,7 @@ Future<void> addTimeSlots({
               IconButton(
                 icon: const Icon(Icons.chat, color: AppTheme.primaryColor),
                 onPressed: () async {
-                  final selectedDate = '${dates[selectedDayIndex]} ${days[selectedDayIndex]}';
+                  final selectedDate = dates[selectedDayIndex];
                   final selectedTime = times[selectedTimeIndex];
                   final note = await Navigator.push<String>(
                     context,

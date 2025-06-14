@@ -130,8 +130,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         child: Container(
           width: double.infinity,
@@ -141,7 +142,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             vertical: AppTheme.kPaddingXLarge,
           ),
           child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.colorScheme.primary,
+                    ),
+                  ),
+                )
               : Column(
                   children: [
                     Container(
@@ -149,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.primaryColor.withOpacity(0.1),
+                            color: theme.colorScheme.primary.withOpacity(0.1),
                             blurRadius: 10,
                             spreadRadius: 2,
                           ),
@@ -157,6 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: CircleAvatar(
                         radius: 48,
+                        backgroundColor: theme.colorScheme.surfaceVariant,
                         backgroundImage: _patientProfile?['profile_image'] != null
                             ? NetworkImage(_patientProfile!['profile_image'])
                             : const AssetImage('assets/images/profile_picture.png') as ImageProvider,
@@ -165,12 +173,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: AppTheme.kPaddingLarge),
                     Text(
                       _patientProfile?['full_name'] ?? 'Patient',
-                      style: AppTheme.headlineMedium,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: theme.colorScheme.onBackground,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: AppTheme.kPaddingSmall),
                     Text(
                       _supabase.auth.currentUser?.email ?? '',
-                      style: AppTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: AppTheme.kPaddingXLarge),
                     Expanded(
@@ -226,6 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             icon: Icons.logout,
                             title: 'Logout',
                             onTap: _handleLogout,
+                            iconColor: theme.colorScheme.error,
                           ),
                         ],
                       ),
@@ -241,36 +255,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    Color? iconColor,
   }) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.kPaddingMedium),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusMedium),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.5),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.05),
-            blurRadius: 10,
+            color: theme.colorScheme.shadow.withOpacity(0.05),
+            blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ListTile(
+        onTap: onTap,
         leading: Icon(
           icon,
-          color: AppTheme.primaryColor,
-          size: 24,
+          color: iconColor ?? theme.colorScheme.primary,
         ),
         title: Text(
           title,
-          style: AppTheme.titleMedium,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         trailing: Icon(
           Icons.chevron_right,
-          color: AppTheme.primaryColor,
-          size: 24,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
-        onTap: onTap,
       ),
     );
   }

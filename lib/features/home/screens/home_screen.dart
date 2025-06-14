@@ -352,9 +352,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProtectionBanner(bool isDarkMode) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? AppTheme.nightCard : const Color(0xFFDBE3F7),
+        color: theme.colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusXLarge),
       ),
       padding: const EdgeInsets.all(AppTheme.kPaddingLarge),
@@ -366,17 +367,17 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'Early protection for your health',
-                  style: TextStyle(
-                    fontSize: AppTheme.kFontSizeMD,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
-                    color: isDarkMode ? AppTheme.nightText : AppTheme.secondaryColor,
                   ),
                 ),
                 const SizedBox(height: AppTheme.kPaddingMedium),
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isDarkMode ? AppTheme.nightPrimary : AppTheme.primaryColor,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusMedium),
                     ),
@@ -384,7 +385,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Text(
                     'Learn more',
-                    style: (isDarkMode ? AppTheme.nightLabelLarge : AppTheme.labelLarge).copyWith(color: Colors.white),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                    ),
                   ),
                 )
               ],
@@ -404,17 +407,18 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isDarkMode = false,
     VoidCallback? onTap,
   }) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: AppTheme.kPaddingSmall),
         padding: const EdgeInsets.all(AppTheme.kPaddingLarge),
         decoration: BoxDecoration(
-          color: isDarkMode ? AppTheme.nightCard : Colors.white,
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppTheme.kBorderRadiusLarge),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: theme.colorScheme.shadow.withOpacity(0.08),
               blurRadius: AppTheme.kElevationMedium,
             ),
           ],
@@ -432,13 +436,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     title,
-                    style: isDarkMode ? AppTheme.nightTitleMedium : AppTheme.titleMedium,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                     textAlign: TextAlign.start,
                   ),
                   const SizedBox(height: AppTheme.kPaddingSmall),
                   Text(
                     subtitle,
-                    style: isDarkMode ? AppTheme.nightBodyMedium : AppTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   )
