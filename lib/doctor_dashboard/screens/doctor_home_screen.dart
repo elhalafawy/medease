@@ -26,6 +26,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   Map<String, double> _genderStats = {'male': 0, 'female': 0};
   List<Map<String, dynamic>> _doctorReviews = [];
   List<Map<String, dynamic>> _allDoctorReviews = [];
+  String _selectedAnalyticsPeriod = 'This Week';
 
   @override
   void initState() {
@@ -471,22 +472,33 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         ),
                         const SizedBox(height: 24),
                         // Analytics
-                        const Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
+                            const Text(
                               "Analytics",
                               style: AppTheme.titleLarge,
                             ),
-                            Row(
-                              children: [
-                                Text(
-                                  "This Week",
-                                  style: AppTheme.bodyMedium,
-                                ),
-                                Icon(Icons.keyboard_arrow_down,
-                                    size: 18, color: AppTheme.greyColor),
-                              ],
+                            DropdownButton<String>(
+                              value: _selectedAnalyticsPeriod,
+                              icon: const Icon(Icons.keyboard_arrow_down,
+                                  size: 18, color: AppTheme.greyColor),
+                              underline: const SizedBox.shrink(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedAnalyticsPeriod = newValue!;
+                                });
+                              },
+                              items: <String>['This Week', 'This Month']
+                                  .map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value,
+                                    style: AppTheme.bodyMedium,
+                                  ),
+                                );
+                              }).toList(),
                             ),
                           ],
                         ),
@@ -505,7 +517,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                               ),
                             ],
                           ),
-                          child: const AnalyticsChart(),
+                          child: AnalyticsChart(selectedPeriod: _selectedAnalyticsPeriod),
                         ),
                         const SizedBox(height: 24),
                         // Reviews

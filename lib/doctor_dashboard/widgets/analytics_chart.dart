@@ -1,83 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/theme/app_theme.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum ChartPeriod {
   thisWeek,
-  lastWeek,
+  thisMonth,
 }
 
 class AnalyticsChart extends StatefulWidget {
-  const AnalyticsChart({super.key});
+  final String selectedPeriod;
+
+  const AnalyticsChart({super.key, required this.selectedPeriod});
 
   @override
   State<AnalyticsChart> createState() => _AnalyticsChartState();
 }
 
 class _AnalyticsChartState extends State<AnalyticsChart> {
-  ChartPeriod _selectedPeriod = ChartPeriod.thisWeek;
+  List<double> _thisWeekData = List.filled(7, 0.0);
+  List<double> _thisMonthData = List.filled(31, 0.0);
+  double _maxY = 12.0;
 
-  // Fixed data for This Week and Last Week
-  final List<double> _thisWeekData = [
-    0,
-    2,
-    4,
-    6,
-    8,
-    10,
-    12
-  ]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
-  final List<double> _lastWeekData = [
-    0,
-    2,
-    4,
-    6,
-    8,
-    10,
-    12
-  ]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+  @override
+  void initState() {
+    super.initState();
+    _loadChartData();
+  }
+
+  @override
+  void didUpdateWidget(covariant AnalyticsChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedPeriod != widget.selectedPeriod) {
+      _loadChartData();
+    }
+  }
+
+  Future<void> _loadChartData() async {
+    final now = DateTime.now();
+    List<Map<String, dynamic>> fetchedAppointments = [];
+
+    try {
+      if (widget.selectedPeriod == 'This Week') {
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+        final response = await Supabase.instance.client
+            .from('appointments')
+            .select('date')
+            .gte('date', startOfWeek.toIso8601String().split('T')[0])
+            .lte('date', endOfWeek.toIso8601String().split('T')[0])
+            .eq('status', 'completed');
+
+        fetchedAppointments = List<Map<String, dynamic>>.from(response);
+
+        final Map<int, int> weeklyCounts = {};
+        for (var i = 1; i <= 7; i++) {
+          weeklyCounts[i] = 0;
+        }
+
+        for (var appt in fetchedAppointments) {
+          if (appt['date'] != null) {
+            final date = DateTime.parse(appt['date']);
+            final weekday = date.weekday;
+            weeklyCounts[weekday] = (weeklyCounts[weekday] ?? 0) + 1;
+          }
+        }
+
+        setState(() {
+          _thisWeekData = List.generate(7, (index) {
+            final weekday = index + 1;
+            return weeklyCounts[weekday]?.toDouble() ?? 0.0;
+          });
+          _maxY = _thisWeekData.reduce((curr, next) => curr > next ? curr : next) + 2;
+          if (_maxY < 10) _maxY = 10;
+        });
+      } else if (widget.selectedPeriod == 'This Month') {
+        final startOfMonth = DateTime(now.year, now.month, 1);
+        final endOfMonth = DateTime(now.year, now.month + 1, 0);
+
+        final response = await Supabase.instance.client
+            .from('appointments')
+            .select('date')
+            .gte('date', startOfMonth.toIso8601String().split('T')[0])
+            .lte('date', endOfMonth.toIso8601String().split('T')[0])
+            .eq('status', 'completed');
+
+        fetchedAppointments = List<Map<String, dynamic>>.from(response);
+
+        final int daysInMonth = endOfMonth.day;
+        _thisMonthData = List.filled(daysInMonth, 0.0);
+
+        for (var appt in fetchedAppointments) {
+          if (appt['date'] != null) {
+            final date = DateTime.parse(appt['date']);
+            final dayOfMonth = date.day;
+            if (dayOfMonth <= daysInMonth) {
+              _thisMonthData[dayOfMonth - 1] = (_thisMonthData[dayOfMonth - 1]) + 1.0;
+            }
+          }
+        }
+
+        setState(() {
+          _maxY = _thisMonthData.reduce((curr, next) => curr > next ? curr : next) + 2;
+          if (_maxY < 10) _maxY = 10;
+        });
+      }
+    } catch (e) {
+      print('Error loading chart data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _selectedPeriod = ChartPeriod.thisWeek;
-                });
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: _selectedPeriod == ChartPeriod.thisWeek
-                    ? AppTheme.primaryColor
-                    : Colors.grey,
-              ),
-              child: const Text('This Week'),
-            ),
-            const SizedBox(width: 16),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _selectedPeriod = ChartPeriod.lastWeek;
-                });
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: _selectedPeriod == ChartPeriod.lastWeek
-                    ? AppTheme.primaryColor
-                    : Colors.grey,
-              ),
-              child: const Text('Last Week'),
-            ),
-          ],
-        ),
         Expanded(
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.spaceAround,
-              maxY: 12,
+              maxY: _maxY,
               minY: 0,
               barTouchData: BarTouchData(enabled: false),
               titlesData: FlTitlesData(
@@ -87,7 +129,7 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
                     reservedSize: 28,
                     interval: 2,
                     getTitlesWidget: (value, meta) {
-                      if (value % 2 == 0 && value <= 12) {
+                      if (value % 2 == 0 && value <= _maxY) {
                         return Text(
                           value.toInt().toString(),
                           style: AppTheme.bodyMedium.copyWith(fontSize: 10),
@@ -101,19 +143,22 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
                   sideTitles: SideTitles(
                     showTitles: true,
                     getTitlesWidget: (value, meta) {
-                      const days = [
-                        'Mon',
-                        'Tue',
-                        'Wed',
-                        'Thu',
-                        'Fri',
-                        'Sat',
-                        'Sun'
-                      ];
-                      return Text(days[value.toInt()],
-                          style: AppTheme.bodyMedium.copyWith(fontSize: 10));
+                      final List<String> labels;
+                      if (widget.selectedPeriod == 'This Week') {
+                        labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                      } else {
+                        labels = List.generate(_thisMonthData.length, (index) => (index + 1).toString());
+                      }
+                      if (value.toInt() < labels.length) {
+                         if (widget.selectedPeriod == 'This Month' && value.toInt() % 7 != 0) {
+                           return const SizedBox.shrink();
+                         }
+                        return Text(labels[value.toInt()],
+                            style: AppTheme.bodyMedium.copyWith(fontSize: 10));
+                      }
+                      return const SizedBox.shrink();
                     },
-                    interval: 1,
+                    interval: widget.selectedPeriod == 'This Month' ? 7 : 1,
                   ),
                 ),
                 rightTitles:
@@ -122,6 +167,21 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
                     const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
               borderData: FlBorderData(show: false),
+              gridData: FlGridData(
+                show: true,
+                drawHorizontalLine: true,
+                drawVerticalLine: true,
+                verticalInterval: 1,
+                horizontalInterval: 2,
+                getDrawingVerticalLine: (value) => FlLine(
+                  color: AppTheme.greyColor.withOpacity(0.3),
+                  strokeWidth: 0.5,
+                ),
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: AppTheme.greyColor.withOpacity(0.3),
+                  strokeWidth: 0.5,
+                ),
+              ),
               barGroups: _buildBarGroups(),
             ),
           ),
@@ -131,34 +191,25 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
   }
 
   List<BarChartGroupData> _buildBarGroups() {
-    return List.generate(7, (index) {
-      if (_selectedPeriod == ChartPeriod.thisWeek) {
-        return BarChartGroupData(
-          x: index,
-          barRods: [
-            BarChartRodData(
-                toY: _thisWeekData[index],
-                color: AppTheme.primaryColor,
-                width: 8), // This Week bar
-            BarChartRodData(
-                toY: _lastWeekData[index],
-                color: Colors.grey,
-                width: 8), // Last Week bar
-          ],
-          showingTooltipIndicators: [],
-        );
-      } else {
-        return BarChartGroupData(
-          x: index,
-          barRods: [
-            BarChartRodData(
-                toY: _lastWeekData[index],
-                color: AppTheme.primaryColor,
-                width: 16), // Last Week bar
-          ],
-          showingTooltipIndicators: [],
-        );
-      }
+    final List<double> dataToDisplay;
+    if (widget.selectedPeriod == 'This Week') {
+      dataToDisplay = _thisWeekData;
+    } else {
+      dataToDisplay = _thisMonthData;
+    }
+
+    return List.generate(dataToDisplay.length, (index) {
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: dataToDisplay[index],
+            color: AppTheme.primaryColor,
+            width: 8,
+          ),
+        ],
+        showingTooltipIndicators: [],
+      );
     });
   }
 }
