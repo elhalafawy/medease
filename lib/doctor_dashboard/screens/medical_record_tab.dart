@@ -665,6 +665,15 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
         });
       }
 
+      // Update the appointment status to completed
+      await _supabase
+          .from('appointments')
+          .update({'status': 'completed'})
+          .eq('patient_id', widget.patientId)
+          .eq('doctor_id', doctorId)
+          .eq('date', DateTime.now().toIso8601String())
+          .eq('status', 'confirmed');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Medical record added successfully!')));
