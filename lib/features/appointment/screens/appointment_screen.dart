@@ -605,11 +605,11 @@ Future<void> addTimeSlots({
             final isSelected = index == selectedTimeIndex;
             return GestureDetector(
               onTap: () {
-                setState(() {
-                  selectedTimeIndex = index;
-                });
-                fetchAvailableTimeSlots();
-              },
+                    setState(() {
+                      selectedTimeIndex = index;
+                    });
+                    fetchAvailableTimeSlots();
+                  },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(

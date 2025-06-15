@@ -137,7 +137,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -170,14 +170,13 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       children: [
                                         Text(
                                           "Welcome Dr.Ahmed, ",
-                                          style: theme.textTheme.titleLarge
-                                              ?.copyWith(
+                                          style: theme.textTheme.titleLarge?.copyWith(
                                             color: theme.colorScheme.primary,
                                           ),
                                         ),
-                                        const Text(
+                                        Text(
                                           "👋",
-                                          style: AppTheme.titleLarge,
+                                          style: theme.textTheme.titleLarge,
                                         ),
                                       ],
                                     ),
@@ -193,18 +192,18 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                       },
                                       child: Row(
                                         children: [
-                                          const Icon(Icons.account_circle,
-                                              size: 16,
-                                              color: AppTheme.primaryColor),
+                                          Icon(
+                                            Icons.account_circle,
+                                            size: 16,
+                                            color: theme.colorScheme.primary,
+                                          ),
                                           const SizedBox(width: 4),
                                           Text(
                                             "Doctor Profile",
-                                            style: theme.textTheme.bodyMedium
-                                                ?.copyWith(
-                                                    color: theme
-                                                        .colorScheme.primary,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -244,21 +243,27 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    const Icon(Icons.notifications_none,
-                                        size: 32, color: AppTheme.primaryColor),
+                                    Icon(
+                                      Icons.notifications_none,
+                                      size: 32,
+                                      color: theme.colorScheme.primary,
+                                    ),
                                     if (newDoctorNotifCount > 0)
                                       Positioned(
-                                        right: 2,
+                                        right: 0,
                                         top: 0,
-                                        child: CircleAvatar(
-                                          radius: 8,
-                                          backgroundColor: Colors.red,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.error,
+                                            shape: BoxShape.circle,
+                                          ),
                                           child: Text(
-                                            '$newDoctorNotifCount',
-                                            style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold),
+                                            newDoctorNotifCount.toString(),
+                                            style: theme.textTheme.labelSmall?.copyWith(
+                                              color: theme.colorScheme.onError,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -522,12 +527,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 16),
                         Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          height: 180,
-                          padding: const EdgeInsets.all(12),
+                          height: 200,
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
@@ -540,16 +545,19 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                           child: AnalyticsChart(selectedPeriod: _selectedAnalyticsPeriod),
                         ),
                         const SizedBox(height: 24),
-                        // Reviews
+                        // Reviews Section
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              "Reviews",
-                              style: AppTheme.titleLarge,
+                            Text(
+                              'Reviews',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            TextButton(
-                              onPressed: () {
+                            GestureDetector(
+                              onTap: () {
                                 setState(() {
                                   _showReviews = true;
                                 });
@@ -577,7 +585,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                 style: AppTheme.bodyMedium),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         if (_doctorReviews.isNotEmpty)
                           ..._doctorReviews.map((review) {
                             return Padding(

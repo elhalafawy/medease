@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
 
 class ReviewCard extends StatelessWidget {
   final String? patientName;
@@ -17,12 +16,13 @@ class ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderColor),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,12 +41,17 @@ class ReviewCard extends StatelessWidget {
                   children: [
                     Text(
                       patientName ?? 'Anonymous',
-                      style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                     if (reviewDate != null)
                       Text(
                         reviewDate!,
-                        style: AppTheme.bodySmall.copyWith(color: AppTheme.greyColor),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                   ],
                 ),
@@ -68,7 +73,10 @@ class ReviewCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   reviewText ?? 'No review text available.',
-                  style: AppTheme.bodyMedium.copyWith(fontSize: 13),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
               ],
             ),

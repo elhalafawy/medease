@@ -47,8 +47,9 @@ class DoctorMainNavigationState extends State<DoctorMainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.colorScheme.background,
       body: _buildCurrentScreen(),
       bottomNavigationBar: DoctorBottomBar(
         currentIndex: _currentIndex,
@@ -98,16 +99,26 @@ class _DoctorProfilePlaceholder extends StatelessWidget {
   const _DoctorProfilePlaceholder();
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Profile', style: AppTheme.titleLarge),
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        title: Text(
+          'Profile',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
       ),
       body: Center(
-        child: Text('Profile Screen (Coming Soon)', 
-          style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)
+        child: Text(
+          'Profile Screen (Coming Soon)',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );
@@ -119,15 +130,25 @@ class _ComingSoonPlaceholder extends StatelessWidget {
   const _ComingSoonPlaceholder({required this.title});
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('$title (Coming Soon)', style: AppTheme.titleLarge),
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        title: Text(
+          '$title (Coming Soon)',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
       ),
       body: Center(
-        child: Text('$title feature coming soon!',
-          style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor),
+        child: Text(
+          '$title feature coming soon!',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );

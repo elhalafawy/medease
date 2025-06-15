@@ -554,7 +554,7 @@ class _DoctorBookAppointmentScreenState
                     ),
                     Row(
                       children: [
-                        Text('Dr.Ahmed',
+                        Text('Dr.Ahmed Essmat',
                             style: theme.textTheme.titleLarge
                                 ?.copyWith(color: theme.colorScheme.primary)),
                         const Spacer(),

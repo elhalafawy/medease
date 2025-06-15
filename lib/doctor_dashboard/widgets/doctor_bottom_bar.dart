@@ -13,14 +13,15 @@ class DoctorBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       height: 68,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: theme.colorScheme.shadow.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -39,6 +40,7 @@ class DoctorBottomBar extends StatelessWidget {
   }
 
   Widget _buildNavItem(BuildContext context, String iconPath, String label, int index) {
+    final theme = Theme.of(context);
     final bool isSelected = currentIndex == index;
     return GestureDetector(
       onTap: () {
@@ -68,15 +70,14 @@ class DoctorBottomBar extends StatelessWidget {
           Image.asset(
             iconPath,
             height: 24,
-            color: isSelected ? const Color(0xFF022E5B) : Colors.grey.shade400,
+            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? const Color(0xFF022E5B) : Colors.grey.shade400,
+              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

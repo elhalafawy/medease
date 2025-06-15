@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart' as app_theme;
 import '../widgets/doctor_bottom_bar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/review_card.dart';
@@ -68,44 +67,65 @@ class _DoctorReviewsScreenState extends State<DoctorReviewsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.background,
       appBar: widget.showAppBar
           ? AppBar(
-              backgroundColor: app_theme.AppTheme.primaryColor,
+              backgroundColor: theme.colorScheme.primary,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                icon: Icon(
+                  Icons.arrow_back_ios,
+                  color: theme.colorScheme.onPrimary,
+                ),
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
               title: Text(
                 'Reviews',
-                style: app_theme.AppTheme.titleLarge.copyWith(color: Colors.white),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
               centerTitle: true,
             )
           : null,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                color: theme.colorScheme.primary,
+              ),
+            )
           : _error != null
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: theme.colorScheme.error,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'Error loading reviews',
-                        style: app_theme.AppTheme.titleLarge.copyWith(color: Colors.red),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         _error!,
-                        style: app_theme.AppTheme.bodyMedium.copyWith(color: app_theme.AppTheme.greyColor),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadReviews,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                        ),
                         child: const Text('Try Again'),
                       ),
                     ],
@@ -116,16 +136,24 @@ class _DoctorReviewsScreenState extends State<DoctorReviewsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.mail_outline, size: 64, color: app_theme.AppTheme.greyColor),
+                          Icon(
+                            Icons.mail_outline,
+                            size: 64,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'No reviews yet',
-                            style: app_theme.AppTheme.titleLarge.copyWith(color: app_theme.AppTheme.greyColor),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Reviews from patients will appear here.',
-                            style: app_theme.AppTheme.bodyMedium.copyWith(color: app_theme.AppTheme.greyColor),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),

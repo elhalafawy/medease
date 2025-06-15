@@ -51,7 +51,7 @@ class _GenderPieChartState extends State<GenderPieChart> {
         isLoading = false;
       });
     } catch (e) {
-      print('Error loading gender data: \$e');
+      print('Error loading gender data: $e');
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -62,6 +62,8 @@ class _GenderPieChartState extends State<GenderPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     if (isLoading) {
       return const SizedBox(
         height: 65,
@@ -85,12 +87,14 @@ class _GenderPieChartState extends State<GenderPieChart> {
           centerSpaceRadius: 14,
           sections: [
             PieChartSectionData(
-              color: const Color(0xFF3B82F6), // أزرق بالكامل
-              value: 100, // يمثل 100% من الدائرة
-              title: '100%', // عرض "100%"
-              radius: 18, // نصف قطر مناسب للحجم الحالي
-              titleStyle: AppTheme.bodyMedium
-                  .copyWith(color: Colors.white, fontSize: 7), // حجم الخط 7
+              color: theme.colorScheme.primary,
+              value: 100,
+              title: '100%',
+              radius: 18,
+              titleStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onPrimary,
+                fontSize: 7,
+              ),
             ),
           ],
         ),

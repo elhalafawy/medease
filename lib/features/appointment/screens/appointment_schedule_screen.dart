@@ -388,7 +388,7 @@ class _AppointmentScheduleScreenState extends State<AppointmentScheduleScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            appointment['doctorName'] ?? 'Dr. Ahmed',
+                            appointment['doctorName'] ?? 'Dr. Ahmed Essmat',
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                           ),
                         ),

@@ -86,7 +86,7 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
       _isSearching = true;
       _searchResults = [
         {
-          'doctorName': 'Dr. Ahmed',
+          'doctorName': 'Dr. Ahmed Essmat',
           'specialty': 'Senior Neurologist and Surgeon',
           'date': 'Mon 4',
           'time': '9:00 AM',
@@ -215,99 +215,99 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-                maxWidth: MediaQuery.of(context).size.width * 0.9,
-              ),
-              padding: const EdgeInsets.all(0),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxWidth: MediaQuery.of(context).size.width * 0.9,
+            ),
+            padding: const EdgeInsets.all(0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.primaryContainer,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(16),
                           topRight: Radius.circular(16),
-                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                           Text(
-                            'Update Appointment',
+                          'Update Appointment',
                             style: theme.textTheme.titleLarge?.copyWith(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                               color: theme.colorScheme.onPrimaryContainer,
-                            ),
                           ),
-                          IconButton(
+                        ),
+                        IconButton(
                             icon: Icon(
                               Icons.close,
                               color: theme.colorScheme.onPrimaryContainer,
                             ),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
-                      ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 24,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
                             'Select Date',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w600,
                               color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                           SizedBox(
                             height: 80,
                             child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
+                      scrollDirection: Axis.horizontal,
                               itemCount: weekDates.length,
                               itemBuilder: (context, index) {
-                                final date = weekDates[index];
+                          final date = weekDates[index];
                                 final isSelected = index == selectedDayIndex;
-                                return GestureDetector(
+                          return GestureDetector(
                                   onTap: () async {
-                                    setState(() {
-                                      selectedDayIndex = index;
+                              setState(() {
+                                selectedDayIndex = index;
                                       selectedDate = DateFormat('yyyy-MM-dd').format(date);
-                                    });
+                              });
                                     if (selectedDate != null) {
                                       await fetchAvailableTimeSlots(selectedDate!, setState);
                                       selectedTimeSlotId = null; // Reset selected time slot when date changes
                                     }
-                                  },
-                                  child: Container(
+                            },
+                            child: Container(
                                     width: 60,
                                     margin: const EdgeInsets.only(right: 10),
-                                    decoration: BoxDecoration(
+                              decoration: BoxDecoration(
                                       color: isSelected
                                           ? theme.colorScheme.primary
                                           : theme.colorScheme.surfaceVariant,
                                       borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
+                                border: Border.all(
                                         color: isSelected
                                             ? theme.colorScheme.primary
                                             : theme.colorScheme.outline.withOpacity(0.5),
-                                      ),
-                                    ),
+                                ),
+                              ),
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
+                                children: [
+                                  Text(
                                           DateFormat('EEE').format(date),
                                           style: theme.textTheme.labelMedium?.copyWith(
                                             color: isSelected
@@ -322,25 +322,25 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                             color: isSelected
                                                 ? theme.colorScheme.onPrimary
                                                 : theme.colorScheme.onSurface,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                );
-                              },
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 24),
+                          );
+                              },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                           Text(
                             'Available Time Slots',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w600,
                               color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                           isLoadingTimeSlots
                               ? Center(
                                   child: CircularProgressIndicator(
@@ -363,76 +363,76 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                       runSpacing: 10,
                                       children: availableTimeSlots.map((slot) {
                                         final isSelected = selectedTimeSlotId == slot['slot_id'];
-                                        return GestureDetector(
+                          return GestureDetector(
                                           onTap: () {
                                             setState(() {
                                               selectedTimeSlotId = slot['slot_id'];
                                             });
                                           },
-                                          child: Container(
+                            child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                            decoration: BoxDecoration(
-                                              color: isSelected
+                              decoration: BoxDecoration(
+                                color: isSelected
                                                   ? theme.colorScheme.primary
                                                   : theme.colorScheme.surfaceVariant,
                                               borderRadius: BorderRadius.circular(20),
-                                              border: Border.all(
-                                                color: isSelected
+                                border: Border.all(
+                                  color: isSelected
                                                     ? theme.colorScheme.primary
                                                     : theme.colorScheme.outline.withOpacity(0.5),
-                                              ),
-                                            ),
-                                            child: Text(
+                                ),
+                              ),
+                              child: Text(
                                               formatTimeTo12Hour(slot['time_slot']),
                                               style: theme.textTheme.labelLarge?.copyWith(
-                                                color: isSelected
+                                  color: isSelected
                                                     ? theme.colorScheme.onPrimary
                                                     : theme.colorScheme.onSurface,
                                                 fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        );
+                                ),
+                              ),
+                            ),
+                          );
                                       }).toList(),
-                                    ),
-                          const SizedBox(height: 24),
+                    ),
+                  const SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: selectedTimeSlotId == null
-                                  ? null
-                                  : () async {
+                          onPressed: selectedTimeSlotId == null
+                              ? null
+                              : () async {
                                       setState(() => isUpdating = true);
-                                      try {
-                                        await updateAppointment(
-                                          appointmentId,
+                                  try {
+                                    await updateAppointment(
+                                      appointmentId,
                                           selectedDate!,
-                                          selectedTimeSlotId!,
-                                        );
-                                        CustomSnackBar.show(
-                                          context: _scaffoldContext,
+                                      selectedTimeSlotId!,
+                                    );
+                                      CustomSnackBar.show(
+                                        context: _scaffoldContext,
                                           message: 'Appointment updated successfully!',
-                                        );
+                                      );
                                         Navigator.pop(context);
-                                      } catch (e) {
-                                        CustomSnackBar.show(
-                                          context: _scaffoldContext,
+                                  } catch (e) {
+                                      CustomSnackBar.show(
+                                        context: _scaffoldContext,
                                           message: 'Failed to update appointment: ${e.toString()}',
-                                          isError: true,
-                                        );
+                                        isError: true,
+                                      );
                                       } finally {
                                         setState(() => isUpdating = false);
-                                      }
-                                    },
-                              style: ElevatedButton.styleFrom(
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
                                 backgroundColor: theme.colorScheme.primary,
                                 foregroundColor: theme.colorScheme.onPrimary,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
+                            shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                ),
+                            ),
                                 elevation: 0,
-                              ),
+                          ),
                               child: isUpdating
                                   ? SizedBox(
                                       height: 20,
@@ -450,15 +450,15 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                                         color: theme.colorScheme.onPrimary,
                                         fontWeight: FontWeight.w600,
                                       ),
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
+                  ],
+          ),
+        ),
             ),
           );
         },
@@ -711,59 +711,59 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
                     child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Expanded(
-                              child: _buildInfoColumn(
-                                Icons.calendar_today,
-                                'Date',
-                                widget.appointment['date']?.toString() ?? 'Mon 4',
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.calendar_today,
+                                  'Date',
+                                  widget.appointment['date']?.toString() ?? 'Mon 4',
                                 theme,
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: _buildInfoColumn(
-                                Icons.access_time,
-                                'Time',
-                                (() {
-                                  final t = widget.appointment['time'];
-                                  if (t is String && t.length >= 5) {
-                                    final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
-                                    return formatTimeTo12Hour(timeStr);
-                                  }
-                                  return t ?? '9:00 AM';
-                                })(),
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.access_time,
+                                  'Time',
+                                  (() {
+                                    final t = widget.appointment['time'];
+                                    if (t is String && t.length >= 5) {
+                                      final timeStr = t.endsWith(':00') ? t.substring(0,5) : t;
+                                      return formatTimeTo12Hour(timeStr);
+                                    }
+                                    return t ?? '9:00 AM';
+                                  })(),
                                 theme,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
                         ),
                         const SizedBox(height: 10), // Space between the two cards
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Expanded(
-                              child: _buildInfoColumn(
-                                Icons.location_on,
-                                'Location',
-                                widget.appointment['location'] ?? 'Medical Center',
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.location_on,
+                                  'Location',
+                                  widget.appointment['location'] ?? 'Medical Center',
                                 theme,
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              child: _buildInfoColumn(
-                                Icons.medical_services_outlined,
-                                'Type',
-                                ((widget.appointment['type'] ?? 'consultation')
-                                  .toString()
-                                  .replaceAll('_', ' ')
-                                  .split(' ')
+                              Expanded(
+                                child: _buildInfoColumn(
+                                  Icons.medical_services_outlined,
+                                  'Type',
+                                  ((widget.appointment['type'] ?? 'consultation')
+                                    .toString()
+                                    .replaceAll('_', ' ')
+                                    .split(' ')
                                   .map((word) => word[0].toUpperCase() + word.substring(1))
-                                  .join(' ')),
+                                    .join(' ')),
                                 theme,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
                         ),
                       ],
                     ),
@@ -904,12 +904,12 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
           children: [
             Icon(icon, size: 20, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
-            Text(
+        Text(
               title,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
-            ),
+          ),
           ],
         ),
         const SizedBox(height: 4),
@@ -974,11 +974,11 @@ class _AppointmentDetailsScreenState extends State<AppointmentDetailsScreen> {
   }
 
   String formatTimeTo12Hour(String time) {
-    final parts = time.split(':');
+      final parts = time.split(':');
     if (parts.length < 2) return time; // Invalid format
 
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
 
     final period = hour < 12 ? 'AM' : 'PM';
     final displayHour = (hour % 12 == 0) ? 12 : hour % 12;

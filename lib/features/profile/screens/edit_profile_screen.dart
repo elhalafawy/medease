@@ -288,14 +288,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: _pickImage,
+                onTap: _pickImage,
               child: Stack(
                 children: [
                   CircleAvatar(
                     radius: 60,
                     backgroundColor: theme.colorScheme.surfaceVariant,
-                    backgroundImage: _profileImage != null
-                        ? FileImage(_profileImage!)
+                  backgroundImage: _profileImage != null
+                      ? FileImage(_profileImage!)
                         : null,
                     child: _profileImage == null
                         ? Icon(
@@ -318,9 +318,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         Icons.camera_alt,
                         size: 20,
                         color: theme.colorScheme.onPrimary,
-                      ),
                     ),
                   ),
+                ),
                 ],
               ),
             ),
@@ -485,7 +485,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: theme.colorScheme.primary,
                       width: 2,

@@ -45,7 +45,7 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
         'note': noteText,
         'date': widget.date,
         'time': widget.time,
-        'doctor_name': 'Dr. Ahmed',
+        'doctor_name': 'Dr. Ahmed Essmat',
         'created_at': DateTime.now().toIso8601String(),
       });
 
@@ -115,17 +115,17 @@ class _PatientNotesScreenState extends State<PatientNotesScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Dr. Ahmed", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
+                        Text("Dr. Ahmed Essmat", style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
                         const SizedBox(height: 4),
                         Text("Neurologist | hospital", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 4),
-                        Text("Hourly Rate: 25.00 EGP", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                        Text("Hourly Rate:  300 EGP", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                       ],
                     ),
                   ),
                   Row(
                     children: [
-                      Text("4.8", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)),
+                      Text("5.0", style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)),
                       Icon(Icons.star, color: Colors.amber[600], size: 20),
                     ],
                   )

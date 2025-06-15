@@ -113,6 +113,7 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Expanded(
@@ -132,7 +133,10 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
                       if (value % 2 == 0 && value <= _maxY) {
                         return Text(
                           value.toInt().toString(),
-                          style: AppTheme.bodyMedium.copyWith(fontSize: 10),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurface,
+                          ),
                         );
                       }
                       return const SizedBox.shrink();
@@ -150,21 +154,24 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
                         labels = List.generate(_thisMonthData.length, (index) => (index + 1).toString());
                       }
                       if (value.toInt() < labels.length) {
-                         if (widget.selectedPeriod == 'This Month' && value.toInt() % 7 != 0) {
-                           return const SizedBox.shrink();
-                         }
-                        return Text(labels[value.toInt()],
-                            style: AppTheme.bodyMedium.copyWith(fontSize: 10));
+                        if (widget.selectedPeriod == 'This Month' && value.toInt() % 7 != 0) {
+                          return const SizedBox.shrink();
+                        }
+                        return Text(
+                          labels[value.toInt()],
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        );
                       }
                       return const SizedBox.shrink();
                     },
                     interval: widget.selectedPeriod == 'This Month' ? 7 : 1,
                   ),
                 ),
-                rightTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
               borderData: FlBorderData(show: false),
               gridData: FlGridData(
@@ -174,11 +181,11 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
                 verticalInterval: 1,
                 horizontalInterval: 2,
                 getDrawingVerticalLine: (value) => FlLine(
-                  color: AppTheme.greyColor.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withOpacity(0.3),
                   strokeWidth: 0.5,
                 ),
                 getDrawingHorizontalLine: (value) => FlLine(
-                  color: AppTheme.greyColor.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withOpacity(0.3),
                   strokeWidth: 0.5,
                 ),
               ),
@@ -191,6 +198,7 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
   }
 
   List<BarChartGroupData> _buildBarGroups() {
+    final theme = Theme.of(context);
     final List<double> dataToDisplay;
     if (widget.selectedPeriod == 'This Week') {
       dataToDisplay = _thisWeekData;
@@ -198,18 +206,19 @@ class _AnalyticsChartState extends State<AnalyticsChart> {
       dataToDisplay = _thisMonthData;
     }
 
-    return List.generate(dataToDisplay.length, (index) {
-      return BarChartGroupData(
+    return List.generate(
+      dataToDisplay.length,
+      (index) => BarChartGroupData(
         x: index,
         barRods: [
           BarChartRodData(
             toY: dataToDisplay[index],
-            color: AppTheme.primaryColor,
+            color: theme.colorScheme.primary,
             width: 8,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
         ],
-        showingTooltipIndicators: [],
-      );
-    });
+      ),
+    );
   }
 }

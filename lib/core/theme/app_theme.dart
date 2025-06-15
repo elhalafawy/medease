@@ -296,7 +296,7 @@ class AppTheme {
       colorScheme: lightColorScheme,
       primaryColor: primaryColor,
       scaffoldBackgroundColor: lightColorScheme.background,
-      
+
       // Updated text theme with better contrast
       textTheme: TextTheme(
         displayLarge: displayLarge.copyWith(
@@ -409,11 +409,11 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(
             horizontal: kPaddingLarge,
             vertical: kPaddingMedium,
-          ),
+        ),
           textStyle: labelLarge.copyWith(
             color: lightColorScheme.onPrimary,
             fontWeight: FontWeight.w600,
-          ),
+      ),
           minimumSize: const Size(88, 48),
         ),
       ),
@@ -428,11 +428,11 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(
             horizontal: kPaddingMedium,
             vertical: kPaddingSmall,
-          ),
+        ),
           textStyle: labelLarge.copyWith(
             color: lightColorScheme.primary,
             fontWeight: FontWeight.w600,
-          ),
+      ),
           minimumSize: const Size(88, 48),
         ),
       ),
@@ -451,11 +451,11 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(
             horizontal: kPaddingLarge,
             vertical: kPaddingMedium,
-          ),
+        ),
           textStyle: labelLarge.copyWith(
             color: lightColorScheme.primary,
             fontWeight: FontWeight.w600,
-          ),
+      ),
           minimumSize: const Size(88, 48),
         ),
       ),
@@ -469,8 +469,8 @@ class AppTheme {
           minimumSize: const Size(48, 48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          ),
         ),
+      ),
       ),
 
       // Updated FloatingActionButton theme
@@ -493,7 +493,7 @@ class AppTheme {
           side: BorderSide(
             color: lightColorScheme.outlineVariant,
             width: 0.5,
-          ),
+        ),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -777,11 +777,11 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(
             horizontal: kPaddingLarge,
             vertical: kPaddingMedium,
-          ),
+        ),
           textStyle: nightLabelLarge.copyWith(
             color: darkColorScheme.onPrimary,
             fontWeight: FontWeight.w600,
-          ),
+      ),
           minimumSize: const Size(88, 48),
         ),
       ),
@@ -796,11 +796,11 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(
             horizontal: kPaddingMedium,
             vertical: kPaddingSmall,
-          ),
+        ),
           textStyle: nightLabelLarge.copyWith(
             color: darkColorScheme.primary,
             fontWeight: FontWeight.w600,
-          ),
+      ),
           minimumSize: const Size(88, 48),
         ),
       ),
@@ -819,11 +819,11 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(
             horizontal: kPaddingLarge,
             vertical: kPaddingMedium,
-          ),
+        ),
           textStyle: nightLabelLarge.copyWith(
             color: darkColorScheme.primary,
             fontWeight: FontWeight.w600,
-          ),
+      ),
           minimumSize: const Size(88, 48),
         ),
       ),
@@ -837,8 +837,8 @@ class AppTheme {
           minimumSize: const Size(48, 48),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadiusMedium),
-          ),
         ),
+      ),
       ),
 
       // Updated FloatingActionButton theme for dark mode
@@ -861,7 +861,7 @@ class AppTheme {
           side: BorderSide(
             color: darkColorScheme.outlineVariant,
             width: 0.5,
-          ),
+        ),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -883,35 +883,35 @@ class AppTheme {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-            color: darkColorScheme.outline,
+              color: darkColorScheme.outline,
             width: 1,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-            color: darkColorScheme.outline,
+              color: darkColorScheme.outline,
             width: 1,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-            color: darkColorScheme.primary,
+              color: darkColorScheme.primary,
             width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-            color: darkColorScheme.error,
+              color: darkColorScheme.error,
             width: 1,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(kBorderRadiusMedium),
           borderSide: BorderSide(
-            color: darkColorScheme.error,
+              color: darkColorScheme.error,
             width: 2,
           ),
         ),
