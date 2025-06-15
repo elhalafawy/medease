@@ -577,9 +577,12 @@ class _DoctorReviewsDialogState extends State<DoctorReviewsDialog> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    review['patient_name'] ?? 'Anonymous',
-                                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                  Expanded(
+                                    child: Text(
+                                      review['patient_name'] ?? 'Anonymous',
+                                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                   Row(
                                     children: [

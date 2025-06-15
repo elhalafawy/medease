@@ -155,7 +155,7 @@ class _LabRadiologyReportDetailsScreenState extends State<LabRadiologyReportDeta
     }
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
         title: Text(
           'Report Details',
@@ -203,7 +203,9 @@ class _LabRadiologyReportDetailsScreenState extends State<LabRadiologyReportDeta
             ),
             const SizedBox(height: 16),
             Card(
+              color: theme.colorScheme.surface,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -344,18 +346,22 @@ class _LabRadiologyReportDetailsScreenState extends State<LabRadiologyReportDeta
                     else if (isPdfUrl(reportUrl))
                       ElevatedButton.icon(
                         onPressed: () => _openFile(_publicUrl),
-                        icon: const Icon(Icons.picture_as_pdf),
-                        label: const Text('Open PDF'),
+                        icon: Icon(Icons.picture_as_pdf, color: theme.colorScheme.primary),
+                        label: Text('Open PDF', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          foregroundColor: theme.colorScheme.primary,
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
                       )
                     else
                       ElevatedButton.icon(
                         onPressed: () => _openFile(_publicUrl),
-                        icon: const Icon(Icons.open_in_new),
-                        label: const Text('Open File'),
+                        icon: Icon(Icons.open_in_new, color: theme.colorScheme.primary),
+                        label: Text('Open File', style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primaryContainer,
+                          foregroundColor: theme.colorScheme.primary,
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
                       ),

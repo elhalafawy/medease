@@ -74,9 +74,13 @@ class _PatientMedicalRecordScreenState
         }
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: Text('Medical Record - ${widget.patientName}'),
-        foregroundColor: Colors.white,
+        title: Text('Medical Record - ${widget.patientName}', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
+        elevation: 0,
+        iconTheme: IconThemeData(color: theme.colorScheme.onSurface),
       ),
       body: Column(
           children: [

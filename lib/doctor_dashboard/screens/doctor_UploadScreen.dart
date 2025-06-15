@@ -364,7 +364,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
   Widget _buildTile(BuildContext context, String label, IconData icon) {
     final theme = Theme.of(context);
     return Card(
-      color: theme.primaryColor,
+      color: theme.colorScheme.primary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () async {
@@ -407,7 +407,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
   Widget _buildTileWithImage(BuildContext context, String label, String assetPath) {
     final theme = Theme.of(context);
     return Card(
-      color: theme.primaryColor,
+      color: theme.colorScheme.primary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () async {
@@ -455,7 +455,7 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
           width: _pageIndex == i ? 12 : 8,
           height: _pageIndex == i ? 12 : 8,
           decoration: BoxDecoration(
-            color: _pageIndex == i ? theme.primaryColor : theme.dividerColor,
+            color: _pageIndex == i ? theme.colorScheme.primary : theme.dividerColor,
             shape: BoxShape.circle,
           ),
         );
@@ -482,11 +482,13 @@ class _UploadScreenState extends State<DoctorUploadscreen> {
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text('OCR Flow', style: theme.appBarTheme.titleTextStyle),
-          backgroundColor: AppTheme.appBarBackgroundColor,
-          foregroundColor: theme.appBarTheme.foregroundColor,
+          title: Text('OCR Flow', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface)),
+          backgroundColor: theme.colorScheme.surface,
+          foregroundColor: theme.colorScheme.onSurface,
           elevation: 1,
-          systemOverlayStyle: SystemUiOverlayStyle.dark,
+          systemOverlayStyle: Theme.of(context).brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark,
         ),
         body: Stack(children: [
           PageView(

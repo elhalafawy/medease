@@ -57,7 +57,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       );
     }
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -66,7 +66,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, size: 22, color: AppTheme.primaryColor),
+                    icon: Icon(Icons.arrow_back_ios_new, size: 22, color: theme.colorScheme.primary),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const SizedBox(width: 4),
@@ -84,10 +84,6 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                     CircleAvatar(
                       radius: 32,
                       backgroundImage: const AssetImage('assets/images/doctor_photo.png') as ImageProvider,
-                      // doctor?['image'] != null
-                      //     ? NetworkImage(doctor!['image'])
-                          // :
-                           // const AssetImage('assets/images/doctor_photo.png') as ImageProvider,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -105,9 +101,9 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surface,
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.borderColor),
+                        border: Border.all(color: theme.dividerColor),
                       ),
-                      child: const Icon(Icons.edit, size: 20, color: AppTheme.primaryColor),
+                      child: Icon(Icons.edit, size: 20, color: theme.colorScheme.primary),
                     ),
                   ],
                 ),
@@ -120,7 +116,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  Text('Profile', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+                  Text('Profile', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                   const SizedBox(height: 8),
                   _ProfileListTile(
                     icon: Icons.settings,
@@ -152,7 +148,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                     },
                   ),
                   const SizedBox(height: 18),
-                  Text('Support', style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+                  Text('Support', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                   const SizedBox(height: 8),
                   _ProfileListTile(
                     icon: Icons.info_outline,
@@ -180,7 +176,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                               ),
                               ElevatedButton(
                                 onPressed: () => Navigator.of(context).pop(true),
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.error),
                                 child: const Text('Confirm'),
                               ),
                             ],
@@ -234,35 +230,36 @@ class _ProfileListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (title == 'Request Account Deletion') {
       return ValueListenableBuilder<bool>(
         valueListenable: DoctorProfileScreen.deletionPending,
         builder: (context, pending, _) => ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: Icon(icon, color: AppTheme.primaryColor),
-          title: Text(title, style: AppTheme.bodyLarge),
+          leading: Icon(icon, color: theme.colorScheme.primary),
+          title: Text(title, style: theme.textTheme.bodyLarge),
           trailing: pending
               ? Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
                     'Pending',
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary),
                   ),
                 )
-              : const Icon(Icons.arrow_forward_ios, size: 20, color: AppTheme.greyColor),
+              : Icon(Icons.arrow_forward_ios, size: 20, color: theme.colorScheme.onSurfaceVariant),
           onTap: onTap,
         ),
       );
     }
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: iconColor ?? AppTheme.primaryColor),
-      title: Text(title, style: AppTheme.bodyLarge),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 20, color: AppTheme.greyColor),
+      leading: Icon(icon, color: iconColor ?? theme.colorScheme.primary),
+      title: Text(title, style: theme.textTheme.bodyLarge),
+      trailing: Icon(Icons.arrow_forward_ios, size: 20, color: theme.colorScheme.onSurfaceVariant),
       onTap: onTap,
     );
   }
@@ -281,91 +278,103 @@ class _EditDoctorProfileSheetState extends State<_EditDoctorProfileSheet> {
   late TextEditingController _nameController;
   late TextEditingController _expController;
   late TextEditingController _specController;
+  late TextEditingController _hospitalController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-  late TextEditingController _hospitalController;
 
   @override
   void initState() {
     super.initState();
-    final d = widget.doctor ?? {};
-    _nameController = TextEditingController(text: d['name'] ?? '');
-    _expController = TextEditingController(text: d['experience']?.toString() ?? '');
-    _specController = TextEditingController(text: d['type'] ?? '');
-    _emailController = TextEditingController(text: d['email'] ?? '');
-    _phoneController = TextEditingController(text: d['phone'] ?? '');
-    _hospitalController = TextEditingController(text: d['hospital'] ?? '');
+    _nameController = TextEditingController(text: widget.doctor?['name'] ?? '');
+    _expController = TextEditingController(text: widget.doctor?['years_of_experience']?.toString() ?? '');
+    _specController = TextEditingController(text: widget.doctor?['specialization'] ?? '');
+    _hospitalController = TextEditingController(text: widget.doctor?['hospital'] ?? '');
+    _emailController = TextEditingController(text: widget.doctor?['email'] ?? '');
+    _phoneController = TextEditingController(text: widget.doctor?['phone'] ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _expController.dispose();
+    _specController.dispose();
+    _hospitalController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      padding: EdgeInsets.only(
-        left: 20, right: 20,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.background,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, size: 22, color: AppTheme.textColor),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text('Edit Profile', style: AppTheme.titleLarge),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _buildField('Full Name', _nameController),
-              const SizedBox(height: 16),
-              _buildField('Years Of Experience', _expController),
-              const SizedBox(height: 16),
-              _buildField('specialization', _specController),
-              const SizedBox(height: 16),
-              _buildField('Hospital', _hospitalController),
-              const SizedBox(height: 16),
-              _buildField('Email', _emailController, keyboardType: TextInputType.emailAddress),
-              const SizedBox(height: 16),
-              _buildField('Phone', _phoneController, keyboardType: TextInputType.phone),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Profile updated successfully!'),
-                          backgroundColor: Colors.green,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back_ios_new, size: 22, color: theme.colorScheme.onSurface),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                  ),
-                  child: const Text('Save', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const SizedBox(width: 8),
+                    Text('Edit Profile', style: theme.textTheme.titleLarge),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                _buildField('Full Name', _nameController),
+                const SizedBox(height: 16),
+                _buildField('Years Of Experience', _expController),
+                const SizedBox(height: 16),
+                _buildField('specialization', _specController),
+                const SizedBox(height: 16),
+                _buildField('Hospital', _hospitalController),
+                const SizedBox(height: 16),
+                _buildField('Email', _emailController, keyboardType: TextInputType.emailAddress),
+                const SizedBox(height: 16),
+                _buildField('Phone', _phoneController, keyboardType: TextInputType.phone),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Profile updated successfully!'),
+                            backgroundColor: theme.colorScheme.secondary,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                    ),
+                    child: Text('Save', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -373,30 +382,33 @@ class _EditDoctorProfileSheetState extends State<_EditDoctorProfileSheet> {
   }
 
   Widget _buildField(String label, TextEditingController controller, {TextInputType keyboardType = TextInputType.text}) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTheme.bodyLarge),
+        Text(label, style: theme.textTheme.bodyLarge),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          style: TextStyle(color: theme.colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: theme.colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.borderColor),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.borderColor),
+              borderSide: BorderSide(color: theme.dividerColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+              borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
           ),
           validator: (v) => v == null || v.isEmpty ? 'Required' : null,
         ),
@@ -410,8 +422,9 @@ class _RequestSuccessDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.background,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -423,37 +436,30 @@ class _RequestSuccessDialog extends StatelessWidget {
               height: 120,
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Request sent successfully!',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF00264D),
-              ),
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Your account deletion request has been received and is pending review.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00264D),
+                backgroundColor: theme.colorScheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 child: Text(
                   'Continue',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimary),
                 ),
               ),
             ),

@@ -241,6 +241,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddLabRadiologyRecordDialog(
           context,
@@ -250,8 +251,8 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
           selectedLabRadiologyTab == 0 ? 'Add Lab Record' : 'Add Radiology Record',
           style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white),
         ),
-        icon: const Icon(Icons.add, color: Colors.white),
-        backgroundColor: AppTheme.primaryColor,
+        icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+        backgroundColor: theme.colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -393,9 +394,9 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: [BoxShadow(color: theme.colorScheme.shadow.withOpacity(0.08), blurRadius: 4)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -405,7 +406,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
             children: [
               Text(
                 title,
-                style: AppTheme.titleMedium.copyWith(color: AppTheme.primaryColor)),
+                style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.primary)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
@@ -422,14 +423,14 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
           ),
           const SizedBox(height: 8),
           Text('Medical Record #$medicalRecordNumber',
-              style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const SizedBox(height: 8),
           Text('Date: $date',
-              style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           if (description.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(description,
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ],
           const SizedBox(height: 20),
           Row(
@@ -447,7 +448,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
+                    side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
@@ -455,12 +456,12 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.remove_red_eye,
-                          color: AppTheme.primaryColor),
+                      Icon(Icons.remove_red_eye,
+                          color: theme.colorScheme.primary),
                       const SizedBox(width: 4), // Spacing between icon and text
                       Text(
                         'View',
-                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontSize: 12.0),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary, fontSize: 12.0),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -473,7 +474,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                 child: OutlinedButton(
                   onPressed: () => _pickAndUploadFile(report, isRadiology),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
+                    side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
@@ -481,11 +482,11 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.upload_file, color: AppTheme.primaryColor),
+                      Icon(Icons.upload_file, color: theme.colorScheme.primary),
                       const SizedBox(width: 4), // Spacing between icon and text
                       Text(
                         'Upload',
-                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontSize: 12.0),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary, fontSize: 12.0),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -498,7 +499,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                 child: OutlinedButton(
                   onPressed: () => _showEditLabRadiologyRecordDialog(context, report, isRadiology: isRadiology, recordId: recordId),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
+                    side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
@@ -506,11 +507,11 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.edit, color: AppTheme.primaryColor),
+                      Icon(Icons.edit, color: theme.colorScheme.primary),
                       const SizedBox(width: 4), // Spacing between icon and text
                       Text(
                         'Edit',
-                        style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor, fontSize: 12.0),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary, fontSize: 12.0),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -532,7 +533,7 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                     }
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
+                    side: BorderSide(color: theme.colorScheme.error),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
@@ -540,11 +541,11 @@ class _LabRadiologyTabState extends State<LabRadiologyTab> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.delete_outline, color: Colors.red),
+                      Icon(Icons.delete_outline, color: theme.colorScheme.error),
                       const SizedBox(width: 4), // Spacing between icon and text
                       Text(
                         'Delete',
-                        style: AppTheme.bodyLarge.copyWith(color: Colors.red, fontSize: 12.0),
+                        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.error, fontSize: 12.0),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),

@@ -497,13 +497,13 @@ class _DoctorBookAppointmentScreenState
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.appBarTheme.backgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         title: Text("Doctor's Schedule",
             style: theme.textTheme.titleLarge
-                ?.copyWith(color: theme.colorScheme.primary)),
+                ?.copyWith(color: theme.colorScheme.onSurface)),
         centerTitle: true,
-        foregroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: Stack(
         children: [
@@ -571,7 +571,7 @@ class _DoctorBookAppointmentScreenState
                               Text(
                                 _getAverageRating().toStringAsFixed(1),
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.primary,
+                                  color: theme.colorScheme.onSecondaryContainer,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                 ),
@@ -625,8 +625,8 @@ class _DoctorBookAppointmentScreenState
                                   horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? const Color(0xFF7DDCFF)
-                                    : Colors.white,
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.surface,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                     color: theme.colorScheme.primary
@@ -679,7 +679,7 @@ class _DoctorBookAppointmentScreenState
                               padding: const EdgeInsets.symmetric(
                                   vertical: 14, horizontal: 16),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: theme.colorScheme.surface,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                     color: theme.colorScheme.primary
@@ -708,7 +708,7 @@ class _DoctorBookAppointmentScreenState
                               padding: const EdgeInsets.symmetric(
                                   vertical: 14, horizontal: 16),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: theme.colorScheme.surface,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                     color: theme.colorScheme.primary
@@ -768,7 +768,7 @@ class _DoctorBookAppointmentScreenState
                                       : isUnavailable
                                           ? theme.colorScheme.primary
                                               .withOpacity(0.2)
-                                          : Colors.white,
+                                          : theme.colorScheme.surface,
                                   borderRadius: BorderRadius.circular(22),
                                   border: Border.all(
                                     color: isSelected

@@ -83,15 +83,15 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
       return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: theme.colorScheme.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
             'Patients',
-            style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+            style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
           ),
         ),
         body: const Center(
@@ -103,15 +103,15 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Patients',
-          style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+          style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView.builder(
@@ -147,11 +147,11 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryColor.withOpacity(0.1),
+                      color: theme.colorScheme.primary.withOpacity(0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -177,16 +177,16 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                             children: [
                               Text(
                                 patient['full_name'] ?? 'N/A',
-                                style: AppTheme.titleLarge.copyWith(
-                                  color: AppTheme.primaryColor,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Patient ID: ${patientId != null && patientId.isNotEmpty ? patientId.substring(0, 4) : 'N/A'}',
-                                style: AppTheme.bodyMedium.copyWith(
-                                  color: AppTheme.greyColor,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -211,8 +211,8 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                     Center(
                       child: Text(
                         'Tap to view medical records',
-                        style: AppTheme.bodyMedium.copyWith(
-                          color: AppTheme.primaryColor,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -228,18 +228,19 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
   }
 
   Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.greyColor,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Expanded(
           child: label == 'Email' && value.contains('@')
               ? Column(
@@ -249,8 +250,8 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                       .map((part) => Text(
                             part + (value.split('@').last != part ? '@' : ''),
                             textAlign: TextAlign.right,
-                            style: AppTheme.bodyMedium.copyWith(
-                              color: AppTheme.primaryColor,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w600,
                             ),
                           ))
@@ -259,8 +260,8 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
               : Text(
                   value,
                   textAlign: TextAlign.right,
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.primaryColor,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

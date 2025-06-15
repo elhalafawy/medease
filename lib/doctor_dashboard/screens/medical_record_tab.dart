@@ -131,10 +131,10 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => _showNewMedicalRecordDialog(context),
-            icon: const Icon(Icons.add),
-            label: const Text('Create New Record'),
+            icon: Icon(Icons.add, color: Colors.white),
+            label: Text('Create New Record', style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
+              backgroundColor: theme.colorScheme.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
@@ -148,6 +148,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
   }
 
   Widget _buildMedicalRecordCard(Map<String, dynamic> record, int index) {
+    final theme = Theme.of(context);
     final String date = record['created_at'] != null
         ? DateTime.parse(record['created_at'])
             .toLocal()
@@ -167,9 +168,9 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: [BoxShadow(color: theme.colorScheme.shadow.withOpacity(0.08), blurRadius: 4)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,11 +181,11 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
             children: [
               Text(
                 'Date: $date',
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
               Text(
                 'Doctor: $doctorName',
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -194,21 +195,21 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
             children: [
               Text(
                 'Symptoms',
-                style: AppTheme.bodyMedium.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
+                  color: theme.colorScheme.primary,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   '${_medicalRecords.length - index}',
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.primaryColor,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -218,7 +219,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
           const SizedBox(height: 4),
           Text(
             symptoms,
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           _buildInfoRow('Notes', notes),
@@ -226,9 +227,9 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
           if (labReports.isNotEmpty) ...[
             Text(
               'Lab Tests',
-              style: AppTheme.bodyMedium.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
+                color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 4),
@@ -238,7 +239,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Text(
                   report['Title'] ?? 'N/A',
-                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
               )).toList(),
             ),
@@ -247,9 +248,9 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
           if (radiologyReports.isNotEmpty) ...[
             Text(
               'Radiology Tests',
-              style: AppTheme.bodyMedium.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
+                color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 4),
@@ -259,7 +260,7 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                 padding: const EdgeInsets.only(bottom: 4.0),
                 child: Text(
                   report['Title'] ?? 'N/A',
-                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
               )).toList(),
             ),
@@ -275,11 +276,11 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                   onPressed: () {
                     _showEditMedicalRecordDialog(context, record);
                   },
-                  icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
+                  icon: Icon(Icons.edit, color: theme.colorScheme.primary),
                   label: Text('Edit',
-                      style: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor)),
+                      style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary)),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
+                    side: BorderSide(color: theme.colorScheme.primary),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -299,11 +300,11 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                       );
                     }
                   },
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
                   label: Text('Delete',
-                      style: AppTheme.bodyLarge.copyWith(color: Colors.red)),
+                      style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.error)),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
+                    side: BorderSide(color: theme.colorScheme.error),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -318,20 +319,21 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
   }
 
   Widget _buildInfoRow(String label, String value) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: AppTheme.bodyMedium.copyWith(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppTheme.primaryColor,
+            color: theme.colorScheme.primary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -365,30 +367,30 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
             children: [
               Text(
                 'New Medical Record',
-                style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
               ),
               const SizedBox(height: 16),
               Text(
                 'Patient: ${widget.patientName}',
-                style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface),
               ),
               Text(
                 'Age: ${widget.patientAge}',
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: _conditionController,
                 decoration: themedInputDecoration(
                     label: 'Medical Condition', icon: Icons.sick),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _symptomsController,
                 decoration: themedInputDecoration(
                     label: 'Symptoms', icon: Icons.healing),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -396,28 +398,28 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                 maxLines: 3,
                 decoration: themedInputDecoration(
                     label: 'Notes (Doctor\'s Comments)', icon: Icons.note_alt),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _medicationsController,
                 decoration: themedInputDecoration(
                     label: 'Medications', icon: Icons.medical_services_outlined),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _labTestsController,
                 decoration: themedInputDecoration(
                     label: 'Lab Tests', icon: Icons.science),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _radiologyTestsController,
                 decoration: themedInputDecoration(
                     label: 'Radiology Tests', icon: Icons.medical_information),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 24),
               Row(
@@ -481,30 +483,30 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
             children: [
               Text(
                 'Edit Medical Record',
-                style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
               ),
               const SizedBox(height: 16),
               Text(
                 'Patient: ${widget.patientName}',
-                style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.onSurface),
               ),
               Text(
                 'Age: ${widget.patientAge}',
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: _conditionController,
                 decoration: themedInputDecoration(
                     label: 'Medical Condition', icon: Icons.sick),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _symptomsController,
                 decoration: themedInputDecoration(
                     label: 'Symptoms', icon: Icons.healing),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -512,28 +514,28 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
                 maxLines: 3,
                 decoration:
                     themedInputDecoration(label: 'Notes', icon: Icons.note_alt),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _medicationsController,
                 decoration: themedInputDecoration(
                     label: 'Medications', icon: Icons.medical_services_outlined),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _labTestsController,
                 decoration: themedInputDecoration(
                     label: 'Lab Tests', icon: Icons.science),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _radiologyTestsController,
                 decoration: themedInputDecoration(
                     label: 'Radiology Tests', icon: Icons.medical_information),
-                style: AppTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 24),
               Row(
@@ -839,18 +841,23 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
   }
 
   InputDecoration themedInputDecoration({required String label, IconData? icon}) {
+    final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
-      prefixIcon: icon != null ? Icon(icon, color: AppTheme.primaryColor) : null,
+      prefixIcon: icon != null ? Icon(icon, color: theme.colorScheme.primary) : null,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppTheme.greyColor),
+        borderSide: BorderSide(color: theme.colorScheme.onSurfaceVariant),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
       ),
-      labelStyle: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+      labelStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7)),
+      fillColor: theme.colorScheme.surface,
+      filled: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 
@@ -861,8 +868,8 @@ class _MedicalRecordTabState extends State<MedicalRecordTab> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showNewMedicalRecordDialog(context),
         label: Text('Add Medical Record', style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white)),
-        icon: const Icon(Icons.add, color: Colors.white),
-        backgroundColor: AppTheme.primaryColor,
+        icon: Icon(Icons.add, color: Colors.white),
+        backgroundColor: theme.colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

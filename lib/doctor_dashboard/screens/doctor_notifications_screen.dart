@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
 
 class DoctorNotificationsScreen extends StatefulWidget {
   final int appointmentsCount;
@@ -22,40 +21,40 @@ class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
     final notifications = [
       {
         'icon': Icons.calendar_month,
-        'iconColor': const Color(0xFF2563EB),
-        'iconBg': const Color(0xFFE8F1FB),
+        'iconColor': Theme.of(context).colorScheme.primary,
+        'iconBg': Theme.of(context).colorScheme.primary.withOpacity(0.1),
         'title': '${widget.appointmentsCount} Schedules!',
         'subtitle': 'Check your schedule Today',
         'badge': widget.appointmentsCount,
       },
       {
         'icon': Icons.chat,
-        'iconColor': const Color(0xFFEA4E6D),
-        'iconBg': const Color(0xFFFDE8ED),
+        'iconColor': Theme.of(context).colorScheme.secondary,
+        'iconBg': Theme.of(context).colorScheme.secondary.withOpacity(0.1),
         'title': '14 Messages',
         'subtitle': 'Check your schedule Today',
         'badge': newMessages,
       },
       {
         'icon': Icons.medication,
-        'iconColor': const Color(0xFFF5B100),
-        'iconBg': const Color(0xFFFFF7E6),
+        'iconColor': Theme.of(context).colorScheme.tertiary,
+        'iconBg': Theme.of(context).colorScheme.tertiary.withOpacity(0.1),
         'title': 'Medicine',
         'subtitle': 'Check your schedule Today',
         'badge': newMedicine,
       },
       {
         'icon': Icons.vaccines,
-        'iconColor': const Color(0xFF22D3EE),
-        'iconBg': const Color(0xFFE6F9FB),
+        'iconColor': Theme.of(context).colorScheme.primaryContainer,
+        'iconBg': Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15),
         'title': 'Vaccine Update',
         'subtitle': 'Check your schedule Today',
         'badge': newVaccine,
       },
       {
         'icon': Icons.refresh,
-        'iconColor': const Color(0xFFB91C1C),
-        'iconBg': const Color(0xFFFDE8ED),
+        'iconColor': Theme.of(context).colorScheme.error,
+        'iconBg': Theme.of(context).colorScheme.error.withOpacity(0.08),
         'title': 'App Update',
         'subtitle': 'Check your schedule Today',
         'badge': newUpdate,
@@ -63,15 +62,15 @@ class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
     ];
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Notifications', style: AppTheme.headlineMedium),
+        title: Text('Notifications', style: theme.textTheme.headlineMedium?.copyWith(color: theme.colorScheme.onSurface)),
         centerTitle: false,
-        foregroundColor: AppTheme.textColor,
+        foregroundColor: theme.colorScheme.onSurface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 22),
+          icon: Icon(Icons.arrow_back_ios_new, size: 22, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -83,9 +82,9 @@ class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
           final n = notifications[i];
           return Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppTheme.notifCardBorder),
+              border: Border.all(color: theme.dividerColor),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withAlpha(8),
@@ -113,10 +112,10 @@ class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
                       top: 0,
                       child: CircleAvatar(
                         radius: 10,
-                        backgroundColor: Colors.red,
+                        backgroundColor: theme.colorScheme.error,
                         child: Text(
                           '${n['badge']}',
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                          style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onError),
                         ),
                       ),
                     ),
@@ -124,13 +123,13 @@ class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
               ),
               title: Text(
                 n['title'] as String,
-                style: AppTheme.titleLarge,
+                style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface),
               ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   n['subtitle'] as String,
-                  style: AppTheme.bodyMedium,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
               ),
             ),
@@ -143,32 +142,32 @@ class _DoctorNotificationsScreenState extends State<DoctorNotificationsScreen> {
   Color _getNotifIconColor(int i) {
     switch (i) {
       case 0:
-        return AppTheme.notifCalendarIcon;
+        return Theme.of(context).colorScheme.primary;
       case 1:
-        return AppTheme.notifChatIcon;
+        return Theme.of(context).colorScheme.secondary;
       case 2:
-        return AppTheme.notifMedicineIcon;
+        return Theme.of(context).colorScheme.tertiary;
       case 3:
-        return AppTheme.notifVaccineIcon;
+        return Theme.of(context).colorScheme.primaryContainer;
       case 4:
-        return AppTheme.notifUpdateIcon;
+        return Theme.of(context).colorScheme.error;
       default:
-        return AppTheme.primaryColor;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 
   Color _getNotifBgColor(int i) {
     switch (i) {
       case 0:
-        return AppTheme.notifCalendarBg;
+        return Theme.of(context).colorScheme.primary.withOpacity(0.1);
       case 1:
-        return AppTheme.notifChatBg;
+        return Theme.of(context).colorScheme.secondary.withOpacity(0.1);
       case 2:
-        return AppTheme.notifMedicineBg;
+        return Theme.of(context).colorScheme.tertiary.withOpacity(0.1);
       case 3:
-        return AppTheme.notifVaccineBg;
+        return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.15);
       case 4:
-        return AppTheme.notifUpdateBg;
+        return Theme.of(context).colorScheme.error.withOpacity(0.08);
       default:
         return Colors.white;
     }

@@ -76,7 +76,6 @@ class _GenderPieChartState extends State<GenderPieChart> {
       );
     }
 
-    // final total = maleCount + femaleCount; // لم يعد يستخدم بعد تحويلها لأزرق بالكامل
 
     return SizedBox(
       height: 170,
@@ -87,7 +86,7 @@ class _GenderPieChartState extends State<GenderPieChart> {
           centerSpaceRadius: 14,
           sections: [
             PieChartSectionData(
-              color: theme.colorScheme.primary,
+              color: const Color(0xFF3B82F6),
               value: 100,
               title: '100%',
               radius: 18,

@@ -191,22 +191,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
   // Example data with status and message
   List<Map<String, dynamic>> get displayAppointments {
     final allAppointments = _appointments.isEmpty ? [
-    // {
-    //   'patient': 'Menna Ahmed',
-    //     'date': '2023-04-22',
-    //     'day': 'Saturday',
-    //   'time': '16:30 - 18:30',
-    //     'status': 'pending',
-    //     'message': 'I have a fever and headache.',
-    // },
-    // {
-    //   'patient': 'Rana Mohamed',
-    //     'date': '2023-04-24',
-    //     'day': 'Monday',
-    //   'time': '11:00-16:00',
-    //     'status': 'confirmed',
-    //     'message': '',
-    //   },
+
       {
         'patient': 'Ali Hassan',
         'date': '2023-04-25',
@@ -235,16 +220,17 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
     }
   }
   
-  Color statusColor(String status) {
+  Color statusColor(BuildContext context, String status) {
+    final theme = Theme.of(context);
     switch (status) {
       case 'confirmed':
         return Colors.green;
       case 'pending':
-        return Colors.orange;
+        return theme.colorScheme.primary;
       case 'cancelled':
-        return Colors.red;
+        return theme.colorScheme.error;
       default:
-        return AppTheme.greyColor;
+        return theme.colorScheme.onSurfaceVariant;
     }
   }
 
@@ -285,17 +271,17 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
               children: [
                 Text(
                   appt['patients']?['full_name'] ?? 'Unknown',
-                  style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: statusColor(appt['status']).withOpacity(0.1),
+                    color: statusColor(context, appt['status']).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     statusText(appt['status']),
-                    style: AppTheme.bodyMedium.copyWith(color: statusColor(appt['status']), fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: statusColor(context, appt['status']), fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -303,11 +289,11 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.medical_services_outlined, size: 18, color: AppTheme.primaryColor),
+                Icon(Icons.medical_services_outlined, size: 18, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   ((appt['type'] ?? 'consultation').toString().replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1).toLowerCase() : '').join(' ')),
-                  style: AppTheme.bodyLarge.copyWith(
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     letterSpacing: 0.3,
                     height: 1.4,
                     leadingDistribution: TextLeadingDistribution.even,
@@ -322,14 +308,14 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
+                  Icon(Icons.calendar_today, size: 16, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 4),
                   Text(
                     appt['date'] ?? '',
-                    style: AppTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(width: 12),
-                  const Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
+                  Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 4),
                   Text(
                     (() {
@@ -340,23 +326,23 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                       }
                       return t ?? '';
                     })(),
-                    style: AppTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
             if ((appt['notes']).isNotEmpty) ...[
-              Text('Message from patient:', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor)),
+              Text('Message from patient:', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
               const SizedBox(height: 6),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.07),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.07),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(appt['notes'], style: AppTheme.bodyLarge),
+                child: Text(appt['notes'], style: Theme.of(context).textTheme.bodyLarge),
               ),
               const SizedBox(height: 16),
             ],
@@ -370,8 +356,8 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         await confirmAppointment(appt['appointment_id']);
                         Navigator.pop(context);
                       },
-                      icon: const Icon(Icons.check, size: 18),
-                      label: const Text('Confirm', style: TextStyle(fontSize: 13)),
+                      icon: Icon(Icons.check, size: 18),
+                      label: Text('Confirm', style: TextStyle(fontSize: 13)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -392,11 +378,11 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Edit Appointment'),
-                            content: const Text('Are you sure you want to edit this appointment?'),
+                            title: Text('Edit Appointment'),
+                            content: Text('Are you sure you want to edit this appointment?'),
                             actions: [
-                              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-                              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Edit')),
+                              TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancel')),
+                              TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Edit')),
                             ],
                           ),
                         );
@@ -404,10 +390,10 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                           _showEditAppointmentDialog(appt);
                         }
                       },
-                      icon: const Icon(Icons.edit, size: 18),
-                      label: const Text('Edit', style: TextStyle(fontSize: 13)),
+                      icon: Icon(Icons.edit, size: 18),
+                      label: Text('Edit', style: TextStyle(fontSize: 13)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         padding: const EdgeInsets.symmetric(horizontal: 0),
                         minimumSize: const Size(0, 38),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -425,11 +411,11 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         final confirmed = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Cancel Appointment'),
-                            content: const Text('Are you sure you want to cancel this appointment?'),
+                            title: Text('Cancel Appointment'),
+                            content: Text('Are you sure you want to cancel this appointment?'),
                             actions: [
-                              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('No')),
-                              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Yes, Cancel')),
+                              TextButton(onPressed: () => Navigator.pop(context, false), child: Text('No')),
+                              TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Yes, Cancel')),
                             ],
                           ),
                         );
@@ -438,8 +424,8 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                           Navigator.pop(context);
                         }
                       },
-                      icon: const Icon(Icons.cancel, size: 18),
-                      label: const Text('Cancel', style: TextStyle(fontSize: 13)),
+                      icon: Icon(Icons.cancel, size: 18),
+                      label: Text('Cancel', style: TextStyle(fontSize: 13)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         padding: const EdgeInsets.symmetric(horizontal: 0),
@@ -483,7 +469,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                         CircleAvatar(
                           radius: 28,
                           backgroundImage: const AssetImage('assets/images/profile_picture.png'),
-                          backgroundColor: AppTheme.primaryColor.withOpacity(0.08),
+                          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -492,18 +478,18 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                             children: [
                               Text(
                                 appt['patients']?['full_name'] ?? 'Unknown',
-                                style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontSize: 18),
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, fontSize: 18),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  const Icon(Icons.medical_services_outlined, size: 18, color: AppTheme.primaryColor),
+                                  Icon(Icons.medical_services_outlined, size: 18, color: Theme.of(context).colorScheme.primary),
                                   const SizedBox(width: 8),
                                   Text(
                                     ((appt['type'] ?? 'consultation').toString().replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1).toLowerCase() : '').join(' ')),
-                                    style: AppTheme.bodyLarge.copyWith(
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                       letterSpacing: 0.3,
                                       height: 1.4,
                                       leadingDistribution: TextLeadingDistribution.even,
@@ -522,19 +508,19 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                         : appt['status'] == 'pending'
                                             ? Icons.hourglass_top
                                             : Icons.cancel,
-                                    color: statusColor(appt['status']),
+                                    color: statusColor(context, appt['status']),
                                     size: 18,
                                   ),
                                   const SizedBox(width: 4),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: statusColor(appt['status']).withOpacity(0.13),
+                                      color: statusColor(context, appt['status']).withOpacity(0.13),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Text(
                                       statusText(appt['status']),
-                                      style: AppTheme.bodyMedium.copyWith(color: statusColor(appt['status']), fontWeight: FontWeight.bold),
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: statusColor(context, appt['status']), fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ],
@@ -545,7 +531,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                       ],
                     ),
                     const SizedBox(height: 18),
-                    Text('Select Day', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                    Text('Select Day', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     SizedBox(
                       height: 38,
@@ -574,14 +560,14 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: selectedDay == i ? AppTheme.primaryColor : Colors.white,
+                              color: selectedDay == i ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppTheme.primaryColor),
+                              border: Border.all(color: Theme.of(context).colorScheme.primary),
                             ),
                             child: Text(
                               daysShort[i],
-                              style: AppTheme.bodyLarge.copyWith(
-                                color: selectedDay == i ? Colors.white : AppTheme.primaryColor,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: selectedDay == i ? Colors.white : Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
@@ -591,7 +577,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    Text('Time', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
+                    Text('Time', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     loadingSlots
                       ? const Center(child: CircularProgressIndicator())
@@ -615,10 +601,10 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                   child: Container(
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
-                                      color: isSelected ? AppTheme.primaryColor : Colors.grey[200],
+                                      color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceVariant,
                                       borderRadius: BorderRadius.circular(30),
                                       border: Border.all(
-                                        color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
+                                        color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor,
                                       ),
                                     ),
                                     child: Text(
@@ -631,7 +617,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                         return t ?? 'N/A';
                                       })(),
                                       style: TextStyle(
-                                        color: isSelected ? Colors.white : Colors.black,
+                                        color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
                                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                                       ),
                                     ),
@@ -651,7 +637,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
-                              textStyle: AppTheme.bodyLarge.copyWith(color: AppTheme.primaryColor),
+                              textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
                             ),
                             child: const Text('Cancel'),
                           ),
@@ -688,13 +674,13 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryColor,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
-                              textStyle: AppTheme.bodyLarge,
+                              textStyle: Theme.of(context).textTheme.bodyLarge,
                             ),
                             child: const Text('Save'),
                           ),
@@ -860,19 +846,19 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                                       : appt['status'] == 'pending'
                                                           ? Icons.hourglass_top
                                                           : Icons.cancel,
-                                                  color: statusColor(appt['status']),
+                                                  color: statusColor(context, appt['status']),
                                                   size: 20,
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Container(
                                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                                   decoration: BoxDecoration(
-                                                    color: statusColor(appt['status']).withOpacity(0.13),
+                                                    color: statusColor(context, appt['status']).withOpacity(0.13),
                                                     borderRadius: BorderRadius.circular(10),
                                                   ),
                                                   child: Text(
                                                     statusText(appt['status']),
-                                                    style: theme.textTheme.bodyMedium?.copyWith(color: statusColor(appt['status']), fontWeight: FontWeight.bold),
+                                                    style: theme.textTheme.bodyMedium?.copyWith(color: statusColor(context, appt['status']), fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ],
@@ -884,14 +870,14 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryColor),
+                                      Icon(Icons.calendar_today, size: 16, color: Theme.of(context).colorScheme.primary),
                                       const SizedBox(width: 4),
                                       Text(
                                         appt['date'] ?? '',
                                         style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                                       ),
                                       const SizedBox(width: 12),
-                                      const Icon(Icons.access_time, size: 16, color: AppTheme.primaryColor),
+                                      Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.primary),
                                       const SizedBox(width: 4),
                                       Text(
                                         (() {
@@ -905,7 +891,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                         style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                                       ),
                                       const SizedBox(width: 12),
-                                      const Icon(Icons.medical_services_outlined, size: 16, color: AppTheme.primaryColor),
+                                      Icon(Icons.medical_services_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
                                       const SizedBox(width: 4),
                                       Text(
                                         ((appt['type'] ?? 'consultation').toString().replaceAll('_', ' ').split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1).toLowerCase() : '').join(' ')),
@@ -919,7 +905,7 @@ class _DoctorAppointmentsScreenState extends State<DoctorAppointmentsScreen> {
                                           Row(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              const Icon(Icons.message, size: 18, color: AppTheme.primaryColor),
+                                              Icon(Icons.message, size: 18, color: Theme.of(context).colorScheme.primary),
                                               const SizedBox(width: 6),
                                               Expanded(
                                                 child: Text(

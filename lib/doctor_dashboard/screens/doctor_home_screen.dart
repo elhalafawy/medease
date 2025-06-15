@@ -194,7 +194,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                         children: [
                                           Icon(
                                             Icons.account_circle,
-                                            size: 16,
+                                              size: 16,
                                             color: theme.colorScheme.primary,
                                           ),
                                           const SizedBox(width: 4),
@@ -396,9 +396,9 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
-                                        child: const Icon(
+                                        child: Icon(
                                             Icons.chat_bubble_outline,
-                                            color: AppTheme.primaryColor,
+                                            color: theme.colorScheme.primary,
                                             size: 18),
                                       ),
                                     ],
@@ -484,8 +484,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(6),
-                                        child: const Icon(Icons.star_border,
-                                            color: AppTheme.primaryColor,
+                                        child: Icon(Icons.star_border,
+                                            color: theme.colorScheme.primary,
                                             size: 18),
                                       ),
                                     ],
@@ -500,14 +500,17 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Analytics",
-                              style: AppTheme.titleLarge,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             DropdownButton<String>(
                               value: _selectedAnalyticsPeriod,
-                              icon: const Icon(Icons.keyboard_arrow_down,
-                                  size: 18, color: AppTheme.greyColor),
+                              icon: Icon(Icons.keyboard_arrow_down,
+                                  size: 18, color: theme.colorScheme.primary),
                               underline: const SizedBox.shrink(),
                               onChanged: (String? newValue) {
                                 setState(() {
@@ -520,7 +523,12 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                                   value: value,
                                   child: Text(
                                     value,
-                                    style: AppTheme.bodyMedium,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: value == _selectedAnalyticsPeriod
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.onSurfaceVariant,
+                                      fontWeight: value == _selectedAnalyticsPeriod ? FontWeight.bold : null,
+                                    ),
                                   ),
                                 );
                               }).toList(),
@@ -582,7 +590,7 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text("Total ${_allDoctorReviews.length} Reviews",
-                                style: AppTheme.bodyMedium),
+                                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -601,8 +609,8 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                             );
                           }).toList()
                         else
-                          const Center(
-                            child: Text('No reviews yet.'),
+                          Center(
+                            child: Text('No reviews yet.', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                           ),
                       ],
                     ),
@@ -614,23 +622,23 @@ class _DoctorHomeScreenState extends State<DoctorHomeScreen> {
                 child: Column(
                   children: [
                     Container(
-                      color: Colors.white,
+                      color: theme.colorScheme.surface,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       child: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_ios,
-                                color: AppTheme.textColor),
+                            icon: Icon(Icons.arrow_back_ios,
+                                color: theme.colorScheme.onSurface),
                             onPressed: () {
                               setState(() {
                                 _showReviews = false;
                               });
                             },
                           ),
-                          const Text(
+                          Text(
                             'Reviews',
-                            style: AppTheme.titleLarge,
+                            style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -661,18 +669,25 @@ class _GenderLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 10,
+          height: 10,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
         const SizedBox(width: 4),
-        Text(label, style: AppTheme.bodyMedium),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
   }

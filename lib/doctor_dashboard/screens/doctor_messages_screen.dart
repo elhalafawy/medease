@@ -53,18 +53,18 @@ class DoctorMessagesScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryColor),
+          icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text('Messages', style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor)),
-        backgroundColor: AppTheme.appBarBackgroundColor,
+        title: Text('Messages', style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold)),
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
-        foregroundColor: AppTheme.primaryColor,
+        foregroundColor: theme.colorScheme.onSurface,
       ),
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: messages.length,
-        separatorBuilder: (context, i) => Divider(indent: 70, endIndent: 16, height: 1, color: AppTheme.primaryColor.withOpacity(0.08)),
+        separatorBuilder: (context, i) => Divider(indent: 70, endIndent: 16, height: 1, color: theme.colorScheme.primary.withOpacity(0.08)),
         itemBuilder: (context, i) {
           final msg = messages[i];
           return ListTile(
@@ -74,7 +74,7 @@ class DoctorMessagesScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 24,
                   backgroundImage: AssetImage(msg['avatar'] as String),
-                  backgroundColor: AppTheme.primaryColor.withOpacity(0.08),
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.08),
                 ),
                 if (msg['online'] == true)
                   Positioned(
@@ -84,7 +84,7 @@ class DoctorMessagesScreen extends StatelessWidget {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: Colors.green,
+                        color: theme.colorScheme.secondary,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2),
                       ),
@@ -94,11 +94,11 @@ class DoctorMessagesScreen extends StatelessWidget {
             ),
             title: Text(
               msg['name'] as String,
-              style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
             ),
             subtitle: Text(
               msg['message'] as String,
-              style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -108,19 +108,19 @@ class DoctorMessagesScreen extends StatelessWidget {
               children: [
                 Text(
                   msg['time'] as String,
-                  style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
                 if ((msg['unread'] as int) > 0)
                   Container(
                     margin: const EdgeInsets.only(top: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor,
+                      color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       msg['unread'].toString(),
-                      style: AppTheme.bodyMedium.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
               ],

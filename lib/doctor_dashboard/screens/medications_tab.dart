@@ -236,19 +236,23 @@ class _MedicationsTabState extends State<MedicationsTab> {
   }
 
   InputDecoration _buildInputDecoration({required String labelText, IconData? icon}) {
+    final theme = Theme.of(context);
     return InputDecoration(
       labelText: labelText,
-      prefixIcon:
-          icon != null ? Icon(icon, color: AppTheme.primaryColor) : null,
+      prefixIcon: icon != null ? Icon(icon, color: theme.colorScheme.primary) : null,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppTheme.greyColor),
+        borderSide: BorderSide(color: theme.colorScheme.onSurfaceVariant),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
       ),
-      labelStyle: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+      labelStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+      hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7)),
+      fillColor: theme.colorScheme.surface,
+      filled: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 
@@ -279,22 +283,22 @@ class _MedicationsTabState extends State<MedicationsTab> {
                 children: [
                   Text(
                     'Add New Medication',
-                    style: AppTheme.titleLarge.copyWith(color: AppTheme.primaryColor),
+                    style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Patient: ${widget.patientName}',
-                    style: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
                   ),
                   Text(
                     'Age: ${widget.patientAge}',
-                    style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: _nameController,
                     decoration: _buildInputDecoration(labelText: 'Medication Name', icon: Icons.medical_services_outlined),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter medication name';
@@ -306,7 +310,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                   TextFormField(
                     controller: _dosageController,
                     decoration: _buildInputDecoration(labelText: 'Dosage', icon: Icons.medical_services),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter dosage';
@@ -354,7 +358,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                           : DateFormat('yyyy-MM-dd').format(_selectedStartDate!),
                     ),
                     decoration: _buildInputDecoration(labelText: 'Start Date', icon: Icons.calendar_today_outlined),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     onTap: () async {
                       final DateTime? picked = await showDatePicker(
                         context: context,
@@ -387,7 +391,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                           : DateFormat('yyyy-MM-dd').format(_selectedEndDate!),
                     ),
                     decoration: _buildInputDecoration(labelText: 'End Date', icon: Icons.calendar_today_outlined),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     onTap: () async {
                       final DateTime? picked = await showDatePicker(
                         context: context,
@@ -413,7 +417,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                     controller: _notesController,
                     maxLines: 3,
                     decoration: _buildInputDecoration(labelText: 'Notes', icon: Icons.note_alt),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
@@ -458,8 +462,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
                         child: Text('Cancel',
-                            style: AppTheme.bodyLarge
-                                .copyWith(color: AppTheme.greyColor)),
+                            style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
@@ -478,13 +481,13 @@ class _MedicationsTabState extends State<MedicationsTab> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          foregroundColor: Colors.white,
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          textStyle: AppTheme.bodyLarge,
+                          textStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                         ),
                         child: const Text('Add Medication'),
                       ),
@@ -538,25 +541,24 @@ class _MedicationsTabState extends State<MedicationsTab> {
                 children: [
                   Text(
                     'Edit Medication',
-                    style: AppTheme.titleLarge
-                        .copyWith(color: AppTheme.primaryColor),
+                    style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Patient: ${widget.patientName}',
                     style:
-                        AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w500),
+                        theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
                   ),
                   Text(
                     'Age: ${widget.patientAge}',
                     style:
-                        AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+                        theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: nameController,
                     decoration: _buildInputDecoration(labelText: 'Medication Name', icon: Icons.medical_services_outlined),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter medication name';
@@ -568,7 +570,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                   TextFormField(
                     controller: dosageController,
                     decoration: _buildInputDecoration(labelText: 'Dosage', icon: Icons.medical_services),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter dosage';
@@ -616,7 +618,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                           : DateFormat('yyyy-MM-dd').format(selectedStartDate!),
                     ),
                     decoration: _buildInputDecoration(labelText: 'Start Date', icon: Icons.calendar_today_outlined),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     onTap: () async {
                       final DateTime? picked = await showDatePicker(
                         context: context,
@@ -649,7 +651,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                           : DateFormat('yyyy-MM-dd').format(selectedEndDate!),
                     ),
                     decoration: _buildInputDecoration(labelText: 'End Date', icon: Icons.calendar_today_outlined),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                     onTap: () async {
                       final DateTime? picked = await showDatePicker(
                         context: context,
@@ -675,7 +677,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                     controller: notesController,
                     maxLines: 3,
                     decoration: _buildInputDecoration(labelText: 'Notes', icon: Icons.note_alt),
-                    style: AppTheme.bodyLarge,
+                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
@@ -720,8 +722,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
                         child: Text('Cancel',
-                            style: AppTheme.bodyLarge
-                                .copyWith(color: AppTheme.greyColor)),
+                            style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
@@ -741,13 +742,13 @@ class _MedicationsTabState extends State<MedicationsTab> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          foregroundColor: Colors.white,
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          textStyle: AppTheme.bodyLarge,
+                          textStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
                         ),
                         child: const Text('Save Changes'),
                       ),
@@ -766,11 +767,12 @@ class _MedicationsTabState extends State<MedicationsTab> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      backgroundColor: theme.colorScheme.background,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showNewMedicationDialog(context),
         label: Text('Add Medication', style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white)),
-        icon: const Icon(Icons.add, color: Colors.white),
-        backgroundColor: AppTheme.primaryColor,
+        icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+        backgroundColor: theme.colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -779,7 +781,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
           : _medicationsList.isEmpty
               ? Center(
                   child: Text('No medications found',
-                      style: AppTheme.bodyLarge.copyWith(color: AppTheme.greyColor)),
+                      style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 )
               : ListView.builder(
                   padding: EdgeInsets.only(bottom: 80 + MediaQuery.of(context).padding.bottom),
@@ -813,7 +815,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
     }
 
     final String status = (medication['status'] ?? 'N/A').toString().toLowerCase();
-    Color statusColor = AppTheme.greyColor;
+    Color statusColor = Theme.of(context).colorScheme.onSurfaceVariant;
     String badgeText = '';
     if (status == 'active') {
       statusColor = Colors.green;
@@ -849,9 +851,9 @@ class _MedicationsTabState extends State<MedicationsTab> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow.withOpacity(0.08), blurRadius: 4)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -859,8 +861,7 @@ class _MedicationsTabState extends State<MedicationsTab> {
           Row(
             children: [
               Text(medicationName,
-                  style:
-                      AppTheme.titleMedium.copyWith(color: AppTheme.primaryColor)),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -878,23 +879,23 @@ class _MedicationsTabState extends State<MedicationsTab> {
           ),
           const SizedBox(height: 8),
           Text('Dosage: ${dosage}',
-              style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 8),
           Text('Frequency: ${frequency}',
-              style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
           const SizedBox(height: 8),
           Text(
             (startDate != null && endDate != null)
               ? 'Start: ${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}   End: ${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}'
               : 'Start/End: N/A',
-            style: AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.calculate_outlined, size: 16, color: AppTheme.primaryColor),
+              Icon(Icons.calculate_outlined, size: 16, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 4),
-              Text('Pills: ', style: AppTheme.bodyMedium.copyWith(color: AppTheme.primaryColor)),
+              Text('Pills: ', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
               (frequency == 'As needed' || startDate == null || endDate == null)
                 ? const Text('--', style: TextStyle(fontWeight: FontWeight.bold))
                 : Text('$remaining / $total', style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -904,10 +905,9 @@ class _MedicationsTabState extends State<MedicationsTab> {
           Row(
             children: [
               Text('Status: ',
-                  style:
-                      AppTheme.bodyMedium.copyWith(color: AppTheme.greyColor)),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               Text(badgeText,
-                  style: AppTheme.bodyMedium.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: statusColor, fontWeight: FontWeight.bold)),
             ],
           ),
@@ -920,12 +920,11 @@ class _MedicationsTabState extends State<MedicationsTab> {
                   onPressed: () {
                     _showEditMedicationDialog(context, medication);
                   },
-                  icon: const Icon(Icons.edit, color: AppTheme.primaryColor),
+                  icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
                   label: Text('Edit',
-                      style: AppTheme.bodyLarge
-                          .copyWith(color: AppTheme.primaryColor)),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.primary)),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.primaryColor),
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -945,11 +944,11 @@ class _MedicationsTabState extends State<MedicationsTab> {
                       );
                     }
                   },
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   label: Text('Delete',
-                      style: AppTheme.bodyLarge.copyWith(color: Colors.red)),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.error)),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
+                    side: BorderSide(color: Theme.of(context).colorScheme.error),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
